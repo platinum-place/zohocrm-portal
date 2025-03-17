@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'Ameriaca/Santo_Domingo',
+    'timezone' => 'America/Santo_Domingo',
 
     /*
     |--------------------------------------------------------------------------
