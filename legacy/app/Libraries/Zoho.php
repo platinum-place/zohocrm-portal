@@ -33,6 +33,13 @@ class Zoho
         $oAuthClient->generateAccessToken($grant_token);
     }
 
+    public function generateTXTToken($refreshToken)
+    {
+        $oAuthClient = ZohoOAuth::getClientInstance();
+        $userIdentifier = "tecnologia@gruponobe.com";
+        $oAuthTokens = $oAuthClient->generateAccessTokenFromRefreshToken($refreshToken,$userIdentifier);
+    }
+
     public function getRecord($module_api_name, $record_id): ?object
     {
         $moduleIns = ZCRMRestClient::getInstance()->getModuleInstance($module_api_name); // To get module instance

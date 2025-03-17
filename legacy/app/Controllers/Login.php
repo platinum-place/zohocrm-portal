@@ -10,12 +10,14 @@ class Login extends BaseController
 {
     public function index()
     {
+        $libreria = new Zoho;
+
         if ($this->request->getPost()) {
 
             $libreria = new Zoho;
             //buscar el todos los usuarios con el correo y contraseña sean iguales
             //los correos son campos unicos en el crm
-            $criteria = "((Email:equals:".$this->request->getPost("correo").") and (Contrase_a:equals:".$this->request->getPost("pass")."))";
+            $criteria = "((Email:equals:" . $this->request->getPost("correo") . ") and (Contrase_a:equals:" . $this->request->getPost("pass") . "))";
             $usuarios = $libreria->searchRecordsByCriteria("Contacts", $criteria, 1, 1);
             //buscar el todos los usuarios con el correo y contraseña sean iguales
             //los correos son campos unicos en el crm
