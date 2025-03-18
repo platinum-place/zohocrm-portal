@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,12 +11,8 @@ declare(strict_types=1);
 
 namespace CodeIgniter\HTTP;
 
-use CodeIgniter\Exceptions\InvalidArgumentException;
-
 /**
  * An HTTP message
- *
- * @see \CodeIgniter\HTTP\MessageTest
  */
 class Message implements MessageInterface
 {
@@ -40,20 +34,19 @@ class Message implements MessageInterface
         '1.0',
         '1.1',
         '2.0',
-        '3.0',
     ];
 
     /**
      * Message body
      *
-     * @var string|null
+     * @var mixed
      */
     protected $body;
 
     /**
      * Returns the Message's body.
      *
-     * @return string|null
+     * @return mixed
      */
     public function getBody()
     {
@@ -66,8 +59,6 @@ class Message implements MessageInterface
      * @return array<string, Header> An array of the request headers
      *
      * @deprecated Use Message::headers() to make room for PSR-7
-     *
-     * @TODO Incompatible return value with PSR-7
      *
      * @codeCoverageIgnore
      */
@@ -83,8 +74,6 @@ class Message implements MessageInterface
      * @return array|Header|null
      *
      * @deprecated Use Message::header() to make room for PSR-7
-     *
-     * @TODO Incompatible return value with PSR-7
      *
      * @codeCoverageIgnore
      */
@@ -116,13 +105,6 @@ class Message implements MessageInterface
      */
     public function getHeaderLine(string $name): string
     {
-        if ($this->hasMultipleHeaders($name)) {
-            throw new InvalidArgumentException(
-                'The header "' . $name . '" already has multiple headers.'
-                . ' You cannot use getHeaderLine().',
-            );
-        }
-
         $origName = $this->getHeaderName($name);
 
         if (! array_key_exists($origName, $this->headers)) {

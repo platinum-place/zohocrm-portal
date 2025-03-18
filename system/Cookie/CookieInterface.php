@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -145,7 +143,7 @@ interface CookieInterface
      * Gets the options that are passable to the `setcookie` variant
      * available on PHP 7.3+
      *
-     * @return array<string, bool|int|string>
+     * @return array<string, mixed>
      */
     public function getOptions(): array;
 
@@ -164,7 +162,7 @@ interface CookieInterface
     /**
      * Returns the array representation of the Cookie object.
      *
-     * @return array<string, bool|int|string>
+     * @return array<string, mixed>
      */
     public function toArray(): array;
 }

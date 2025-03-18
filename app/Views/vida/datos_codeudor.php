@@ -5,7 +5,7 @@
                 <tbody>
                     <tr>
                         <th scope="col">Nombre</th>
-                        <td><?= $cotizacion->getFieldValue("Nombre_codeudor") . " datos_codeudor.php" . $cotizacion->getFieldValue("Apellido_codeudor") ?></td>
+                        <td><?= $cotizacion->getFieldValue("Nombre_codeudor") . " " . $cotizacion->getFieldValue("Apellido_codeudor") ?></td>
                     </tr>
 
                     <tr>

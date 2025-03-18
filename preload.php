@@ -70,7 +70,7 @@ class preload
     private function loadAutoloader(): void
     {
         $paths = new Config\Paths();
-        require preload . phprtrim($paths->systemDirectory, '\\/ ') . DIRECTORY_SEPARATOR . 'Boot.php';
+        require rtrim($paths->systemDirectory, '\\/ ') . DIRECTORY_SEPARATOR . 'Boot.php';
 
         CodeIgniter\Boot::preload($paths);
     }

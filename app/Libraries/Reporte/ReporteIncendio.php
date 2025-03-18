@@ -122,7 +122,7 @@ class ReporteIncendio
                 $sheet->setCellValue('F' . $pos, $emision->getFieldValue('Prima'));
 
                 // valores relacionados al cliente
-                $sheet->setCellValue('G' . $pos, $emision->getFieldValue("Nombre") . " ReporteIncendio.php" . $emision->getFieldValue("Apellido"));
+                $sheet->setCellValue('G' . $pos, $emision->getFieldValue("Nombre") . " " . $emision->getFieldValue("Apellido"));
                 $sheet->setCellValue('H' . $pos, $emision->getFieldValue('RNC_C_dula'));
                 $sheet->setCellValue('I' . $pos, $emision->getFieldValue('Tel_Residencia'));
                 $sheet->setCellValue('J' . $pos, $emision->getFieldValue('Fecha_de_nacimiento'));

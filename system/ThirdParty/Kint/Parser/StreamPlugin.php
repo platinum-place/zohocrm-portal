@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,62 +25,54 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\Context\ArrayContext;
-use Kint\Value\ResourceValue;
-use Kint\Value\StreamValue;
-use TypeError;
+use Kint\Object\BasicObject;
+use Kint\Object\Representation\Representation;
+use Kint\Object\ResourceObject;
+use Kint\Object\StreamObject;
 
-class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
+class StreamPlugin extends Plugin
 {
-    public function getTypes(): array
+    public function getTypes()
     {
-        return ['resource'];
+        return array('resource');
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (!$v instanceof ResourceValue) {
-            return $v;
+        if (!$o instanceof ResourceObject || 'stream' !== $o->resource_type) {
+            return;
         }
 
-        // Doublecheck that the resource is open before we get the metadata
-        if (!\is_resource($var)) {
-            return $v;
+        if (!$meta = \stream_get_meta_data($var)) {
+            return;
         }
 
-        try {
-            $meta = \stream_get_meta_data($var);
-        } catch (TypeError $e) {
-            return $v;
+        $rep = new Representation('Stream');
+        $rep->implicit_label = true;
+
+        $base_obj = new BasicObject();
+        $base_obj->depth = $o->depth;
+
+        if ($o->access_path) {
+            $base_obj->access_path = 'stream_get_meta_data('.$o->access_path.')';
         }
 
-        $c = $v->getContext();
+        $rep->contents = $this->parser->parse($meta, $base_obj);
 
-        $parser = $this->getParser();
-        $parsed_meta = [];
-        foreach ($meta as $key => $val) {
-            $base = new ArrayContext($key);
-            $base->depth = $c->getDepth() + 1;
-
-            if (null !== ($ap = $c->getAccessPath())) {
-                $base->access_path = 'stream_get_meta_data('.$ap.')['.\var_export($key, true).']';
-            }
-
-            $val = $parser->parse($val, $base);
-            $val->flags |= AbstractValue::FLAG_GENERATED;
-            $parsed_meta[] = $val;
+        if (!\in_array('depth_limit', $rep->contents->hints, true)) {
+            $rep->contents = $rep->contents->value->contents;
         }
 
-        $stream = new StreamValue($c, $parsed_meta, $meta['uri'] ?? null);
-        $stream->flags = $v->flags;
-        $stream->appendRepresentations($v->getRepresentations());
+        $o->addRepresentation($rep, 0);
+        $o->value = $rep;
 
-        return $stream;
+        $stream = new StreamObject($meta);
+        $stream->transplant($o);
+        $o = $stream;
     }
 }

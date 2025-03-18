@@ -107,7 +107,7 @@ class Plantillas extends BaseController
         $sheet->setCellValue('D6', 'Vigencia Hasta:');
         $sheet->setCellValue('E6', date('d/m/Y', strtotime($tua->getFieldValue("Closing_Date"))));
         $sheet->setCellValue('D7', 'Beneficiario:');
-        $sheet->setCellValue('E7', $cliente->getFieldValue("First_Name") . " Plantillas.php" . $cliente->getFieldValue("Last_Name"));
+        $sheet->setCellValue('E7', $cliente->getFieldValue("First_Name") . " " . $cliente->getFieldValue("Last_Name"));
 
         // elegir el contenido del encabezado de la tabla
         $sheet->setCellValue('A12', '#');

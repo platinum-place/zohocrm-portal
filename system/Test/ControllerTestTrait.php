@@ -12,13 +12,13 @@
 namespace CodeIgniter\Test;
 
 use CodeIgniter\Controller;
-use CodeIgniter\Exceptions\InvalidArgumentException;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\URI;
 use Config\App;
 use Config\Services;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -31,7 +31,7 @@ use Throwable;
  *
  *  $this->withRequest($request)
  *       ->withResponse($response)
- *       ->withUri($uri)
+ *       ->withURI($uri)
  *       ->withBody($body)
  *       ->controller('App\Controllers\Home')
  *       ->execute('methodName');
@@ -55,7 +55,7 @@ trait ControllerTestTrait
     /**
      * Response.
      *
-     * @var ResponseInterface
+     * @var Response
      */
     protected $response;
 
@@ -96,38 +96,37 @@ trait ControllerTestTrait
         helper('url');
 
         if (empty($this->appConfig)) {
-            $this->appConfig = config(App::class);
+            $this->appConfig = config('App');
         }
 
         if (! $this->uri instanceof URI) {
-            $factory   = Services::siteurifactory($this->appConfig, service('superglobals'), false);
-            $this->uri = $factory->createFromGlobals();
+            $this->uri = Services::uri($this->appConfig->baseURL ?? 'http://example.com/', false);
         }
 
         if (empty($this->request)) {
-            // Do some acrobatics, so we can use the Request service with our own URI
-            $tempUri = service('uri');
+            // Do some acrobatics so we can use the Request service with our own URI
+            $tempUri = Services::uri();
             Services::injectMock('uri', $this->uri);
 
-            $this->withRequest(service('incomingrequest', $this->appConfig, false));
+            $this->withRequest(Services::request($this->appConfig, false)->setBody($this->body));
 
             // Restore the URI service
             Services::injectMock('uri', $tempUri);
         }
 
         if (empty($this->response)) {
-            $this->response = service('response', $this->appConfig, false);
+            $this->response = Services::response($this->appConfig, false);
         }
 
         if (empty($this->logger)) {
-            $this->logger = service('logger');
+            $this->logger = Services::logger();
         }
     }
 
     /**
      * Loads the specified controller, and generates any needed dependencies.
      *
-     * @return $this
+     * @return mixed
      */
     public function controller(string $name)
     {
@@ -146,9 +145,9 @@ trait ControllerTestTrait
      *
      * @param array $params
      *
-     * @return TestResponse
-     *
      * @throws InvalidArgumentException
+     *
+     * @return TestResponse
      */
     public function execute(string $method, ...$params)
     {
@@ -157,12 +156,9 @@ trait ControllerTestTrait
         }
 
         $response = null;
-        $this->request->setBody($this->body);
 
         try {
             ob_start();
-            // The controller method param types may not be string.
-            // So cannot set `declare(strict_types=1)` in this file.
             $response = $this->controller->{$method}(...$params);
         } catch (Throwable $e) {
             $code = $e->getCode();
@@ -181,7 +177,7 @@ trait ControllerTestTrait
         }
 
         // If the controller did not return a response then start one
-        if (! $response instanceof ResponseInterface) {
+        if (! $response instanceof Response) {
             $response = $this->response;
         }
 
@@ -204,7 +200,7 @@ trait ControllerTestTrait
             // getStatusCode() throws for empty codes
             try {
                 $response->getStatusCode();
-            } catch (HTTPException) {
+            } catch (HTTPException $e) {
                 // If no code has been set then assume success
                 $response->setStatusCode(200);
             }
@@ -217,9 +213,9 @@ trait ControllerTestTrait
     /**
      * Set controller's config, with method chaining.
      *
-     * @param App $appConfig
+     * @param mixed $appConfig
      *
-     * @return $this
+     * @return mixed
      */
     public function withConfig($appConfig)
     {
@@ -231,9 +227,9 @@ trait ControllerTestTrait
     /**
      * Set controller's request, with method chaining.
      *
-     * @param IncomingRequest $request
+     * @param mixed $request
      *
-     * @return $this
+     * @return mixed
      */
     public function withRequest($request)
     {
@@ -248,9 +244,9 @@ trait ControllerTestTrait
     /**
      * Set controller's response, with method chaining.
      *
-     * @param ResponseInterface $response
+     * @param mixed $response
      *
-     * @return $this
+     * @return mixed
      */
     public function withResponse($response)
     {
@@ -262,9 +258,9 @@ trait ControllerTestTrait
     /**
      * Set controller's logger, with method chaining.
      *
-     * @param LoggerInterface $logger
+     * @param mixed $logger
      *
-     * @return $this
+     * @return mixed
      */
     public function withLogger($logger)
     {
@@ -276,17 +272,11 @@ trait ControllerTestTrait
     /**
      * Set the controller's URI, with method chaining.
      *
-     * @return $this
+     * @return mixed
      */
     public function withUri(string $uri)
     {
-        $factory   = service('siteurifactory');
-        $this->uri = $factory->createFromString($uri);
-        Services::injectMock('uri', $this->uri);
-
-        // Update the Request instance, because Request has the SiteURI instance.
-        $this->request = service('incomingrequest', null, false);
-        Services::injectMock('request', $this->request);
+        $this->uri = new URI($uri);
 
         return $this;
     }
@@ -296,7 +286,7 @@ trait ControllerTestTrait
      *
      * @param string|null $body
      *
-     * @return $this
+     * @return mixed
      */
     public function withBody($body)
     {

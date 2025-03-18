@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,44 +12,44 @@ declare(strict_types=1);
 namespace CodeIgniter\CLI;
 
 use CodeIgniter\CodeIgniter;
-use Config\App;
-use Config\Services;
 use Exception;
 
 /**
  * Console
- *
- * @see \CodeIgniter\CLI\ConsoleTest
  */
 class Console
 {
     /**
+     * Main CodeIgniter instance.
+     *
+     * @var CodeIgniter
+     */
+    protected $app;
+
+    public function __construct(CodeIgniter $app)
+    {
+        $this->app = $app;
+    }
+
+    /**
      * Runs the current command discovered on the CLI.
      *
-     * @return int|void Exit code
-     *
      * @throws Exception
+     *
+     * @return mixed
      */
-    public function run()
+    public function run(bool $useSafeOutput = false)
     {
-        // Create CLIRequest
-        $appConfig = config(App::class);
-        Services::createRequest($appConfig, true);
-        // Load Routes
-        Services::routes()->loadRoutes();
+        $path = CLI::getURI() ?: 'list';
 
-        $runner  = Services::commands();
-        $params  = array_merge(CLI::getSegments(), CLI::getOptions());
-        $params  = $this->parseParamsForHelpOption($params);
-        $command = array_shift($params) ?? 'list';
+        // Set the path for the application to route to.
+        $this->app->setPath("ci{$path}");
 
-        return $runner->run($command, $params);
+        return $this->app->useSafeOutput($useSafeOutput)->run();
     }
 
     /**
      * Displays basic information about the Console.
-     *
-     * @return void
      */
     public function showHeader(bool $suppress = false)
     {
@@ -59,32 +57,7 @@ class Console
             return;
         }
 
-        CLI::write(sprintf(
-            'CodeIgniter v%s Command Line Tool - Server Time: %s UTC%s',
-            CodeIgniter::CI_VERSION,
-            date('Y-m-d H:i:s'),
-            date('P'),
-        ), 'green');
+        CLI::write(sprintf('CodeIgniter v%s Command Line Tool - Server Time: %s UTC%s', CodeIgniter::CI_VERSION, date('Y-m-d H:i:s'), date('P')), 'green');
         CLI::newLine();
-    }
-
-    /**
-     * Introspects the `$params` passed for presence of the
-     * `--help` option.
-     *
-     * If present, it will be found as `['help' => null]`.
-     * We'll remove that as an option from `$params` and
-     * unshift it as argument instead.
-     */
-    private function parseParamsForHelpOption(array $params): array
-    {
-        if (array_key_exists('help', $params)) {
-            unset($params['help']);
-
-            $params = $params === [] ? ['list'] : $params;
-            array_unshift($params, 'help');
-        }
-
-        return $params;
     }
 }

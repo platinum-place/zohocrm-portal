@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -19,9 +17,7 @@ namespace CodeIgniter\Config;
 class ForeignCharacters
 {
     /**
-     * The list of foreign characters.
-     *
-     * @var array<string, string>
+     * Without further ado, the list of foreign characters.
      */
     public $characterList = [
         '/ä|æ|ǽ/'                                                     => 'ae',

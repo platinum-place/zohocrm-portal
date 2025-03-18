@@ -25,7 +25,7 @@ class Login extends BaseController
                 //el objeto con las propiedades de la api pasa a ser una sesion
                 session()->set('cuenta', $usuario->getFieldValue('Account_Name')->getLookupLabel());
                 session()->set('cuenta_id', $usuario->getFieldValue('Account_Name')->getEntityId());
-                session()->set('usuario', $usuario->getFieldValue('First_Name') . " Login.php" . $usuario->getFieldValue('Last_Name'));
+                session()->set('usuario', $usuario->getFieldValue('First_Name') . " " . $usuario->getFieldValue('Last_Name'));
                 session()->set('usuario_id', $usuario->getEntityId());
 
                 if ($usuario->getFieldValue("Title") == "Administrador") {

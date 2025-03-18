@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -17,7 +15,8 @@ use Config\Autoload;
 
 class MockAutoload extends Autoload
 {
-    public $psr4     = [];
+    public $psr4 = [];
+
     public $classmap = [];
 
     public function __construct()

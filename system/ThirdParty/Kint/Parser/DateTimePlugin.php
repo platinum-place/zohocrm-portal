@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,41 +25,31 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use DateTimeInterface;
-use Error;
-use Kint\Value\AbstractValue;
-use Kint\Value\DateTimeValue;
-use Kint\Value\InstanceValue;
+use DateTime;
+use Kint\Object\BasicObject;
+use Kint\Object\DateTimeObject;
 
-class DateTimePlugin extends AbstractPlugin implements PluginCompleteInterface
+class DateTimePlugin extends Plugin
 {
-    public function getTypes(): array
+    public function getTypes()
     {
-        return ['object'];
+        return array('object');
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (!$var instanceof DateTimeInterface || !$v instanceof InstanceValue) {
-            return $v;
+        if (!$var instanceof DateTime) {
+            return;
         }
 
-        try {
-            $dtv = new DateTimeValue($v->getContext(), $var);
-        } catch (Error $e) {
-            // Only happens if someone makes a DateTimeInterface with a private __clone
-            return $v;
-        }
+        $object = new DateTimeObject($var);
+        $object->transplant($o);
 
-        $dtv->setChildren($v->getChildren());
-        $dtv->flags = $v->flags;
-        $dtv->appendRepresentations($v->getRepresentations());
-
-        return $dtv;
+        $o = $object;
     }
 }

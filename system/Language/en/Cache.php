@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,7 +11,7 @@ declare(strict_types=1);
 
 // Cache language settings
 return [
-    'unableToWrite'   => 'Cache unable to write to "{0}".',
+    'unableToWrite'   => 'Cache unable to write to {0}.',
     'invalidHandlers' => 'Cache config must have an array of $validHandlers.',
     'noBackup'        => 'Cache config must have a handler and backupHandler set.',
     'handlerNotFound' => 'Cache config has an invalid handler or backup handler specified.',

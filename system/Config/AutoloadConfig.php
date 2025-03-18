@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -12,19 +10,6 @@ declare(strict_types=1);
  */
 
 namespace CodeIgniter\Config;
-
-use Laminas\Escaper\Escaper;
-use Laminas\Escaper\Exception\ExceptionInterface;
-use Laminas\Escaper\Exception\InvalidArgumentException as EscaperInvalidArgumentException;
-use Laminas\Escaper\Exception\RuntimeException;
-use Psr\Log\AbstractLogger;
-use Psr\Log\InvalidArgumentException;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LoggerTrait;
-use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
 
 /**
  * AUTOLOADER CONFIGURATION
@@ -47,7 +32,7 @@ class AutoloadConfig
      * but this should be done prior to creating any namespaced classes,
      * else you will need to modify all of those classes for this to work.
      *
-     * @var array<string, list<string>|string>
+     * @var array<string, string>
      */
     public $psr4 = [];
 
@@ -73,7 +58,7 @@ class AutoloadConfig
      * that will be autoloaded. This can be useful for bootstrap operations
      * or for loading functions.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     public $files = [];
 
@@ -92,7 +77,7 @@ class AutoloadConfig
      */
     protected $corePsr4 = [
         'CodeIgniter' => SYSTEMPATH,
-        'Config'      => APPPATH . 'Config',
+        'App'         => APPPATH, // To ensure filters, etc still found,
     ];
 
     /**
@@ -105,21 +90,18 @@ class AutoloadConfig
      * searched for within one or more directories as they would if they
      * were being autoloaded through a namespace.
      *
-     * @var array<class-string, string>
+     * @var array<string, string>
      */
     protected $coreClassmap = [
-        AbstractLogger::class                  => SYSTEMPATH . 'ThirdParty/PSR/Log/AbstractLogger.php',
-        InvalidArgumentException::class        => SYSTEMPATH . 'ThirdParty/PSR/Log/InvalidArgumentException.php',
-        LoggerAwareInterface::class            => SYSTEMPATH . 'ThirdParty/PSR/Log/LoggerAwareInterface.php',
-        LoggerAwareTrait::class                => SYSTEMPATH . 'ThirdParty/PSR/Log/LoggerAwareTrait.php',
-        LoggerInterface::class                 => SYSTEMPATH . 'ThirdParty/PSR/Log/LoggerInterface.php',
-        LoggerTrait::class                     => SYSTEMPATH . 'ThirdParty/PSR/Log/LoggerTrait.php',
-        LogLevel::class                        => SYSTEMPATH . 'ThirdParty/PSR/Log/LogLevel.php',
-        NullLogger::class                      => SYSTEMPATH . 'ThirdParty/PSR/Log/NullLogger.php',
-        ExceptionInterface::class              => SYSTEMPATH . 'ThirdParty/Escaper/Exception/ExceptionInterface.php',
-        EscaperInvalidArgumentException::class => SYSTEMPATH . 'ThirdParty/Escaper/Exception/InvalidArgumentException.php',
-        RuntimeException::class                => SYSTEMPATH . 'ThirdParty/Escaper/Exception/RuntimeException.php',
-        Escaper::class                         => SYSTEMPATH . 'ThirdParty/Escaper/Escaper.php',
+        'Psr\Log\AbstractLogger'           => SYSTEMPATH . 'ThirdParty/PSR/Log/AbstractLogger.php',
+        'Psr\Log\InvalidArgumentException' => SYSTEMPATH . 'ThirdParty/PSR/Log/InvalidArgumentException.php',
+        'Psr\Log\LoggerAwareInterface'     => SYSTEMPATH . 'ThirdParty/PSR/Log/LoggerAwareInterface.php',
+        'Psr\Log\LoggerAwareTrait'         => SYSTEMPATH . 'ThirdParty/PSR/Log/LoggerAwareTrait.php',
+        'Psr\Log\LoggerInterface'          => SYSTEMPATH . 'ThirdParty/PSR/Log/LoggerInterface.php',
+        'Psr\Log\LoggerTrait'              => SYSTEMPATH . 'ThirdParty/PSR/Log/LoggerTrait.php',
+        'Psr\Log\LogLevel'                 => SYSTEMPATH . 'ThirdParty/PSR/Log/LogLevel.php',
+        'Psr\Log\NullLogger'               => SYSTEMPATH . 'ThirdParty/PSR/Log/NullLogger.php',
+        'Laminas\Escaper\Escaper'          => SYSTEMPATH . 'ThirdParty/Escaper/Escaper.php',
     ];
 
     /**
@@ -148,6 +130,6 @@ class AutoloadConfig
 
         $this->psr4     = array_merge($this->corePsr4, $this->psr4);
         $this->classmap = array_merge($this->coreClassmap, $this->classmap);
-        $this->files    = [...$this->coreFiles, ...$this->files];
+        $this->files    = array_merge($this->coreFiles, $this->files);
     }
 }

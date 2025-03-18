@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,28 +25,25 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\Representation\BinaryRepresentation;
-use Kint\Value\StringValue;
+use Kint\Object\BasicObject;
+use Kint\Object\BlobObject;
 
-class BinaryPlugin extends AbstractPlugin implements PluginCompleteInterface
+class BinaryPlugin extends Plugin
 {
-    public function getTypes(): array
+    public function getTypes()
     {
-        return ['string'];
+        return array('string');
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if ($v instanceof StringValue && false === $v->getEncoding()) {
-            $v->addRepresentation(new BinaryRepresentation($v->getValue(), true), 0);
+        if (!$o instanceof BlobObject || !\in_array($o->encoding, array('ASCII', 'UTF-8'), true)) {
+            $o->value->hints[] = 'binary';
         }
-
-        return $v;
     }
 }

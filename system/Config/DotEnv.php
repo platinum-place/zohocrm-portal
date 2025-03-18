@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,12 +11,10 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Config;
 
-use CodeIgniter\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 
 /**
  * Environment-specific configuration
- *
- * @see \CodeIgniter\Config\DotEnvTest
  */
 class DotEnv
 {
@@ -70,12 +66,12 @@ class DotEnv
 
         foreach ($lines as $line) {
             // Is it a comment?
-            if (str_starts_with(trim($line), '#')) {
+            if (strpos(trim($line), '#') === 0) {
                 continue;
             }
 
             // If there is an equal sign, then we know we are assigning a variable.
-            if (str_contains($line, '=')) {
+            if (strpos($line, '=') !== false) {
                 [$name, $value] = $this->normaliseVariable($line);
                 $vars[$name]    = $value;
                 $this->setVariable($name, $value);
@@ -89,12 +85,10 @@ class DotEnv
      * Sets the variable into the environment. Will parse the string
      * first to look for {name}={value} pattern, ensure that nested
      * variables are handled, and strip it of single and double quotes.
-     *
-     * @return void
      */
     protected function setVariable(string $name, string $value = '')
     {
-        if (getenv($name, true) === false) {
+        if (! getenv($name, true)) {
             putenv("{$name}={$value}");
         }
 
@@ -114,7 +108,7 @@ class DotEnv
     public function normaliseVariable(string $name, string $value = ''): array
     {
         // Split our compound string into its parts.
-        if (str_contains($name, '=')) {
+        if (strpos($name, '=') !== false) {
             [$name, $value] = explode('=', $name, 2);
         }
 
@@ -122,8 +116,7 @@ class DotEnv
         $value = trim($value);
 
         // Sanitize the name
-        $name = preg_replace('/^export[ \t]++(\S+)/', '$1', $name);
-        $name = str_replace(['\'', '"'], '', $name);
+        $name = str_replace(['export', '\'', '"'], '', $name);
 
         // Sanitize the value
         $value = $this->sanitizeValue($value);
@@ -142,7 +135,7 @@ class DotEnv
      */
     protected function sanitizeValue(string $value): string
     {
-        if ($value === '') {
+        if (! $value) {
             return $value;
         }
 
@@ -164,7 +157,7 @@ class DotEnv
                 %1$s          # and the closing quote
                 .*$           # and discard any string after the closing quote
                 /mx',
-                $quote,
+                $quote
             );
 
             $value = preg_replace($regexPattern, '$1', $value);
@@ -194,7 +187,7 @@ class DotEnv
      */
     protected function resolveNestedVariables(string $value): string
     {
-        if (str_contains($value, '$')) {
+        if (strpos($value, '$') !== false) {
             $value = preg_replace_callback(
                 '/\${([a-zA-Z0-9_\.]+)}/',
                 function ($matchedPatterns) {
@@ -206,7 +199,7 @@ class DotEnv
 
                     return $nestedVariable;
                 },
-                $value,
+                $value
             );
         }
 

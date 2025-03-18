@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -17,8 +15,6 @@ use CodeIgniter\Log\Exceptions\LogException;
 
 /**
  * Log handler that writes to PHP's `error_log()`
- *
- * @see \CodeIgniter\Log\Handlers\ErrorlogHandlerTest
  */
 class ErrorlogHandler extends BaseHandler
 {
@@ -45,7 +41,7 @@ class ErrorlogHandler extends BaseHandler
     /**
      * Constructor.
      *
-     * @param list<mixed> $config
+     * @param mixed[] $config
      */
     public function __construct(array $config = [])
     {

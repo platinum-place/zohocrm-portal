@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -15,11 +13,10 @@ namespace CodeIgniter\Cookie;
 
 use ArrayAccess;
 use CodeIgniter\Cookie\Exceptions\CookieException;
-use CodeIgniter\Exceptions\InvalidArgumentException;
-use CodeIgniter\Exceptions\LogicException;
-use CodeIgniter\I18n\Time;
 use Config\Cookie as CookieConfig;
 use DateTimeInterface;
+use InvalidArgumentException;
+use LogicException;
 use ReturnTypeWillChange;
 
 /**
@@ -39,9 +36,6 @@ use ReturnTypeWillChange;
  * $cookie2 = $cookie->withName('prod_cookie');
  * $cookie2->getName(); // prod_cookie
  * ```
- *
- * @template-implements ArrayAccess<string, bool|int|string>
- * @see \CodeIgniter\Cookie\CookieTest
  */
 class Cookie implements ArrayAccess, CloneableCookieInterface
 {
@@ -61,7 +55,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     protected $value;
 
     /**
-     * @var int Unix timestamp
+     * @var int
      */
     protected $expires;
 
@@ -99,9 +93,9 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
      * Default attributes for a Cookie object. The keys here are the
      * lowercase attribute names. Do not camelCase!
      *
-     * @var array<string, bool|int|string>
+     * @var array<string, mixed>
      */
-    private static array $defaults = [
+    private static $defaults = [
         'prefix'   => '',
         'expires'  => 0,
         'path'     => '/',
@@ -116,18 +110,18 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
      * A cookie name can be any US-ASCII characters, except control characters,
      * spaces, tabs, or separator characters.
      *
+     * @var string
+     *
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes
      * @see https://tools.ietf.org/html/rfc2616#section-2.2
      */
-    private static string $reservedCharsList = "=,; \t\r\n\v\f()<>@:\\\"/[]?{}";
+    private static $reservedCharsList = "=,; \t\r\n\v\f()<>@:\\\"/[]?{}";
 
     /**
      * Set the default attributes to a Cookie instance by injecting
      * the values from the `CookieConfig` config or an array.
      *
-     * This method is called from Response::__construct().
-     *
-     * @param array<string, bool|int|string>|CookieConfig $config
+     * @param array<string, mixed>|CookieConfig $config
      *
      * @return array<string, mixed> The old defaults array. Useful for resetting.
      */
@@ -158,16 +152,16 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
         return $oldDefaults;
     }
 
-    // =========================================================================
+    //=========================================================================
     // CONSTRUCTORS
-    // =========================================================================
+    //=========================================================================
 
     /**
      * Create a new Cookie instance from a `Set-Cookie` header.
      *
-     * @return static
-     *
      * @throws CookieException
+     *
+     * @return static
      */
     public static function fromHeaderString(string $cookie, bool $raw = false)
     {
@@ -182,7 +176,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
         unset($part);
 
         foreach ($parts as $part) {
-            if (str_contains($part, '=')) {
+            if (strpos($part, '=') !== false) {
                 [$attr, $val] = explode('=', $part);
             } else {
                 $attr = $part;
@@ -198,9 +192,9 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * Construct a new Cookie instance.
      *
-     * @param string                         $name    The cookie's name
-     * @param string                         $value   The cookie's value
-     * @param array<string, bool|int|string> $options The cookie's options
+     * @param string               $name    The cookie's name
+     * @param string               $value   The cookie's value
+     * @param array<string, mixed> $options The cookie's options
      *
      * @throws CookieException
      */
@@ -212,12 +206,12 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
 
         // If both `Expires` and `Max-Age` are set, `Max-Age` has precedence.
         if (isset($options['max-age']) && is_numeric($options['max-age'])) {
-            $options['expires'] = Time::now()->getTimestamp() + (int) $options['max-age'];
+            $options['expires'] = time() + (int) $options['max-age'];
             unset($options['max-age']);
         }
 
         // to preserve backward compatibility with array-based cookies in previous CI versions
-        $prefix = ($options['prefix'] === '') ? self::$defaults['prefix'] : $options['prefix'];
+        $prefix = $options['prefix'] ?: self::$defaults['prefix'];
         $path   = $options['path'] ?: self::$defaults['path'];
         $domain = $options['domain'] ?: self::$defaults['domain'];
 
@@ -244,9 +238,9 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
         $this->raw      = $raw;
     }
 
-    // =========================================================================
+    //=========================================================================
     // GETTERS
-    // =========================================================================
+    //=========================================================================
 
     /**
      * {@inheritDoc}
@@ -283,7 +277,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
             $name .= $this->getName();
         } else {
             $search  = str_split(self::$reservedCharsList);
-            $replace = array_map(rawurlencode(...), $search);
+            $replace = array_map('rawurlencode', $search);
 
             $name .= str_replace($search, $replace, $this->getName());
         }
@@ -320,7 +314,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
      */
     public function isExpired(): bool
     {
-        return $this->expires === 0 || $this->expires < Time::now()->getTimestamp();
+        return $this->expires === 0 || $this->expires < time();
     }
 
     /**
@@ -328,7 +322,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
      */
     public function getMaxAge(): int
     {
-        $maxAge = $this->expires - Time::now()->getTimestamp();
+        $maxAge = $this->expires - time();
 
         return $maxAge >= 0 ? $maxAge : 0;
     }
@@ -397,9 +391,9 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
         ];
     }
 
-    // =========================================================================
+    //=========================================================================
     // CLONING
-    // =========================================================================
+    //=========================================================================
 
     /**
      * {@inheritDoc}
@@ -468,9 +462,21 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * {@inheritDoc}
      */
+    public function withNeverExpiring()
+    {
+        $cookie = clone $this;
+
+        $cookie->expires = time() + 5 * YEAR;
+
+        return $cookie;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function withPath(?string $path)
     {
-        $path = $path !== null && $path !== '' && $path !== '0' ? $path : self::$defaults['path'];
+        $path = $path ?: self::$defaults['path'];
         $this->validatePrefix($this->prefix, $this->secure, $path, $this->domain);
 
         $cookie = clone $this;
@@ -485,7 +491,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
      */
     public function withDomain(?string $domain)
     {
-        $domain ??= self::$defaults['domain'];
+        $domain = $domain ?? self::$defaults['domain'];
         $this->validatePrefix($this->prefix, $this->secure, $this->path, $domain);
 
         $cookie = clone $this;
@@ -550,14 +556,14 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
         return $cookie;
     }
 
-    // =========================================================================
+    //=========================================================================
     // ARRAY ACCESS FOR BC
-    // =========================================================================
+    //=========================================================================
 
     /**
      * Whether an offset exists.
      *
-     * @param string $offset
+     * @param mixed $offset
      */
     public function offsetExists($offset): bool
     {
@@ -567,11 +573,11 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * Offset to retrieve.
      *
-     * @param string $offset
-     *
-     * @return bool|int|string
+     * @param mixed $offset
      *
      * @throws InvalidArgumentException
+     *
+     * @return mixed
      */
     #[ReturnTypeWillChange]
     public function offsetGet($offset)
@@ -586,8 +592,8 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * Offset to set.
      *
-     * @param string          $offset
-     * @param bool|int|string $value
+     * @param mixed $offset
+     * @param mixed $value
      *
      * @throws LogicException
      */
@@ -599,7 +605,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * Offset to unset.
      *
-     * @param string $offset
+     * @param mixed $offset
      *
      * @throws LogicException
      */
@@ -608,9 +614,9 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
         throw new LogicException(sprintf('Cannot unset values of properties of %s as it is immutable.', static::class));
     }
 
-    // =========================================================================
+    //=========================================================================
     // CONVERTERS
-    // =========================================================================
+    //=========================================================================
 
     /**
      * {@inheritDoc}
@@ -623,7 +629,7 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
     /**
      * {@inheritDoc}
      */
-    public function __toString(): string
+    public function __toString()
     {
         $cookieHeader = [];
 
@@ -710,9 +716,9 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
         return $expires > 0 ? (int) $expires : 0;
     }
 
-    // =========================================================================
+    //=========================================================================
     // VALIDATION
-    // =========================================================================
+    //=========================================================================
 
     /**
      * Validates the cookie name per RFC 2616.
@@ -740,11 +746,11 @@ class Cookie implements ArrayAccess, CloneableCookieInterface
      */
     protected function validatePrefix(string $prefix, bool $secure, string $path, string $domain): void
     {
-        if (str_starts_with($prefix, '__Secure-') && ! $secure) {
+        if (strpos($prefix, '__Secure-') === 0 && ! $secure) {
             throw CookieException::forInvalidSecurePrefix();
         }
 
-        if (str_starts_with($prefix, '__Host-') && (! $secure || $domain !== '' || $path !== '/')) {
+        if (strpos($prefix, '__Host-') === 0 && (! $secure || $domain !== '' || $path !== '/')) {
             throw CookieException::forInvalidHostPrefix();
         }
     }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -27,10 +25,8 @@ use CodeIgniter\Test\Mock\MockEmail;
 use CodeIgniter\Test\Mock\MockSession;
 use Config\App;
 use Config\Autoload;
-use Config\Email;
 use Config\Modules;
 use Config\Services;
-use Config\Session;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
@@ -49,10 +45,7 @@ abstract class CIUnitTestCase extends TestCase
     /**
      * Methods to run during setUp.
      *
-     * WARNING: Do not override unless you know exactly what you are doing.
-     *          This property may be deprecated in the future.
-     *
-     * @var list<string> array of methods
+     * @var array of methods
      */
     protected $setUpMethods = [
         'resetFactories',
@@ -64,20 +57,20 @@ abstract class CIUnitTestCase extends TestCase
     /**
      * Methods to run during tearDown.
      *
-     * WARNING: This property may be deprecated in the future.
-     *
-     * @var list<string> array of methods
+     * @var array of methods
      */
     protected $tearDownMethods = [];
 
     /**
      * Store of identified traits.
+     *
+     * @var string[]|null
      */
-    private ?array $traits = null;
+    private $traits;
 
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
     // Database Properties
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
     /**
      * Should run db migration?
@@ -111,7 +104,7 @@ abstract class CIUnitTestCase extends TestCase
      * The seed file(s) used for all tests within this test case.
      * Should be fully-namespaced or relative to $basePath
      *
-     * @var class-string<Seeder>|list<class-string<Seeder>>
+     * @var array|string
      */
     protected $seed = '';
 
@@ -125,7 +118,7 @@ abstract class CIUnitTestCase extends TestCase
 
     /**
      * The namespace(s) to help us find the migration classes.
-     * `null` is equivalent to running `spark migrate --all`.
+     * Empty is equivalent to running `spark migrate -all`.
      * Note that running "all" runs migrations in date order,
      * but specifying namespaces runs them in namespace order (then date)
      *
@@ -137,7 +130,7 @@ abstract class CIUnitTestCase extends TestCase
      * The name of the database group to connect to.
      * If not present, will use the defaultGroup.
      *
-     * @var non-empty-string
+     * @var string
      */
     protected $DBGroup = 'tests';
 
@@ -151,7 +144,7 @@ abstract class CIUnitTestCase extends TestCase
     /**
      * Migration Runner instance.
      *
-     * @var MigrationRunner|null
+     * @var MigrationRunner|mixed
      */
     protected $migrations;
 
@@ -170,9 +163,9 @@ abstract class CIUnitTestCase extends TestCase
      */
     protected $insertCache = [];
 
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
     // Feature Properties
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
     /**
      * If present, will override application
@@ -220,9 +213,9 @@ abstract class CIUnitTestCase extends TestCase
      */
     protected $requestBody = '';
 
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
     // Staging
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
     /**
      * Load the helpers.
@@ -238,7 +231,7 @@ abstract class CIUnitTestCase extends TestCase
     {
         parent::setUp();
 
-        if (! $this->app instanceof CodeIgniter) {
+        if (! $this->app) { // @phpstan-ignore-line
             $this->app = $this->createApplication();
         }
 
@@ -293,9 +286,9 @@ abstract class CIUnitTestCase extends TestCase
         }
     }
 
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
     // Mocking
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
     /**
      * Resets shared instanced for all Factories components
@@ -308,9 +301,9 @@ abstract class CIUnitTestCase extends TestCase
     /**
      * Resets shared instanced for all Services
      */
-    protected function resetServices(bool $initAutoloader = true)
+    protected function resetServices()
     {
-        Services::reset($initAutoloader);
+        Services::reset();
     }
 
     /**
@@ -326,7 +319,7 @@ abstract class CIUnitTestCase extends TestCase
      */
     protected function mockEmail()
     {
-        Services::injectMock('email', new MockEmail(config(Email::class)));
+        Services::injectMock('email', new MockEmail(config('Email')));
     }
 
     /**
@@ -336,21 +329,23 @@ abstract class CIUnitTestCase extends TestCase
     {
         $_SESSION = [];
 
-        $config  = config(Session::class);
+        $config  = config('App');
         $session = new MockSession(new ArrayHandler($config, '0.0.0.0'), $config);
 
         Services::injectMock('session', $session);
     }
 
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
     // Assertions
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
     /**
      * Custom function to hook into CodeIgniter's Logging mechanism
      * to check if certain messages were logged during code execution.
      *
      * @param string|null $expectedMessage
+     *
+     * @throws Exception
      *
      * @return bool
      */
@@ -361,25 +356,10 @@ abstract class CIUnitTestCase extends TestCase
         $this->assertTrue($result, sprintf(
             'Failed asserting that expected message "%s" with level "%s" was logged.',
             $expectedMessage ?? '',
-            $level,
+            $level
         ));
 
         return $result;
-    }
-
-    /**
-     * Asserts that there is a log record that contains `$logMessage` in the message.
-     */
-    public function assertLogContains(string $level, string $logMessage, string $message = ''): void
-    {
-        $this->assertTrue(
-            TestLogger::didLog($level, $logMessage, false),
-            $message !== '' ? $message : sprintf(
-                'Failed asserting that logs have a record of message containing "%s" with level "%s".',
-                $logMessage,
-                $level,
-            ),
-        );
     }
 
     /**
@@ -408,31 +388,60 @@ abstract class CIUnitTestCase extends TestCase
     }
 
     /**
-     * Hooks into xdebug's headers capture, looking for presence of
-     * a specific header emitted.
+     * Hooks into xdebug's headers capture, looking for a specific header
+     * emitted
      *
      * @param string $header The leading portion of the header we are looking for
+     *
+     * @throws Exception
      */
     public function assertHeaderEmitted(string $header, bool $ignoreCase = false): void
     {
-        $this->assertNotNull(
-            $this->getHeaderEmitted($header, $ignoreCase, __METHOD__),
-            "Didn't find header for {$header}",
-        );
+        $found = false;
+
+        if (! function_exists('xdebug_get_headers')) {
+            $this->markTestSkipped('XDebug not found.');
+        }
+
+        foreach (xdebug_get_headers() as $emitted) {
+            $found = $ignoreCase ?
+                    (stripos($emitted, $header) === 0) :
+                    (strpos($emitted, $header) === 0);
+            if ($found) {
+                break;
+            }
+        }
+
+        $this->assertTrue($found, "Didn't find header for {$header}");
     }
 
     /**
-     * Hooks into xdebug's headers capture, looking for absence of
-     * a specific header emitted.
+     * Hooks into xdebug's headers capture, looking for a specific header
+     * emitted
      *
      * @param string $header The leading portion of the header we don't want to find
+     *
+     * @throws Exception
      */
     public function assertHeaderNotEmitted(string $header, bool $ignoreCase = false): void
     {
-        $this->assertNull(
-            $this->getHeaderEmitted($header, $ignoreCase, __METHOD__),
-            "Found header for {$header}",
-        );
+        $found = false;
+
+        if (! function_exists('xdebug_get_headers')) {
+            $this->markTestSkipped('XDebug not found.');
+        }
+
+        foreach (xdebug_get_headers() as $emitted) {
+            $found = $ignoreCase ?
+                    (stripos($emitted, $header) === 0) :
+                    (strpos($emitted, $header) === 0);
+            if ($found) {
+                break;
+            }
+        }
+
+        $success = ! $found;
+        $this->assertTrue($success, "Found header for {$header}");
     }
 
     /**
@@ -441,7 +450,7 @@ abstract class CIUnitTestCase extends TestCase
      * where the result is close but not exactly equal to the
      * expected time, for reasons beyond our control.
      *
-     * @param float|int $actual
+     * @param mixed $actual
      *
      * @throws Exception
      */
@@ -461,9 +470,9 @@ abstract class CIUnitTestCase extends TestCase
      * @param mixed $expected
      * @param mixed $actual
      *
-     * @return bool|null
-     *
      * @throws Exception
+     *
+     * @return bool|void
      */
     public function assertCloseEnoughString($expected, $actual, string $message = '', int $tolerance = 1)
     {
@@ -479,16 +488,14 @@ abstract class CIUnitTestCase extends TestCase
             $difference = abs($expected - $actual);
 
             $this->assertLessThanOrEqual($tolerance, $difference, $message);
-        } catch (Exception) {
+        } catch (Exception $e) {
             return false;
         }
-
-        return null;
     }
 
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
     // Utility
-    // --------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
     /**
      * Loads up an instance of CodeIgniter
@@ -499,7 +506,7 @@ abstract class CIUnitTestCase extends TestCase
     protected function createApplication()
     {
         // Initialize the autoloader.
-        service('autoloader')->initialize(new Autoload(), new Modules());
+        Services::autoloader()->initialize(new Autoload(), new Modules());
 
         $app = new MockCodeIgniter(new App());
         $app->initialize();
@@ -509,20 +516,23 @@ abstract class CIUnitTestCase extends TestCase
 
     /**
      * Return first matching emitted header.
+     *
+     * @param string $header Identifier of the header of interest
+     *
+     * @return string|null The value of the header found, null if not found
      */
-    protected function getHeaderEmitted(string $header, bool $ignoreCase = false, string $method = __METHOD__): ?string
+    protected function getHeaderEmitted(string $header, bool $ignoreCase = false): ?string
     {
         if (! function_exists('xdebug_get_headers')) {
-            $this->markTestSkipped($method . '() requires xdebug.');
+            $this->markTestSkipped('XDebug not found.');
         }
 
-        foreach (xdebug_get_headers() as $emittedHeader) {
-            $found = $ignoreCase
-                ? (str_starts_with(strtolower($emittedHeader), strtolower($header)))
-                : (str_starts_with($emittedHeader, $header));
-
+        foreach (xdebug_get_headers() as $emitted) {
+            $found = $ignoreCase ?
+                    (stripos($emitted, $header) === 0) :
+                    (strpos($emitted, $header) === 0);
             if ($found) {
-                return $emittedHeader;
+                return $emitted;
             }
         }
 

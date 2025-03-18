@@ -34,7 +34,7 @@
                         <td><?= date('d/m/Y', strtotime($cotizacion->getCreatedTime())) ?></td>
                         <td><?= $cotizacion->getFieldValue('Quote_Number') ?></td>
                         <td>
-                            <?= $cotizacion->getFieldValue('Nombre') . ' buscar_cotizaciones.php' . $cotizacion->getFieldValue('Apellido') ?>
+                            <?= $cotizacion->getFieldValue('Nombre') . ' ' . $cotizacion->getFieldValue('Apellido') ?>
                         </td>
                         <td><?= $cotizacion->getFieldValue('RNC_C_dula') ?></td>
                         <td><?= $cotizacion->getFieldValue('Plan') ?> </td>

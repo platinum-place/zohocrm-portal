@@ -176,7 +176,7 @@ class Cotizaciones extends BaseController
         // pasa la tabla de cotizacion en array para agregarla al registro
         $planes = json_decode($this->request->getPost("planes"), true);
         $registro = [
-            "Subject" => $this->request->getPost("nombre") . " Cotizaciones.php" . $this->request->getPost("apellido"),
+            "Subject" => $this->request->getPost("nombre") . " " . $this->request->getPost("apellido"),
             "Valid_Till" => date("Y-m-d", strtotime(date("Y-m-d") . "+ 30 days")),
             "Vigencia_desde" => date("Y-m-d"),
             "Account_Name" => session('cuenta_id'),
@@ -289,7 +289,7 @@ class Cotizaciones extends BaseController
         // obtener los datos de la cotizacion, la funcion es heredada de la libreria del api
         $cotizacion = $libreria->getRecord("Quotes", $id);
 
-        $cliente = $cotizacion->getFieldValue('Nombre') . " Cotizaciones.php" . $cotizacion->getFieldValue('Apellido');
+        $cliente = $cotizacion->getFieldValue('Nombre') . " " . $cotizacion->getFieldValue('Apellido');
 
 
         if ($this->request->getPost()) {

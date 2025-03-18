@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -18,7 +16,7 @@ use CodeIgniter\Exceptions\FrameworkException;
 /**
  * RouterException
  */
-class RouterException extends FrameworkException implements ExceptionInterface
+class RouterException extends FrameworkException
 {
     /**
      * Thrown when the actual parameter type does not match
@@ -59,25 +57,5 @@ class RouterException extends FrameworkException implements ExceptionInterface
     public static function forInvalidRoute(string $route)
     {
         return new static(lang('HTTP.invalidRoute', [$route]));
-    }
-
-    /**
-     * Throw when dynamic controller.
-     *
-     * @return RouterException
-     */
-    public static function forDynamicController(string $handler)
-    {
-        return new static(lang('Router.invalidDynamicController', [$handler]));
-    }
-
-    /**
-     * Throw when controller name has `/`.
-     *
-     * @return RouterException
-     */
-    public static function forInvalidControllerName(string $handler)
-    {
-        return new static(lang('Router.invalidControllerName', [$handler]));
     }
 }

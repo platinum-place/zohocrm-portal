@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,14 +12,11 @@ declare(strict_types=1);
 namespace CodeIgniter\HTTP;
 
 use Config\UserAgents;
-use Stringable;
 
 /**
  * Abstraction for an HTTP user agent
- *
- * @see \CodeIgniter\HTTP\UserAgentTest
  */
-class UserAgent implements Stringable
+class UserAgent
 {
     /**
      * Current user-agent
@@ -96,7 +91,7 @@ class UserAgent implements Stringable
     /**
      * HTTP Referer
      *
-     * @var bool|string|null
+     * @var mixed
      */
     protected $referrer;
 
@@ -107,7 +102,7 @@ class UserAgent implements Stringable
      */
     public function __construct(?UserAgents $config = null)
     {
-        $this->config = $config ?? config(UserAgents::class);
+        $this->config = $config ?? new UserAgents();
 
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
             $this->agent = trim($_SERVER['HTTP_USER_AGENT']);
@@ -117,6 +112,8 @@ class UserAgent implements Stringable
 
     /**
      * Is Browser
+     *
+     * @param string $key
      */
     public function isBrowser(?string $key = null): bool
     {
@@ -125,7 +122,7 @@ class UserAgent implements Stringable
         }
 
         // No need to be specific, it's a browser
-        if ((string) $key === '') {
+        if ($key === null) {
             return true;
         }
 
@@ -135,6 +132,8 @@ class UserAgent implements Stringable
 
     /**
      * Is Robot
+     *
+     * @param string $key
      */
     public function isRobot(?string $key = null): bool
     {
@@ -143,7 +142,7 @@ class UserAgent implements Stringable
         }
 
         // No need to be specific, it's a robot
-        if ((string) $key === '') {
+        if ($key === null) {
             return true;
         }
 
@@ -153,6 +152,8 @@ class UserAgent implements Stringable
 
     /**
      * Is Mobile
+     *
+     * @param string $key
      */
     public function isMobile(?string $key = null): bool
     {
@@ -161,7 +162,7 @@ class UserAgent implements Stringable
         }
 
         // No need to be specific, it's a mobile
-        if ((string) $key === '') {
+        if ($key === null) {
             return true;
         }
 
@@ -246,8 +247,6 @@ class UserAgent implements Stringable
 
     /**
      * Parse a custom user-agent string
-     *
-     * @return void
      */
     public function parse(string $string)
     {
@@ -263,15 +262,13 @@ class UserAgent implements Stringable
         // Set the new user-agent string and parse it, unless empty
         $this->agent = $string;
 
-        if ($string !== '') {
+        if (! empty($string)) {
             $this->compileData();
         }
     }
 
     /**
      * Compile the User Agent Data
-     *
-     * @return void
      */
     protected function compileData()
     {
@@ -289,7 +286,7 @@ class UserAgent implements Stringable
      */
     protected function setPlatform(): bool
     {
-        if (is_array($this->config->platforms) && $this->config->platforms !== []) {
+        if (is_array($this->config->platforms) && $this->config->platforms) {
             foreach ($this->config->platforms as $key => $val) {
                 if (preg_match('|' . preg_quote($key, '|') . '|i', $this->agent)) {
                     $this->platform = $val;
@@ -309,7 +306,7 @@ class UserAgent implements Stringable
      */
     protected function setBrowser(): bool
     {
-        if (is_array($this->config->browsers) && $this->config->browsers !== []) {
+        if (is_array($this->config->browsers) && $this->config->browsers) {
             foreach ($this->config->browsers as $key => $val) {
                 if (preg_match('|' . $key . '.*?([0-9\.]+)|i', $this->agent, $match)) {
                     $this->isBrowser = true;
@@ -330,7 +327,7 @@ class UserAgent implements Stringable
      */
     protected function setRobot(): bool
     {
-        if (is_array($this->config->robots) && $this->config->robots !== []) {
+        if (is_array($this->config->robots) && $this->config->robots) {
             foreach ($this->config->robots as $key => $val) {
                 if (preg_match('|' . preg_quote($key, '|') . '|i', $this->agent)) {
                     $this->isRobot = true;
@@ -350,7 +347,7 @@ class UserAgent implements Stringable
      */
     protected function setMobile(): bool
     {
-        if (is_array($this->config->mobiles) && $this->config->mobiles !== []) {
+        if (is_array($this->config->mobiles) && $this->config->mobiles) {
             foreach ($this->config->mobiles as $key => $val) {
                 if (false !== (stripos($this->agent, $key))) {
                     $this->isMobile = true;

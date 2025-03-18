@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,130 +25,68 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Object\BasicObject;
+use Kint\Object\TraceFrameObject;
+use Kint\Object\TraceObject;
 use Kint\Utils;
-use Kint\Value\AbstractValue;
-use Kint\Value\ArrayValue;
-use Kint\Value\Context\ArrayContext;
-use Kint\Value\Representation\ContainerRepresentation;
-use Kint\Value\Representation\SourceRepresentation;
-use Kint\Value\Representation\ValueRepresentation;
-use Kint\Value\TraceFrameValue;
-use Kint\Value\TraceValue;
-use RuntimeException;
 
-/**
- * @psalm-import-type TraceFrame from TraceFrameValue
- */
-class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
+class TracePlugin extends Plugin
 {
-    public static array $blacklist = ['spl_autoload_call'];
-    public static array $path_blacklist = [];
+    public static $blacklist = array('spl_autoload_call');
 
-    public function getTypes(): array
+    public function getTypes()
     {
-        return ['array'];
+        return array('array');
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (!$v instanceof ArrayValue) {
-            return $v;
+        if (!$o->value) {
+            return;
         }
 
-        // Shallow copy so we don't have to worry about touching var
-        $trace = $var;
+        $trace = $this->parser->getCleanArray($var);
 
-        if (!Utils::isTrace($trace)) {
-            return $v;
+        if (\count($trace) !== \count($o->value->contents) || !Utils::isTrace($trace)) {
+            return;
         }
 
-        $pdepth = $this->getParser()->getDepthLimit();
-        $c = $v->getContext();
+        $traceobj = new TraceObject();
+        $traceobj->transplant($o);
+        $rep = $traceobj->value;
 
-        // We need at least 2 levels in order to get $trace[n]['args']
-        if ($pdepth && $c->getDepth() + 2 >= $pdepth) {
-            return $v;
-        }
+        $old_trace = $rep->contents;
 
-        $contents = $v->getContents();
+        Utils::normalizeAliases(self::$blacklist);
 
-        self::$blacklist = Utils::normalizeAliases(self::$blacklist);
-        $path_blacklist = self::normalizePaths(self::$path_blacklist);
+        $rep->contents = array();
 
-        $frames = [];
+        foreach ($old_trace as $frame) {
+            $index = $frame->name;
 
-        foreach ($contents as $frame) {
-            if (!$frame instanceof ArrayValue || !$frame->getContext() instanceof ArrayContext) {
+            if (!isset($trace[$index]['function'])) {
+                // Something's very very wrong here, but it's probably a plugin's fault
                 continue;
             }
 
-            $index = $frame->getContext()->getName();
-
-            if (!isset($trace[$index]) || Utils::traceFrameIsListed($trace[$index], self::$blacklist)) {
+            if (Utils::traceFrameIsListed($trace[$index], self::$blacklist)) {
                 continue;
             }
 
-            if (isset($trace[$index]['file']) && false !== ($realfile = \realpath($trace[$index]['file']))) {
-                foreach ($path_blacklist as $path) {
-                    if (0 === \strpos($realfile, $path)) {
-                        continue 2;
-                    }
-                }
-            }
-
-            $frame = new TraceFrameValue($frame, $trace[$index]);
-
-            if (null !== ($file = $frame->getFile()) && null !== ($line = $frame->getLine())) {
-                try {
-                    $frame->addRepresentation(new SourceRepresentation($file, $line));
-                } catch (RuntimeException $e) {
-                }
-            }
-
-            if ($args = $frame->getArgs()) {
-                $frame->addRepresentation(new ContainerRepresentation('Arguments', $args));
-            }
-
-            if ($obj = $frame->getObject()) {
-                $frame->addRepresentation(
-                    new ValueRepresentation(
-                        'Callee object ['.$obj->getClassName().']',
-                        $obj,
-                        'callee_object'
-                    )
-                );
-            }
-
-            $frames[$index] = $frame;
+            $rep->contents[$index] = new TraceFrameObject($frame, $trace[$index]);
         }
 
-        $traceobj = new TraceValue($c, \count($frames), $frames);
+        \ksort($rep->contents);
+        $rep->contents = \array_values($rep->contents);
 
-        if ($frames) {
-            $traceobj->addRepresentation(new ContainerRepresentation('Contents', $frames, null, true));
-        }
-
-        return $traceobj;
-    }
-
-    protected static function normalizePaths(array $paths): array
-    {
-        $normalized = [];
-
-        foreach ($paths as $path) {
-            $realpath = \realpath($path);
-            if (\is_dir($realpath)) {
-                $realpath .= DIRECTORY_SEPARATOR;
-            }
-
-            $normalized[] = $realpath;
-        }
-
-        return $normalized;
+        $traceobj->clearRepresentations();
+        $traceobj->addRepresentation($rep);
+        $traceobj->size = \count($rep->contents);
+        $o = $traceobj;
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -48,6 +46,17 @@ abstract class BaseHandler implements HandlerInterface
     {
         return in_array($level, $this->handles, true);
     }
+
+    /**
+     * Handles logging the message.
+     * If the handler returns false, then execution of handlers
+     * will stop. Any handlers that have not run, yet, will not
+     * be run.
+     *
+     * @param string $level
+     * @param string $message
+     */
+    abstract public function handle($level, $message): bool;
 
     /**
      * Stores the date format to use while logging messages.

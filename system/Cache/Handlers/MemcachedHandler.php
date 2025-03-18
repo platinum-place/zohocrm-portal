@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,9 +11,7 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Cache\Handlers;
 
-use CodeIgniter\Exceptions\BadMethodCallException;
 use CodeIgniter\Exceptions\CriticalError;
-use CodeIgniter\I18n\Time;
 use Config\Cache;
 use Exception;
 use Memcache;
@@ -23,8 +19,6 @@ use Memcached;
 
 /**
  * Mamcached cache handler
- *
- * @see \CodeIgniter\Cache\Handlers\MemcachedHandlerTest
  */
 class MemcachedHandler extends BaseHandler
 {
@@ -47,14 +41,13 @@ class MemcachedHandler extends BaseHandler
         'raw'    => false,
     ];
 
-    /**
-     * Note: Use `CacheFactory::getHandler()` to instantiate.
-     */
     public function __construct(Cache $config)
     {
         $this->prefix = $config->prefix;
 
-        $this->config = array_merge($this->config, $config->memcached);
+        if (! empty($config)) {
+            $this->config = array_merge($this->config, $config->memcached);
+        }
     }
 
     /**
@@ -86,7 +79,7 @@ class MemcachedHandler extends BaseHandler
                 $this->memcached->addServer(
                     $this->config['host'],
                     $this->config['port'],
-                    $this->config['weight'],
+                    $this->config['weight']
                 );
 
                 // attempt to get status of servers
@@ -104,7 +97,7 @@ class MemcachedHandler extends BaseHandler
                 // Check if we can connect to the server
                 $canConnect = $this->memcached->connect(
                     $this->config['host'],
-                    $this->config['port'],
+                    $this->config['port']
                 );
 
                 // If we can't connect, throw a CriticalError exception
@@ -117,11 +110,13 @@ class MemcachedHandler extends BaseHandler
                     $this->config['host'],
                     $this->config['port'],
                     true,
-                    $this->config['weight'],
+                    $this->config['weight']
                 );
             } else {
                 throw new CriticalError('Cache: Not support Memcache(d) extension.');
             }
+        } catch (CriticalError $e) {
+            throw $e;
         } catch (Exception $e) {
             throw new CriticalError('Cache: Memcache(d) connection refused (' . $e->getMessage() . ').');
         }
@@ -132,8 +127,7 @@ class MemcachedHandler extends BaseHandler
      */
     public function get(string $key)
     {
-        $data = [];
-        $key  = static::validateKey($key, $this->prefix);
+        $key = static::validateKey($key, $this->prefix);
 
         if ($this->memcached instanceof Memcached) {
             $data = $this->memcached->get($key);
@@ -152,7 +146,7 @@ class MemcachedHandler extends BaseHandler
             }
         }
 
-        return is_array($data) ? $data[0] : $data;
+        return is_array($data) ? $data[0] : $data; // @phpstan-ignore-line
     }
 
     /**
@@ -165,7 +159,7 @@ class MemcachedHandler extends BaseHandler
         if (! $this->config['raw']) {
             $value = [
                 $value,
-                Time::now()->getTimestamp(),
+                time(),
                 $ttl,
             ];
         }
@@ -178,6 +172,7 @@ class MemcachedHandler extends BaseHandler
             return $this->memcached->set($key, $value, 0, $ttl);
         }
 
+        // @phpstan-ignore-next-line
         return false;
     }
 
@@ -193,12 +188,10 @@ class MemcachedHandler extends BaseHandler
 
     /**
      * {@inheritDoc}
-     *
-     * @return never
      */
     public function deleteMatching(string $pattern)
     {
-        throw new BadMethodCallException('The deleteMatching method is not implemented for Memcached. You must select File, Redis or Predis handlers to use it.');
+        throw new Exception('The deleteMatching method is not implemented for Memcached. You must select File, Redis or Predis handlers to use it.');
     }
 
     /**
@@ -212,6 +205,7 @@ class MemcachedHandler extends BaseHandler
 
         $key = static::validateKey($key, $this->prefix);
 
+        // @phpstan-ignore-next-line
         return $this->memcached->increment($key, $offset, $offset, 60);
     }
 
@@ -227,7 +221,7 @@ class MemcachedHandler extends BaseHandler
         $key = static::validateKey($key, $this->prefix);
 
         // FIXME: third parameter isn't other handler actions.
-
+        // @phpstan-ignore-next-line
         return $this->memcached->decrement($key, $offset, $offset, 60);
     }
 
@@ -257,7 +251,7 @@ class MemcachedHandler extends BaseHandler
 
         // if not an array, don't try to count for PHP7.2
         if (! is_array($stored) || count($stored) !== 3) {
-            return false; // @TODO This will return null in a future release
+            return false; // This will return null in a future release
         }
 
         [$data, $time, $limit] = $stored;

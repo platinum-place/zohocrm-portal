@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,10 +12,10 @@ declare(strict_types=1);
 namespace CodeIgniter\Database;
 
 use CodeIgniter\CLI\CLI;
-use CodeIgniter\Exceptions\InvalidArgumentException;
 use Config\Database;
 use Faker\Factory;
 use Faker\Generator;
+use InvalidArgumentException;
 
 /**
  * Class Seeder
@@ -27,7 +25,7 @@ class Seeder
     /**
      * The name of the database group to use.
      *
-     * @var non-empty-string
+     * @var string
      */
     protected $DBGroup;
 
@@ -69,9 +67,9 @@ class Seeder
     /**
      * Faker Generator instance.
      *
-     * @deprecated
+     * @var Generator|null
      */
-    private static ?Generator $faker = null;
+    private static $faker;
 
     /**
      * Seeder constructor.
@@ -80,7 +78,7 @@ class Seeder
     {
         $this->seedPath = $config->filesPath ?? APPPATH . 'Database/';
 
-        if ($this->seedPath === '') {
+        if (empty($this->seedPath)) {
             throw new InvalidArgumentException('Invalid filesPath set in the Config\Database.');
         }
 
@@ -92,20 +90,18 @@ class Seeder
 
         $this->config = &$config;
 
-        $db ??= Database::connect($this->DBGroup);
+        $db = $db ?? Database::connect($this->DBGroup);
 
-        $this->db    = $db;
+        $this->db    = &$db;
         $this->forge = Database::forge($this->DBGroup);
     }
 
     /**
      * Gets the Faker Generator instance.
-     *
-     * @deprecated
      */
     public static function faker(): ?Generator
     {
-        if (! self::$faker instanceof Generator && class_exists(Factory::class)) {
+        if (self::$faker === null && class_exists(Factory::class)) {
             self::$faker = Factory::create();
         }
 
@@ -125,7 +121,7 @@ class Seeder
             throw new InvalidArgumentException('No seeder was specified.');
         }
 
-        if (! str_contains($class, '\\')) {
+        if (strpos($class, '\\') === false) {
             $path = $this->seedPath . str_replace('.php', '', $class) . '.php';
 
             if (! is_file($path)) {
@@ -183,7 +179,7 @@ class Seeder
      * Child classes must implement this method and take care
      * of inserting their data here.
      *
-     * @return void
+     * @return mixed
      *
      * @codeCoverageIgnore
      */

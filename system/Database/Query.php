@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,12 +11,10 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Database;
 
-use Stringable;
-
 /**
  * Query builder
  */
-class Query implements QueryInterface, Stringable
+class Query implements QueryInterface
 {
     /**
      * The query string, as provided by the user.
@@ -28,16 +24,9 @@ class Query implements QueryInterface, Stringable
     protected $originalQueryString;
 
     /**
-     * The query string if table prefix has been swapped.
-     *
-     * @var string|null
-     */
-    protected $swappedQueryString;
-
-    /**
      * The final query string after binding, etc.
      *
-     * @var string|null
+     * @var string
      */
     protected $finalQueryString;
 
@@ -95,7 +84,7 @@ class Query implements QueryInterface, Stringable
      */
     public $db;
 
-    public function __construct(ConnectionInterface $db)
+    public function __construct(ConnectionInterface &$db)
     {
         $this->db = $db;
     }
@@ -110,7 +99,6 @@ class Query implements QueryInterface, Stringable
     public function setQuery(string $sql, $binds = null, bool $setEscape = true)
     {
         $this->originalQueryString = $sql;
-        unset($this->swappedQueryString);
 
         if ($binds !== null) {
             if (! is_array($binds)) {
@@ -118,7 +106,7 @@ class Query implements QueryInterface, Stringable
             }
 
             if ($setEscape) {
-                array_walk($binds, static function (&$item): void {
+                array_walk($binds, static function (&$item) {
                     $item = [
                         $item,
                         true,
@@ -127,8 +115,6 @@ class Query implements QueryInterface, Stringable
             }
             $this->binds = $binds;
         }
-
-        unset($this->finalQueryString);
 
         return $this;
     }
@@ -141,14 +127,12 @@ class Query implements QueryInterface, Stringable
     public function setBinds(array $binds, bool $setEscape = true)
     {
         if ($setEscape) {
-            array_walk($binds, static function (&$item): void {
+            array_walk($binds, static function (&$item) {
                 $item = [$item, true];
             });
         }
 
         $this->binds = $binds;
-
-        unset($this->finalQueryString);
 
         return $this;
     }
@@ -160,8 +144,10 @@ class Query implements QueryInterface, Stringable
     public function getQuery(): string
     {
         if (empty($this->finalQueryString)) {
-            $this->compileBinds();
+            $this->finalQueryString = $this->originalQueryString;
         }
+
+        $this->compileBinds();
 
         return $this->finalQueryString;
     }
@@ -170,6 +156,8 @@ class Query implements QueryInterface, Stringable
      * Records the execution time of the statement using microtime(true)
      * for it's start and end values. If no end value is present, will
      * use the current time to determine total duration.
+     *
+     * @param float $end
      *
      * @return $this
      */
@@ -263,14 +251,9 @@ class Query implements QueryInterface, Stringable
      */
     public function swapPrefix(string $orig, string $swap)
     {
-        $sql = $this->swappedQueryString ?? $this->originalQueryString;
+        $sql = empty($this->finalQueryString) ? $this->originalQueryString : $this->finalQueryString;
 
-        $from = '/(\W)' . $orig . '(\S)/';
-        $to   = '\\1' . $swap . '\\2';
-
-        $this->swappedQueryString = preg_replace($from, $to, $sql);
-
-        unset($this->finalQueryString);
+        $this->finalQueryString = preg_replace('/(\W)' . $orig . '(\S+?)/', '\\1' . $swap . '\\2', $sql);
 
         return $this;
     }
@@ -284,33 +267,41 @@ class Query implements QueryInterface, Stringable
     }
 
     /**
-     * Escapes and inserts any binds into the finalQueryString property.
+     * Escapes and inserts any binds into the finalQueryString object.
      *
-     * @see https://regex101.com/r/EUEhay/5
+     * @see https://regex101.com/r/EUEhay/4
      */
     protected function compileBinds()
     {
-        $sql   = $this->swappedQueryString ?? $this->originalQueryString;
-        $binds = $this->binds;
+        $sql = $this->finalQueryString;
 
-        if (empty($binds)) {
-            $this->finalQueryString = $sql;
+        $hasNamedBinds = preg_match('/:((?!=).+):/', $sql) === 1;
 
+        if (empty($this->binds)
+            || empty($this->bindMarker)
+            || (! $hasNamedBinds && strpos($sql, $this->bindMarker) === false)
+        ) {
             return;
         }
 
-        if (is_int(array_key_first($binds))) {
-            $bindCount = count($binds);
-            $ml        = strlen($this->bindMarker);
-
-            $this->finalQueryString = $this->matchSimpleBinds($sql, $binds, $bindCount, $ml);
+        if (! is_array($this->binds)) {
+            $binds     = [$this->binds];
+            $bindCount = 1;
         } else {
-            // Reverse the binds so that duplicate named binds
-            // will be processed prior to the original binds.
-            $binds = array_reverse($binds);
-
-            $this->finalQueryString = $this->matchNamedBinds($sql, $binds);
+            $binds     = $this->binds;
+            $bindCount = count($binds);
         }
+
+        // Reverse the binds so that duplicate named binds
+        // will be processed prior to the original binds.
+        if (! is_numeric(key(array_slice($binds, 0, 1)))) {
+            $binds = array_reverse($binds);
+        }
+
+        $ml  = strlen($this->bindMarker);
+        $sql = $hasNamedBinds ? $this->matchNamedBinds($sql, $binds) : $this->matchSimpleBinds($sql, $binds, $bindCount, $ml);
+
+        $this->finalQueryString = $sql;
     }
 
     /**
@@ -342,7 +333,7 @@ class Query implements QueryInterface, Stringable
      */
     protected function matchSimpleBinds(string $sql, array $binds, int $bindCount, int $ml): string
     {
-        if ($c = preg_match_all("/'[^']*'/", $sql, $matches) >= 1) {
+        if ($c = preg_match_all("/'[^']*'/", $sql, $matches)) {
             $c = preg_match_all('/' . preg_quote($this->bindMarker, '/') . '/i', str_replace($matches[0], str_replace($this->bindMarker, str_repeat(' ', $ml), $matches[0]), $sql, $c), $matches, PREG_OFFSET_CAPTURE);
 
             // Bind values' count must match the count of markers in the query
@@ -361,7 +352,7 @@ class Query implements QueryInterface, Stringable
                 $escapedValue = '(' . implode(',', $escapedValue) . ')';
             }
 
-            $sql = substr_replace($sql, (string) $escapedValue, $matches[0][$c][1], $ml);
+            $sql = substr_replace($sql, $escapedValue, $matches[0][$c][1], $ml);
         } while ($c !== 0);
 
         return $sql;
@@ -374,51 +365,50 @@ class Query implements QueryInterface, Stringable
     {
         // Key words we want bolded
         static $highlight = [
-            'AND',
-            'AS',
-            'ASC',
-            'AVG',
-            'BY',
-            'COUNT',
-            'DESC',
+            'SELECT',
             'DISTINCT',
             'FROM',
-            'GROUP',
-            'HAVING',
-            'IN',
-            'INNER',
+            'WHERE',
+            'AND',
+            'LEFT&nbsp;JOIN',
+            'RIGHT&nbsp;JOIN',
+            'JOIN',
+            'ORDER&nbsp;BY',
+            'GROUP&nbsp;BY',
+            'LIMIT',
             'INSERT',
             'INTO',
-            'IS',
-            'JOIN',
-            'LEFT',
+            'VALUES',
+            'UPDATE',
+            'OR&nbsp;',
+            'HAVING',
+            'OFFSET',
+            'NOT&nbsp;IN',
+            'IN',
             'LIKE',
-            'LIMIT',
+            'NOT&nbsp;LIKE',
+            'COUNT',
             'MAX',
             'MIN',
-            'NOT',
-            'NULL',
-            'OFFSET',
             'ON',
-            'OR',
-            'ORDER',
-            'RIGHT',
-            'SELECT',
+            'AS',
+            'AVG',
             'SUM',
-            'UPDATE',
-            'VALUES',
-            'WHERE',
+            '(',
+            ')',
         ];
 
-        $sql = esc($this->getQuery());
+        if (empty($this->finalQueryString)) {
+            $this->compileBinds(); // @codeCoverageIgnore
+        }
 
-        /**
-         * @see https://stackoverflow.com/a/20767160
-         * @see https://regex101.com/r/hUlrGN/4
-         */
-        $search = '/\b(?:' . implode('|', $highlight) . ')\b(?![^(&#039;)]*&#039;(?:(?:[^(&#039;)]*&#039;){2})*[^(&#039;)]*$)/';
+        $sql = $this->finalQueryString;
 
-        return preg_replace_callback($search, static fn ($matches): string => '<strong>' . str_replace(' ', '&nbsp;', $matches[0]) . '</strong>', $sql);
+        foreach ($highlight as $term) {
+            $sql = str_replace($term, '<strong>' . $term . '</strong>', $sql);
+        }
+
+        return $sql;
     }
 
     /**

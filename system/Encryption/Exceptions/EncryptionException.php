@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,12 +12,13 @@ declare(strict_types=1);
 namespace CodeIgniter\Encryption\Exceptions;
 
 use CodeIgniter\Exceptions\DebugTraceableTrait;
-use CodeIgniter\Exceptions\RuntimeException;
+use CodeIgniter\Exceptions\ExceptionInterface;
+use RuntimeException;
 
 /**
  * Encryption exception
  */
-class EncryptionException extends RuntimeException
+class EncryptionException extends RuntimeException implements ExceptionInterface
 {
     use DebugTraceableTrait;
 
@@ -45,6 +44,8 @@ class EncryptionException extends RuntimeException
 
     /**
      * Thrown when the handler requested is unknown.
+     *
+     * @param string $driver
      *
      * @return static
      */

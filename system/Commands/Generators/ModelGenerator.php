@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -55,7 +53,7 @@ class ModelGenerator extends BaseCommand
     /**
      * The Command's Arguments
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $arguments = [
         'name' => 'The model class name.',
@@ -64,7 +62,7 @@ class ModelGenerator extends BaseCommand
     /**
      * The Command's Options
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $options = [
         '--table'     => 'Supply a table name. Default: "the lowercased plural of the class name".',
@@ -85,7 +83,7 @@ class ModelGenerator extends BaseCommand
         $this->template  = 'model.tpl.php';
 
         $this->classNameLang = 'CLI.generator.className.model';
-        $this->generateClass($params);
+        $this->execute($params);
     }
 
     /**
@@ -94,17 +92,15 @@ class ModelGenerator extends BaseCommand
     protected function prepare(string $class): string
     {
         $table   = $this->getOption('table');
-        $dbGroup = $this->getOption('dbgroup');
+        $DBGroup = $this->getOption('dbgroup');
         $return  = $this->getOption('return');
 
-        $baseClass = class_basename($class);
+        $baseClass = strtolower(str_replace(trim(implode('\\', array_slice(explode('\\', $class), 0, -1)), '\\') . '\\', '', $class));
+        $baseClass = strpos($baseClass, 'model') ? str_replace('model', '', $baseClass) : $baseClass;
 
-        if (preg_match('/^(\S+)Model$/i', $baseClass, $match) === 1) {
-            $baseClass = $match[1];
-        }
-
-        $table  = is_string($table) ? $table : plural(strtolower($baseClass));
-        $return = is_string($return) ? $return : 'array';
+        $table   = is_string($table) ? $table : plural($baseClass);
+        $DBGroup = is_string($DBGroup) ? $DBGroup : 'default';
+        $return  = is_string($return) ? $return : 'array';
 
         if (! in_array($return, ['array', 'object', 'entity'], true)) {
             // @codeCoverageIgnoreStart
@@ -116,20 +112,17 @@ class ModelGenerator extends BaseCommand
         if ($return === 'entity') {
             $return = str_replace('Models', 'Entities', $class);
 
-            if (preg_match('/^(\S+)Model$/i', $return, $match) === 1) {
-                $return = $match[1];
+            if ($pos = strpos($return, 'Model')) {
+                $return = substr($return, 0, $pos);
 
                 if ($this->getOption('suffix')) {
                     $return .= 'Entity';
                 }
             }
 
-            $return = '\\' . trim($return, '\\') . '::class';
             $this->call('make:entity', array_merge([$baseClass], $this->params));
-        } else {
-            $return = "'{$return}'";
         }
 
-        return $this->parseTemplate($class, ['{dbGroup}', '{table}', '{return}'], [$dbGroup, $table, $return], compact('dbGroup'));
+        return $this->parseTemplate($class, ['{table}', '{DBGroup}', '{return}'], [$table, $DBGroup, $return]);
     }
 }

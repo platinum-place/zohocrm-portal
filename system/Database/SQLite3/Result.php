@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -17,14 +15,10 @@ use Closure;
 use CodeIgniter\Database\BaseResult;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Entity\Entity;
-use SQLite3;
-use SQLite3Result;
 use stdClass;
 
 /**
  * Result for SQLite3
- *
- * @extends BaseResult<SQLite3, SQLite3Result>
  */
 class Result extends BaseResult
 {
@@ -33,7 +27,7 @@ class Result extends BaseResult
      */
     public function getFieldCount(): int
     {
-        return $this->resultID->numColumns();
+        return $this->resultID->numColumns(); // @phpstan-ignore-line
     }
 
     /**
@@ -44,7 +38,7 @@ class Result extends BaseResult
         $fieldNames = [];
 
         for ($i = 0, $c = $this->getFieldCount(); $i < $c; $i++) {
-            $fieldNames[] = $this->resultID->columnName($i);
+            $fieldNames[] = $this->resultID->columnName($i); // @phpstan-ignore-line
         }
 
         return $fieldNames;
@@ -64,26 +58,24 @@ class Result extends BaseResult
         ];
 
         $retVal = [];
-        $this->resultID->fetchArray(SQLITE3_NUM);
+        $this->resultID->fetchArray(SQLITE3_NUM); // @phpstan-ignore-line
 
         for ($i = 0, $c = $this->getFieldCount(); $i < $c; $i++) {
             $retVal[$i]             = new stdClass();
-            $retVal[$i]->name       = $this->resultID->columnName($i);
-            $type                   = $this->resultID->columnType($i);
+            $retVal[$i]->name       = $this->resultID->columnName($i); // @phpstan-ignore-line
+            $type                   = $this->resultID->columnType($i); // @phpstan-ignore-line
             $retVal[$i]->type       = $type;
             $retVal[$i]->type_name  = $dataTypes[$type] ?? null;
             $retVal[$i]->max_length = null;
             $retVal[$i]->length     = null;
         }
-        $this->resultID->reset();
+        $this->resultID->reset(); // @phpstan-ignore-line
 
         return $retVal;
     }
 
     /**
      * Frees the current result.
-     *
-     * @return void
      */
     public function freeResult()
     {
@@ -98,9 +90,9 @@ class Result extends BaseResult
      * internally before fetching results to make sure the result set
      * starts at zero.
      *
-     * @return bool
-     *
      * @throws DatabaseException
+     *
+     * @return mixed
      */
     public function dataSeek(int $n = 0)
     {
@@ -108,7 +100,7 @@ class Result extends BaseResult
             throw new DatabaseException('SQLite3 doesn\'t support seeking to other offset.');
         }
 
-        return $this->resultID->reset();
+        return $this->resultID->reset(); // @phpstan-ignore-line
     }
 
     /**
@@ -116,11 +108,11 @@ class Result extends BaseResult
      *
      * Overridden by driver classes.
      *
-     * @return array|false
+     * @return mixed
      */
     protected function fetchAssoc()
     {
-        return $this->resultID->fetchArray(SQLITE3_ASSOC);
+        return $this->resultID->fetchArray(SQLITE3_ASSOC); // @phpstan-ignore-line
     }
 
     /**
@@ -128,7 +120,7 @@ class Result extends BaseResult
      *
      * Overridden by child classes.
      *
-     * @return Entity|false|object|stdClass
+     * @return bool|object
      */
     protected function fetchObject(string $className = 'stdClass')
     {
@@ -144,10 +136,10 @@ class Result extends BaseResult
         $classObj = new $className();
 
         if (is_subclass_of($className, Entity::class)) {
-            return $classObj->injectRawData($row);
+            return $classObj->setAttributes($row);
         }
 
-        $classSet = Closure::bind(function ($key, $value): void {
+        $classSet = Closure::bind(function ($key, $value) {
             $this->{$key} = $value;
         }, $classObj, $className);
 

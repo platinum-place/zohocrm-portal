@@ -5,7 +5,7 @@
             <tbody>
                 <tr>
                     <th scope="col">Nombre</th>
-                    <td><?= $cliente->getFieldValue("First_Name") . " detalles.php" . $cliente->getFieldValue("Last_Name") ?></td>
+                    <td><?= $cliente->getFieldValue("First_Name") . " " . $cliente->getFieldValue("Last_Name") ?></td>
                 </tr>
 
                 <tr>

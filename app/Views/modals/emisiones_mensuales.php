@@ -24,7 +24,7 @@
                                 <tr>
                                     <td><?= date('d/m/Y', strtotime($cotizacion->getFieldValue("Vigencia_desde"))) ?></td>
                                     <td>
-                                        <?= $cotizacion->getFieldValue('Nombre') . ' emisiones_mensuales.php' . $cotizacion->getFieldValue('Apellido') ?>
+                                        <?= $cotizacion->getFieldValue('Nombre') . ' ' . $cotizacion->getFieldValue('Apellido') ?>
                                     </td>
                                     <td><?= $cotizacion->getFieldValue('Coberturas')->getLookupLabel() ?></td>
                                     <td><?= ($cotizacion->getFieldValue('Contact_Name')) ? $cotizacion->getFieldValue('Contact_Name')->getLookupLabel() : "" ?></td>

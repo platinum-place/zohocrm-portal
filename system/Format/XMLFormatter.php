@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -19,17 +17,15 @@ use SimpleXMLElement;
 
 /**
  * XML data formatter
- *
- * @see \CodeIgniter\Format\XMLFormatterTest
  */
 class XMLFormatter implements FormatterInterface
 {
     /**
      * Takes the given data and formats it.
      *
-     * @param array|bool|float|int|object|string|null $data
+     * @param mixed $data
      *
-     * @return false|string (XML string | false)
+     * @return bool|string (XML string | false)
      */
     public function format($data)
     {
@@ -38,7 +34,10 @@ class XMLFormatter implements FormatterInterface
         // SimpleXML is installed but default
         // but best to check, and then provide a fallback.
         if (! extension_loaded('simplexml')) {
-            throw FormatException::forMissingExtension(); // @codeCoverageIgnore
+            // never thrown in travis-ci
+            // @codeCoverageIgnoreStart
+            throw FormatException::forMissingExtension();
+            // @codeCoverageIgnoreEnd
         }
 
         $options = $config->formatterOptions['application/xml'] ?? 0;
@@ -57,8 +56,6 @@ class XMLFormatter implements FormatterInterface
      * @see http://www.codexworld.com/convert-array-to-xml-in-php/
      *
      * @param SimpleXMLElement $output
-     *
-     * @return void
      */
     protected function arrayToXML(array $data, &$output)
     {
@@ -92,8 +89,6 @@ class XMLFormatter implements FormatterInterface
             '\\x{2C00}-\\x{2FEF}\\x{3001}-\\x{D7FF}\\x{F900}-\\x{FDCF}' .
             '\\x{FDF0}-\\x{FFFD}\\x{10000}-\\x{EFFFF}';
         $validName = $startChar . '\\.\\d\\x{B7}\\x{300}-\\x{36F}\\x{203F}-\\x{2040}';
-
-        $key = (string) $key;
 
         $key = trim($key);
         $key = preg_replace("/[^{$validName}-]+/u", '', $key);

@@ -41,7 +41,7 @@ class Paths
      *
      * @var string
      */
-    public $appDirectory = __DIR__ . '/app';
+    public $appDirectory = __DIR__ . '/..';
 
     /**
      * ---------------------------------------------------------------
