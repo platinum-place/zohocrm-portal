@@ -1,3 +1,4 @@
-./vendor
-./zcrm_oauthtokens.txt
-./ZCRMClientLibrary.log
+/vendor
+zcrm_oauthtokens.txt
+ZCRMClientLibrary.log
+/.idea
