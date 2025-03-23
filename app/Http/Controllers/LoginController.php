@@ -12,20 +12,4 @@ class LoginController extends Controller
     {
         return view('login.index');
     }
-
-    public function login(Request $request)
-    {
-        //
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return response()->noContent();
-    }
 }
