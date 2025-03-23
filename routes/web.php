@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,15 +13,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/login', [\App\Http\Controllers\LoginController::class, 'index'])->name('login');
+Route::post('/logout', [\App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
 
 Route::middleware([\App\Http\Middleware\CheckSession::class])->group(function () {
     Route::get('/', function () {
-        return view('welcome');
+        return redirect()->route('home');
     });
 
-    Route::get('/home', function () {
-        return view('welcome');
-    })->name('home');
+    Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
