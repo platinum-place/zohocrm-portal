@@ -14,7 +14,7 @@
 
                     <div class="card shadow-lg border-0 rounded-lg mt-5">
                         <div class="card-header d-flex justify-content-center">
-                            <img src="<?= base_url('images/logo.png') ?>" alt="Logo IT" width="250" height="250">
+                            <img src="<?= base_url('images/logo.png') ?>" alt="Logo IT" width="200" height="200">
                         </div>
 
                         <div class="card-body">
