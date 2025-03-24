@@ -1,6 +1,6 @@
 <nav class="sb-topnav navbar navbar-expand navbar-dark" style="background-color: #004583">
     <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="#"><?= session('username') ?></a>
+    <a class="navbar-brand ps-3" href="#"><?= session('company_name') ?></a>
     <!-- Navbar Search-->
     <div class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
         &nbsp;
