@@ -10,11 +10,13 @@
     <title>IT - Insurance Tech</title>
     <link rel="icon" type="image/png" href="<?= base_url('images/favicon.ico') ?>">
     <link href="<?= base_url('css/styles.css') ?>" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/all.min.css">
     <?= $this->renderSection('css') ?>
 </head>
 
 <body>
+
+<?= $this->include('components/navbar') ?>
 
 <?= $this->renderSection('content') ?>
 
