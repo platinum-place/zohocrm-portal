@@ -22,9 +22,8 @@ class Login extends BaseController
             $session->set([
                 'user_id' => $user['id'],
                 'name' => $user['name'],
-                'username' => $user['username'],
                 'zoho_id' => $user['zoho_id'],
-                'logged_in' => true
+                'company_name' => ''
             ]);
             return redirect()->to('/');
         } else {
