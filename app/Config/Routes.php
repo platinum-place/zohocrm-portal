@@ -35,6 +35,7 @@ $routes->get('login', 'Login::index');
 $routes->post('login', 'Login::login');
 $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'Home::index');
+    $routes->put('logout', 'Login::logout');
 });
 
 /*
