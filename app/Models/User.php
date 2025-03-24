@@ -15,7 +15,7 @@ class User extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'id','username','email',
+        'name','username','email',
         'password','zoho_id','is_admin'
     ];
 

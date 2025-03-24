@@ -21,6 +21,7 @@ class Login extends BaseController
             $session = session();
             $session->set([
                 'user_id' => $user['id'],
+                'name' => $user['name'],
                 'username' => $user['username'],
                 'zoho_id' => $user['zoho_id'],
                 'logged_in' => true
@@ -29,5 +30,11 @@ class Login extends BaseController
         } else {
             return redirect()->back()->with('alert', 'Credenciales inválidas.');
         }
+    }
+
+    public function logout()
+    {
+        session()->destroy();
+        return redirect()->to('login');
     }
 }
