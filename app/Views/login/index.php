@@ -8,9 +8,9 @@
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="col-lg-5">
-                            <?php if (session()->getFlashdata('alerta')) : ?>
+                            <?php if (session()->getFlashdata('alert')) : ?>
                                 <div class="alert alert-danger" role="alert">
-                                    <?= session()->getFlashdata('alerta') ?>
+                                    <?= session()->getFlashdata('alert') ?>
                                 </div>
                             <?php endif ?>
 
@@ -20,14 +20,16 @@
                                 </div>
 
                                 <div class="card-body">
-                                    <form method="POST" action="<?= site_url('/login') ?>">
+                                    <form method="POST" action="<?= site_url('login') ?>">
+                                        <?= csrf_field() ?>
+
                                         <div class="form-floating mb-3">
-                                            <input class="form-control" id="inputEmail" type="email" name="correo" />
+                                            <input class="form-control" id="inputEmail" type="text" name="username" />
                                             <label for="inputEmail">Usuario</label>
                                         </div>
 
                                         <div class="form-floating mb-3">
-                                            <input class="form-control" id="inputPassword" type="password" name="pass" />
+                                            <input class="form-control" id="inputPassword" type="password" name="password" />
                                             <label for="inputPassword">Contraseña</label>
                                         </div>
 
