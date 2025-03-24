@@ -18,15 +18,17 @@
 
 <?= $this->include('components/navbar') ?>
 
-<?= $this->renderSection('content') ?>
+<div id="layoutSidenav">
+    <?= $this->include('components/sidebar') ?>
 
-<footer class="py-4 bg-light mt-auto fixed-bottom">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; Grupo Nobe <?= date('Y') ?></div>
-        </div>
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <?= $this->renderSection('content') ?>
+            </div>
+        </main>
     </div>
-</footer>
+</div>
 
 <?= $this->renderSection('js') ?>
 </body>
