@@ -3,67 +3,12 @@
 namespace App\Controllers;
 
 use App\Libraries\Zoho;
-use App\Libraries\ZohoClient;
-use App\Models\Company;
-use App\Models\CompanyUser;
-use App\Models\User;
 use CodeIgniter\HTTP\RedirectResponse;
 use zcrmsdk\crm\exception\ZCRMException;
 
 class Login extends BaseController
 {
-    protected $zoho;
-
-    public function __construct()
-    {
-        $this->zoho = new ZohoClient();
-    }
-
     public function index()
-    {
-        return view('login/index');
-    }
-
-    public function login()
-    {
-        $model = new User();
-        $user = $model->where('username', $this->request->getPost('username'))->first();
-
-        if ($user && password_verify($this->request->getPost('password'), $user['password'])) {
-            $relation_model = new CompanyUser();
-            $relation = $relation_model->where('user_id', $user['id'])->first();
-
-            $company_model = new Company();
-            $company = $company_model->where('id', $relation['company_id'])->first();
-
-            $session = session();
-
-            $session->set([
-                'user_id' => $user['id'],
-                'name' => $user['name'],
-                'zoho_id' => $user['zoho_id'],
-                'zoho_company_id' => $company['zoho_id'],
-                'company_name' => '',
-                'is_admin' =>$user['is_admin']
-            ]);
-
-            if ($user['is_admin']) {
-                $session->setFlashdata('alert', 'Has iniciado sesión como administrador. Podrás visualizar las cotizaciones y emisiones de los demás usuarios.');
-            }
-
-            return redirect()->to('/');
-        }
-
-        return redirect()->back()->with('alert', 'Credenciales inválidas.');
-    }
-
-    public function logout()
-    {
-        session()->destroy();
-        return redirect()->to('login');
-    }
-
-    public function index2()
     {
         $libreria = new Zoho;
 
@@ -74,7 +19,6 @@ class Login extends BaseController
             //los correos son campos unicos en el crm
             $criteria = "((Email:equals:" . $this->request->getPost("correo") . ") and (Contrase_a:equals:" . $this->request->getPost("pass") . "))";
             $usuarios = $libreria->searchRecordsByCriteria("Contacts", $criteria, 1, 1);
-            var_dump($usuarios);
             //buscar el todos los usuarios con el correo y contraseña sean iguales
             //los correos son campos unicos en el crm
             foreach ((array)$usuarios as $usuario) {
