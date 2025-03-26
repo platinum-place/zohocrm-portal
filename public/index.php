@@ -3,6 +3,8 @@
 // Path to the front controller (this file)
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
+ini_set('memory_limit', '2048M');
+
 /*
  *---------------------------------------------------------------
  * BOOTSTRAP THE APPLICATION
