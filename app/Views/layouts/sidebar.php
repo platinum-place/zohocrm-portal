@@ -2,8 +2,9 @@
     <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
         <div class="sb-sidenav-menu">
             <div class="nav">
+                <br />
                 <div class="text-center">
-                    <img src="<?= base_url('img/logo.jpg') ?>" alt="Logo IT" width="250" height="230">
+                    <img src="<?= base_url('images/logo.png') ?>" alt="Logo IT" width="200" height="190">
                 </div>
 
                 <div class="sb-sidenav-menu-heading">&nbsp;</div>

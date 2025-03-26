@@ -13,11 +13,13 @@ class Zoho
 {
     function __construct()
     {
+        $config = config('Zoho');
+
         ZCRMRestClient::initialize([
-            "client_id" => "1000.7FJQ4A2KDH9S2IJWDYL13HATQFMA2H",
-            "client_secret" => "c3f1d0589803f294a7c5b27e3968ae1658927da9d7",
-            "currentUserEmail" => "tecnologia@gruponobe.com",
-            "redirect_uri" => base_url(),
+            "client_id" => $config->client_id,
+            "client_secret" => $config->client_secret,
+            "currentUserEmail" =>$config->user,
+            "redirect_uri" =>$config->redirect_uri,
             "token_persistence_path" => ROOTPATH
         ]);
     }

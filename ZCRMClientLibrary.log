@@ -11158,3 +11158,4 @@ Trace::#0 /opt/bitnami/apache2/htdocs/portal/vendor/zohocrm/php-sdk-archive/src/
 #13 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
 #14 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
 #15 {main}
+2025-03-25 21:46:08 INFO: Access Token has expired. Hence refreshing.
