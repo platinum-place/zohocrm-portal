@@ -1,5 +1,5 @@
 {
-    "name": "codeigniter4/framework",
+    "name": "codeigniter4/codeigniter4",
     "type": "project",
     "description": "The CodeIgniter framework v4",
     "homepage": "https://codeigniter.com",
@@ -10,24 +10,34 @@
         "ext-intl": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "kint-php/kint": "^3.3",
-        "laminas/laminas-escaper": "^2.8",
-        "psr/log": "^1.1",
-        "zohocrm/php-sdk-archive": "^2.2",
-        "phpoffice/phpspreadsheet": "^1.18",
-        "phpoffice/phpword": "^0.18.2"
+        "kint-php/kint": "^4.0",
+        "laminas/laminas-escaper": "^2.9",
+        "psr/log": "^1.1"
     },
     "require-dev": {
-        "codeigniter/coding-standard": "^1.1",
+        "codeigniter/coding-standard": "1.2.*",
         "fakerphp/faker": "^1.9",
-        "friendsofphp/php-cs-fixer": "^3.1",
+        "friendsofphp/php-cs-fixer": "3.2.*",
         "mikey179/vfsstream": "^1.6",
         "nexusphp/cs-config": "^3.3",
+        "nexusphp/tachycardia": "^1.0",
+        "phpstan/phpstan": "1.4.3",
         "phpunit/phpunit": "^9.1",
-        "predis/predis": "^1.1"
+        "predis/predis": "^1.1",
+        "rector/rector": "0.12.10"
     },
     "suggest": {
         "ext-fileinfo": "Improves mime type detection for files"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-develop": "4.x-dev"
+        }
     },
     "autoload": {
         "psr-4": {
@@ -37,11 +47,33 @@
             "**/Database/Migrations/**"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "CodeIgniter\\": "tests/system/",
+            "Utils\\": "utils/"
+        }
+    },
     "scripts": {
         "post-update-cmd": [
-            "CodeIgniter\\ComposerScripts::postUpdate"
+            "CodeIgniter\\ComposerScripts::postUpdate",
+            "bash -c \"if [ -f admin/setup.sh ]; then bash admin/setup.sh; fi\""
         ],
-        "test": "phpunit"
+        "analyze": "phpstan analyse",
+        "test": "phpunit",
+        "cs": [
+            "php-cs-fixer fix --verbose --dry-run --diff --config=.no-header.php-cs-fixer.dist.php",
+            "php-cs-fixer fix --verbose --dry-run --diff"
+        ],
+        "cs-fix": [
+            "php-cs-fixer fix --verbose --diff --config=.no-header.php-cs-fixer.dist.php",
+            "php-cs-fixer fix --verbose --diff"
+        ]
+    },
+    "scripts-descriptions": {
+        "analyze": "Run static analysis",
+        "test": "Run unit tests",
+        "cs": "Check the coding style",
+        "cs-fix": "Fix the coding style"
     },
     "support": {
         "forum": "http://forum.codeigniter.com/",
