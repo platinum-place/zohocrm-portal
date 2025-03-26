@@ -23,49 +23,40 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Object\Representation;
+namespace Kint\Zval;
 
-class Representation
+use BackedEnum;
+use UnitEnum;
+
+class EnumValue extends InstanceValue
 {
-    public $label;
-    public $implicit_label = false;
-    public $hints = array();
-    public $contents = array();
+    public $enumval;
 
-    protected $name;
+    public $hints = ['object', 'enum'];
 
-    public function __construct($label, $name = null)
+    public function __construct(UnitEnum $enumval)
     {
-        $this->label = $label;
+        $this->enumval = $enumval;
+    }
 
-        if (null === $name) {
-            $name = $label;
+    public function getValueShort()
+    {
+        if ($this->enumval instanceof BackedEnum) {
+            if (\is_string($this->enumval->value)) {
+                return '"'.$this->enumval->value.'"';
+            }
+            if (\is_int($this->enumval->value)) {
+                return (string) $this->enumval->value;
+            }
         }
-
-        $this->setName($name);
     }
 
-    public function getLabel()
+    public function getType()
     {
-        if (\is_array($this->contents) && \count($this->contents) > 1) {
-            return $this->label.' ('.\count($this->contents).')';
-        }
-
-        return $this->label;
+        return $this->classname.'::'.$this->enumval->name;
     }
 
-    public function getName()
+    public function getSize()
     {
-        return $this->name;
-    }
-
-    public function setName($name)
-    {
-        $this->name = \preg_replace('/[^a-z0-9]+/', '_', \strtolower($name));
-    }
-
-    public function labelIsImplicit()
-    {
-        return $this->implicit_label;
     }
 }

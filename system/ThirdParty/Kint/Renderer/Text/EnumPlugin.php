@@ -23,32 +23,22 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Object;
+namespace Kint\Renderer\Text;
 
-use Exception;
-use InvalidArgumentException;
-use Throwable;
+use Kint\Zval\Value;
 
-class ThrowableObject extends InstanceObject
+class EnumPlugin extends Plugin
 {
-    public $message;
-    public $hints = array('object', 'throwable');
-
-    public function __construct($throw)
+    public function render(Value $o)
     {
-        if (!$throw instanceof Exception && (!KINT_PHP70 || !$throw instanceof Throwable)) {
-            throw new InvalidArgumentException('ThrowableObject must be constructed with a Throwable');
+        $out = '';
+
+        if (0 == $o->depth) {
+            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 
-        parent::__construct();
+        $out .= $this->renderer->renderHeader($o).PHP_EOL;
 
-        $this->message = $throw->getMessage();
-    }
-
-    public function getValueShort()
-    {
-        if (\strlen($this->message)) {
-            return '"'.$this->message.'"';
-        }
+        return $out;
     }
 }
