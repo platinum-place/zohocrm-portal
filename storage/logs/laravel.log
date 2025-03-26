@@ -1,0 +1,11 @@
+[2025-03-18 20:24:01] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at /opt/bitnami/apache2/htdocs/portal/vendor/laravel/framework/src/Illuminate/Log/LogManager.php:200)
+[stacktrace]
+#0 /opt/bitnami/apache2/htdocs/portal/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(125): Illuminate\\Log\\LogManager->resolve(NULL, NULL)
+#1 /opt/bitnami/apache2/htdocs/portal/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(112): Illuminate\\Log\\LogManager->get(NULL)
+#2 /opt/bitnami/apache2/htdocs/portal/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(590): Illuminate\\Log\\LogManager->driver()
+#3 /opt/bitnami/apache2/htdocs/portal/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(252): Illuminate\\Log\\LogManager->error('The \"\" director...', Array)
+#4 /opt/bitnami/apache2/htdocs/portal/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(415): Illuminate\\Foundation\\Exceptions\\Handler->report(Object(Symfony\\Component\\Finder\\Exception\\DirectoryNotFoundException))
+#5 /opt/bitnami/apache2/htdocs/portal/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(113): Illuminate\\Foundation\\Http\\Kernel->reportException(Object(Symfony\\Component\\Finder\\Exception\\DirectoryNotFoundException))
+#6 /opt/bitnami/apache2/htdocs/portal/public/index.php(52): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#7 {main}
+"} 

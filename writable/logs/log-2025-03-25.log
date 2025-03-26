@@ -1,0 +1,49 @@
+CRITICAL - 2025-03-25 20:26:04 --> Undefined index: monto_mantenimiento
+#0 /opt/bitnami/apache2/htdocs/portal/app/Views/modals/tabla_resultados.php(26): CodeIgniter\Debug\Exceptions->errorHandler(8, 'Undefined index...', '/opt/bitnami/ap...', 26, Array)
+#1 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(214): include('/opt/bitnami/ap...')
+#2 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(217): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+#3 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(432): CodeIgniter\View\View->render('modals/tabla_re...', NULL, true)
+#4 /opt/bitnami/apache2/htdocs/portal/app/Views/cotizaciones/cotizar.php(74): CodeIgniter\View\View->include('modals/tabla_re...')
+#5 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(214): include('/opt/bitnami/ap...')
+#6 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(217): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+#7 /opt/bitnami/apache2/htdocs/portal/system/Common.php(1092): CodeIgniter\View\View->render('cotizaciones/co...', Array, true)
+#8 /opt/bitnami/apache2/htdocs/portal/app/Controllers/Cotizaciones.php(129): view('cotizaciones/co...', Array)
+#9 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Cotizaciones->index()
+#10 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Cotizaciones))
+#11 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#13 {main}
+CRITICAL - 2025-03-25 20:26:41 --> Undefined index: monto_mantenimiento
+#0 /opt/bitnami/apache2/htdocs/portal/app/Views/modals/tabla_resultados.php(26): CodeIgniter\Debug\Exceptions->errorHandler(8, 'Undefined index...', '/opt/bitnami/ap...', 26, Array)
+#1 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(214): include('/opt/bitnami/ap...')
+#2 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(217): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+#3 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(432): CodeIgniter\View\View->render('modals/tabla_re...', NULL, true)
+#4 /opt/bitnami/apache2/htdocs/portal/app/Views/cotizaciones/cotizar.php(74): CodeIgniter\View\View->include('modals/tabla_re...')
+#5 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(214): include('/opt/bitnami/ap...')
+#6 /opt/bitnami/apache2/htdocs/portal/system/View/View.php(217): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+#7 /opt/bitnami/apache2/htdocs/portal/system/Common.php(1092): CodeIgniter\View\View->render('cotizaciones/co...', Array, true)
+#8 /opt/bitnami/apache2/htdocs/portal/app/Controllers/Cotizaciones.php(129): view('cotizaciones/co...', Array)
+#9 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Cotizaciones->index()
+#10 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Cotizaciones))
+#11 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#12 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#13 {main}
+CRITICAL - 2025-03-25 20:39:38 --> The framework needs the following extension(s) installed and loaded: mbstring.
+#0 /home/warlyn/zohocrm-portal/system/CodeIgniter.php(218): CodeIgniter\Exceptions\FrameworkException::forMissingExtension('mbstring')
+#1 /home/warlyn/zohocrm-portal/system/CodeIgniter.php(176): CodeIgniter\CodeIgniter->resolvePlatformExtensions()
+#2 /home/warlyn/zohocrm-portal/system/bootstrap.php(146): CodeIgniter\CodeIgniter->initialize()
+#3 /home/warlyn/zohocrm-portal/spark(45): require('/home/warlyn/zo...')
+#4 {main}
+CRITICAL - 2025-03-25 20:39:38 --> Uncaught Error: Call to undefined function CodeIgniter\CLI\mb_strpos() in /home/warlyn/zohocrm-portal/system/CLI/CLI.php:719
+Stack trace:
+#0 /home/warlyn/zohocrm-portal/system/CLI/CLI.php(161): CodeIgniter\CLI\CLI::parseCommandLine()
+#1 /home/warlyn/zohocrm-portal/system/CLI/CLI.php(959): CodeIgniter\CLI\CLI::init()
+#2 /home/warlyn/zohocrm-portal/system/Autoloader/Autoloader.php(264): include_once('/home/warlyn/zo...')
+#3 /home/warlyn/zohocrm-portal/system/Autoloader/Autoloader.php(241): CodeIgniter\Autoloader\Autoloader->includeFile('/home/warlyn/zo...')
+#4 /home/warlyn/zohocrm-portal/system/Autoloader/Autoloader.php(219): CodeIgniter\Autoloader\Autoloader->loadInNamespace('CodeIgniter\\CLI...')
+#5 [internal function]: CodeIgniter\Autoloader\Autoloader->loadClass('CodeIgniter\\CLI...')
+#6 /home/warlyn/zohocrm-portal/app/Views/errors/cli/error_exception.php(6): spl_autoload_call('CodeIgniter\\CLI...')
+#7 /home/warlyn/zohocrm-portal/system/Debug/Exceptions.php(235): include('/home/warlyn/zo...')
+#8 /home/warly
+#0 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+#1 {main}

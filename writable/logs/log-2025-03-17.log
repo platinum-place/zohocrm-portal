@@ -1,0 +1,56 @@
+CRITICAL - 2025-03-17 11:03:45 --> exif_imagetype(): Read error!
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'exif_imagetype(...', '/opt/bitnami/ap...', 307, Array)
+#1 /opt/bitnami/apache2/htdocs/portal/app/Controllers/Plantillas.php(307): exif_imagetype('/opt/bitnami/ap...')
+#2 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Plantillas->caso('322237300019143...')
+#3 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Plantillas))
+#4 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#5 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#6 {main}
+CRITICAL - 2025-03-17 11:03:59 --> exif_imagetype(): Read error!
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'exif_imagetype(...', '/opt/bitnami/ap...', 307, Array)
+#1 /opt/bitnami/apache2/htdocs/portal/app/Controllers/Plantillas.php(307): exif_imagetype('/opt/bitnami/ap...')
+#2 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Plantillas->caso('322237300019143...')
+#3 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Plantillas))
+#4 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#5 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#6 {main}
+CRITICAL - 2025-03-17 11:04:57 --> exif_imagetype(): Read error!
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'exif_imagetype(...', '/opt/bitnami/ap...', 307, Array)
+#1 /opt/bitnami/apache2/htdocs/portal/app/Controllers/Plantillas.php(307): exif_imagetype('/opt/bitnami/ap...')
+#2 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Plantillas->caso('322237300019143...')
+#3 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Plantillas))
+#4 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#5 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#6 {main}
+CRITICAL - 2025-03-17 11:15:05 --> exif_imagetype(): Read error!
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'exif_imagetype(...', '/opt/bitnami/ap...', 307, Array)
+#1 /opt/bitnami/apache2/htdocs/portal/app/Controllers/Plantillas.php(307): exif_imagetype('/opt/bitnami/ap...')
+#2 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Plantillas->caso('322237300019034...')
+#3 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Plantillas))
+#4 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#5 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#6 {main}
+CRITICAL - 2025-03-17 16:15:17 --> Call to a member function getEntityId() on null
+#0 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Plantillas->tua_activos('322237300020271...')
+#1 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Plantillas))
+#2 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#3 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#4 {main}
+CRITICAL - 2025-03-17 16:17:38 --> Call to a member function getEntityId() on null
+#0 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Plantillas->tua_activos('322237300020271...')
+#1 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Plantillas))
+#2 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#3 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#4 {main}
+CRITICAL - 2025-03-17 16:34:47 --> Call to a member function getEntityId() on null
+#0 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Plantillas->tua_activos('322237300020271...')
+#1 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Plantillas))
+#2 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#3 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#4 {main}
+CRITICAL - 2025-03-17 16:45:45 --> Call to a member function getEntityId() on null
+#0 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(802): App\Controllers\Plantillas->tua_activos('322237300020271...')
+#1 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(399): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Plantillas))
+#2 /opt/bitnami/apache2/htdocs/portal/system/CodeIgniter.php(317): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#3 /opt/bitnami/apache2/htdocs/portal/public/index.php(37): CodeIgniter\CodeIgniter->run()
+#4 {main}
