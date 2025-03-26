@@ -228,77 +228,38 @@ class CLI
         }
 
         if (is_string($options)) {
-            $extraOutput = ' [' . static::color($options, 'green') . ']';
+            $extraOutput = ' [' . static::color($options, 'white') . ']';
             $default     = $options;
         }
 
         if (is_array($options) && $options) {
             $opts               = $options;
-            $extraOutputDefault = static::color($opts[0], 'green');
+            $extraOutputDefault = static::color($opts[0], 'white');
 
             unset($opts[0]);
 
             if (empty($opts)) {
                 $extraOutput = $extraOutputDefault;
             } else {
-                $extraOutput  = '[' . $extraOutputDefault . ', ' . implode(', ', $opts) . ']';
-                $validation[] = 'in_list[' . implode(', ', $options) . ']';
+                $extraOutput  = ' [' . $extraOutputDefault . ', ' . implode(', ', $opts) . ']';
+                $validation[] = 'in_list[' . implode(',', $options) . ']';
             }
 
             $default = $options[0];
         }
 
-        static::fwrite(STDOUT, $field . (trim($field) ? ' ' : '') . $extraOutput . ': ');
+        static::fwrite(STDOUT, $field . $extraOutput . ': ');
 
         // Read the input from keyboard.
         $input = trim(static::input()) ?: $default;
 
         if ($validation) {
-            while (! static::validate(trim($field), $input, $validation)) {
+            while (! static::validate($field, $input, $validation)) {
                 $input = static::prompt($field, $options, $validation);
             }
         }
 
-        return $input;
-    }
-
-    /**
-     * prompt(), but based on the option's key
-     *
-     * @param array|string      $text       Output "field" text or an one or two value array where the first value is the text before listing the options
-     *                                      and the second value the text before asking to select one option. Provide empty string to omit
-     * @param array             $options    A list of options (array(key => description)), the first option will be the default value
-     * @param array|string|null $validation Validation rules
-     *
-     * @return string The selected key of $options
-     *
-     * @codeCoverageIgnore
-     */
-    public static function promptByKey($text, array $options, $validation = null): string
-    {
-        if (is_string($text)) {
-            $text = [$text];
-        } elseif (! is_array($text)) {
-            throw new InvalidArgumentException('$text can only be of type string|array');
-        }
-
-        if (! $options) {
-            throw new InvalidArgumentException('No options to select from were provided');
-        }
-
-        if ($line = array_shift($text)) {
-            CLI::write($line);
-        }
-
-        // +2 for the square brackets around the key
-        $keyMaxLength = max(array_map('mb_strwidth', array_keys($options))) + 2;
-
-        foreach ($options as $key => $description) {
-            $name = str_pad('  [' . $key . ']  ', $keyMaxLength + 4, ' ');
-            CLI::write(CLI::color($name, 'green') . CLI::wrap($description, 125, $keyMaxLength + 4));
-        }
-
-        return static::prompt(PHP_EOL . array_shift($text), array_keys($options), $validation);
+        return empty($input) ? '' : $input;
     }
 
     /**
@@ -865,12 +826,10 @@ class CLI
                 $out .= "-{$name} ";
             }
 
-            if ($value === null) {
-                continue;
-            }
-
+            // If there's a space, we need to group
+            // so it will pass correctly.
             if (mb_strpos($value, ' ') !== false) {
-                $out .= "\"{$value}\" ";
+                $out .= '"' . $value . '" ';
             } elseif ($value !== null) {
                 $out .= "{$value} ";
             }

@@ -158,7 +158,7 @@ class Model extends BaseModel
      */
     protected function doFindColumn(string $columnName)
     {
-        return $this->select($columnName)->asArray()->find();
+        return $this->select($columnName)->asArray()->find(); // @phpstan-ignore-line
     }
 
     /**
@@ -251,7 +251,7 @@ class Model extends BaseModel
      * This methods works only with dbCalls
      *
      * @param array|null $set       An associative array of insert values
-     * @param bool|null  $escape    Whether to escape values
+     * @param bool|null  $escape    Whether to escape values and identifiers
      * @param int        $batchSize The size of the batch to run
      * @param bool       $testing   True means only number of records is returned, false will execute the query
      *
@@ -557,13 +557,13 @@ class Model extends BaseModel
      * data here. This allows it to be used with any of the other
      * builder methods and still get validated data, like replace.
      *
-     * @param mixed     $key    Field name, or an array of field/value pairs
-     * @param mixed     $value  Field value, if $key is a single field
-     * @param bool|null $escape Whether to escape values
+     * @param array|string $key    Field name, or an array of field/value pairs
+     * @param string|null  $value  Field value, if $key is a single field
+     * @param bool|null    $escape Whether to escape values and identifiers
      *
      * @return $this
      */
-    public function set($key, $value = '', ?bool $escape = null)
+    public function set($key, ?string $value = '', ?bool $escape = null)
     {
         $data = is_array($key) ? $key : [$key => $value];
 
@@ -584,17 +584,12 @@ class Model extends BaseModel
      */
     protected function shouldUpdate($data): bool
     {
-        if (parent::shouldUpdate($data) === false) {
-            return false;
-        }
-
-        if ($this->useAutoIncrement === true) {
-            return true;
-        }
-
-        // When useAutoIncrement feature is disabled, check
+        // When useAutoIncrement feature is disabled check
         // in the database if given record already exists
-        return $this->where($this->primaryKey, $this->getIdValue($data))->countAllResults() === 1;
+        return parent::shouldUpdate($data)
+            && $this->useAutoIncrement
+                ? true
+                : $this->where($this->primaryKey, $this->getIdValue($data))->countAllResults() === 1;
     }
 
     /**
@@ -715,19 +710,24 @@ class Model extends BaseModel
      * Provides direct access to method in the builder (if available)
      * and the database connection.
      *
-     * @return mixed
+     * @return $this|null
      */
     public function __call(string $name, array $params)
     {
-        $builder = $this->builder();
-        $result  = null;
+        $result = parent::__call($name, $params);
 
-        if (method_exists($this->db, $name)) {
-            $result = $this->db->{$name}(...$params);
-        } elseif (method_exists($builder, $name)) {
+        if ($result === null && method_exists($builder = $this->builder(), $name)) {
             $result = $builder->{$name}(...$params);
-        } else {
-            throw new BadMethodCallException('Call to undefined method ' . static::class . '::' . $name);
+        }
+
+        if (empty($result)) {
+            if (! method_exists($this->builder(), $name)) {
+                $className = static::class;
+
+                throw new BadMethodCallException('Call to undefined method ' . $className . '::' . $name);
+            }
+
+            return $result;
         }
 
         if ($result instanceof BaseBuilder) {

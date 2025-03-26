@@ -107,16 +107,12 @@ class Filters
         $this->setResponse($response);
 
         $this->modules = $modules ?? config('Modules');
-
-        if ($this->modules->shouldDiscover('filters')) {
-            $this->discoverFilters();
-        }
     }
 
     /**
      * If discoverFilters is enabled in Config then system will try to
      * auto-discover custom filters files in Namespaces and allow access to
-     * the config object via the variable $filters as with the routes file
+     * the config object via the variable $customfilters as with the routes file
      *
      * Sample :
      * $filters->aliases['custom-auth'] = \Acme\Blob\Filters\BlobAuth::class;
@@ -215,9 +211,11 @@ class Filters
      * The resulting $this->filters is an array of only filters
      * that should be applied to this request.
      *
-     * We go ahead and process the entire tree because we'll need to
+     * We go ahead an process the entire tree because we'll need to
      * run through both a before and after and don't want to double
      * process the rows.
+     *
+     * @param string $uri
      *
      * @return Filters
      */
@@ -225,6 +223,10 @@ class Filters
     {
         if ($this->initialized === true) {
             return $this;
+        }
+
+        if ($this->modules->shouldDiscover('filters')) {
+            $this->discoverFilters();
         }
 
         $this->processGlobals($uri);
@@ -317,8 +319,6 @@ class Filters
      * are passed to the filter when executed.
      *
      * @return Filters
-     *
-     * @deprecated Use enableFilters(). This method will be private.
      */
     public function enableFilter(string $name, string $when = 'before')
     {
@@ -334,9 +334,7 @@ class Filters
             $this->arguments[$name] = $params;
         }
 
-        if (class_exists($name)) {
-            $this->config->aliases[$name] = $name;
-        } elseif (! array_key_exists($name, $this->config->aliases)) {
+        if (! array_key_exists($name, $this->config->aliases)) {
             throw FilterException::forNoAlias($name);
         }
 
@@ -349,24 +347,6 @@ class Filters
         if (! isset($this->filters[$when][$name])) {
             $this->filters[$when][]    = $name;
             $this->filtersClass[$when] = array_merge($this->filtersClass[$when], $classNames);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Ensures that specific filters is on and enabled for the current request.
-     *
-     * Filters can have "arguments". This is done by placing a colon immediately
-     * after the filter name, followed by a comma-separated list of arguments that
-     * are passed to the filter when executed.
-     *
-     * @return Filters
-     */
-    public function enableFilters(array $names, string $when = 'before')
-    {
-        foreach ($names as $filter) {
-            $this->enableFilter($filter, $when);
         }
 
         return $this;
@@ -397,10 +377,13 @@ class Filters
             return;
         }
 
-        $uri = strtolower(trim($uri ?? '', '/ '));
+        $uri = strtolower(trim($uri, '/ '));
 
         // Add any global filters, unless they are excluded for this URI
-        $sets = ['before', 'after'];
+        $sets = [
+            'before',
+            'after',
+        ];
 
         foreach ($sets as $set) {
             if (isset($this->config->globals[$set])) {
@@ -438,7 +421,7 @@ class Filters
         }
 
         // Request method won't be set for CLI-based requests
-        $method = strtolower($this->request->getMethod()) ?? 'cli';
+        $method = strtolower($_SERVER['REQUEST_METHOD'] ?? 'cli');
 
         if (array_key_exists($method, $this->config->methods)) {
             $this->filters['before'] = array_merge($this->filters['before'], $this->config->methods[$method]);

@@ -23,7 +23,7 @@
                                 <td><?= $plan["aseguradora"] ?></td>
                                 <td>RD$
                                     <?php
-                                    if (session()->get('cuenta_id') == "3222373000005967119" and $plan["monto_mantenimiento"] > 0) {
+                                    if (!empty($plan["monto_mantenimiento"]) and session()->get('cuenta_id') == "3222373000005967119" and $plan["monto_mantenimiento"] > 0) {
                                        echo number_format($plan["total"] + $plan["monto_mantenimiento"], 2);
                                     } else {
                                         echo number_format($plan["total"], 2);

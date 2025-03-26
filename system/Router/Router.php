@@ -99,18 +99,8 @@ class Router implements RouterInterface
      * if the matched route should be filtered.
      *
      * @var string|null
-     *
-     * @deprecated Use $filtersInfo
      */
     protected $filterInfo;
-
-    /**
-     * The filter info from Route Collection
-     * if the matched route should be filtered.
-     *
-     * @var string[]
-     */
-    protected $filtersInfo = [];
 
     /**
      * Stores a reference to the RouteCollection object.
@@ -124,6 +114,7 @@ class Router implements RouterInterface
         $this->controller = $this->collection->getDefaultController();
         $this->method     = $this->collection->getDefaultMethod();
 
+        // @phpstan-ignore-next-line
         $this->collection->setHTTPVerb($request->getMethod() ?? strtolower($_SERVER['REQUEST_METHOD']));
     }
 
@@ -153,13 +144,7 @@ class Router implements RouterInterface
 
         if ($this->checkRoutes($uri)) {
             if ($this->collection->isFiltered($this->matchedRoute[0])) {
-                $multipleFiltersEnabled = config('Feature')->multipleFilters ?? false;
-                if ($multipleFiltersEnabled) {
-                    $this->filtersInfo = $this->collection->getFiltersForRoute($this->matchedRoute[0]);
-                } else {
-                    // for backward compatibility
-                    $this->filterInfo = $this->collection->getFilterForRoute($this->matchedRoute[0]);
-                }
+                $this->filterInfo = $this->collection->getFilterForRoute($this->matchedRoute[0]);
             }
 
             return $this->controller;
@@ -181,22 +166,10 @@ class Router implements RouterInterface
      * Returns the filter info for the matched route, if any.
      *
      * @return string
-     *
-     * @deprecated Use getFilters()
      */
     public function getFilter()
     {
         return $this->filterInfo;
-    }
-
-    /**
-     * Returns the filter info for the matched route, if any.
-     *
-     * @return string[]
-     */
-    public function getFilters(): array
-    {
-        return $this->filtersInfo;
     }
 
     /**
@@ -357,7 +330,7 @@ class Router implements RouterInterface
 
         $uri = $uri === '/'
             ? $uri
-            : trim($uri, '/ ');
+            : ltrim($uri, '/ ');
 
         // Loop through the route array looking for wildcards
         foreach ($routes as $key => $val) {

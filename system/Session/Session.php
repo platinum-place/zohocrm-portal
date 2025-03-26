@@ -271,7 +271,11 @@ class Session implements SessionInterface
         setcookie(
             $this->sessionCookieName,
             session_id(),
-            ['expires' => 1, 'path' => $this->cookie->getPath(), 'domain' => $this->cookie->getDomain(), 'secure' => $this->cookie->isSecure(), 'httponly' => true]
+            1,
+            $this->cookie->getPath(),
+            $this->cookie->getDomain(),
+            $this->cookie->isSecure(),
+            true
         );
 
         session_regenerate_id(true);
@@ -306,7 +310,7 @@ class Session implements SessionInterface
 
         if (! isset($this->sessionExpiration)) {
             $this->sessionExpiration = (int) ini_get('session.gc_maxlifetime');
-        } elseif ($this->sessionExpiration > 0) {
+        } else {
             ini_set('session.gc_maxlifetime', (string) $this->sessionExpiration);
         }
 

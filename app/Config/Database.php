@@ -31,12 +31,12 @@ class Database extends Config
      * @var array
      */
     public $default = [
-        'DSN'      => 'sqlite:' . WRITEPATH . 'database/database.sqlite',
-        'hostname' => '',
+        'DSN'      => '',
+        'hostname' => 'localhost',
         'username' => '',
         'password' => '',
-        'database' => WRITEPATH . 'database/database.sqlite',
-        'DBDriver' => 'SQLite3',
+        'database' => '',
+        'DBDriver' => 'MySQLi',
         'DBPrefix' => '',
         'pConnect' => false,
         'DBDebug'  => (ENVIRONMENT !== 'production'),
@@ -47,25 +47,7 @@ class Database extends Config
         'compress' => false,
         'strictOn' => false,
         'failover' => [],
-        'port'     => 0,
-
-//        'DSN'      => '',
-//        'hostname' => 'localhost',
-//        'username' => '',
-//        'password' => '',
-//        'database' => '',
-//        'DBDriver' => 'MySQLi',
-//        'DBPrefix' => '',
-//        'pConnect' => false,
-//        'DBDebug'  => (ENVIRONMENT !== 'production'),
-//        'charset'  => 'utf8',
-//        'DBCollat' => 'utf8_general_ci',
-//        'swapPre'  => '',
-//        'encrypt'  => false,
-//        'compress' => false,
-//        'strictOn' => false,
-//        'failover' => [],
-//        'port'     => 3306,
+        'port'     => 3306,
     ];
 
     /**

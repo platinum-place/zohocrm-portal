@@ -92,17 +92,14 @@ class ModelGenerator extends BaseCommand
     protected function prepare(string $class): string
     {
         $table   = $this->getOption('table');
-        $dbGroup = $this->getOption('dbgroup');
+        $DBGroup = $this->getOption('dbgroup');
         $return  = $this->getOption('return');
 
-        $baseClass = class_basename($class);
+        $baseClass = strtolower(str_replace(trim(implode('\\', array_slice(explode('\\', $class), 0, -1)), '\\') . '\\', '', $class));
+        $baseClass = strpos($baseClass, 'model') ? str_replace('model', '', $baseClass) : $baseClass;
 
-        if (preg_match('/^(\S+)Model$/i', $baseClass, $match) === 1) {
-            $baseClass = $match[1];
-        }
-
-        $table   = is_string($table) ? $table : plural(strtolower($baseClass));
-        $dbGroup = is_string($dbGroup) ? $dbGroup : 'default';
+        $table   = is_string($table) ? $table : plural($baseClass);
+        $DBGroup = is_string($DBGroup) ? $DBGroup : 'default';
         $return  = is_string($return) ? $return : 'array';
 
         if (! in_array($return, ['array', 'object', 'entity'], true)) {
@@ -115,20 +112,17 @@ class ModelGenerator extends BaseCommand
         if ($return === 'entity') {
             $return = str_replace('Models', 'Entities', $class);
 
-            if (preg_match('/^(\S+)Model$/i', $return, $match) === 1) {
-                $return = $match[1];
+            if ($pos = strpos($return, 'Model')) {
+                $return = substr($return, 0, $pos);
 
                 if ($this->getOption('suffix')) {
                     $return .= 'Entity';
                 }
             }
 
-            $return = '\\' . trim($return, '\\') . '::class';
             $this->call('make:entity', array_merge([$baseClass], $this->params));
-        } else {
-            $return = "'{$return}'";
         }
 
-        return $this->parseTemplate($class, ['{table}', '{dbGroup}', '{return}'], [$table, $dbGroup, $return]);
+        return $this->parseTemplate($class, ['{table}', '{DBGroup}', '{return}'], [$table, $DBGroup, $return]);
     }
 }

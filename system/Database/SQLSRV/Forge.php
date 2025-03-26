@@ -11,7 +11,6 @@
 
 namespace CodeIgniter\Database\SQLSRV;
 
-use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Database\Forge as BaseForge;
 
 /**
@@ -24,14 +23,7 @@ class Forge extends BaseForge
      *
      * @var string
      */
-    protected $dropConstraintStr;
-
-    /**
-     * DROP INDEX statement
-     *
-     * @var string
-     */
-    protected $dropIndexStr;
+    protected $dropConstraintStr = 'ALTER TABLE %s DROP CONSTRAINT %s';
 
     /**
      * CREATE DATABASE IF statement
@@ -69,7 +61,7 @@ class Forge extends BaseForge
      *
      * @var string
      */
-    protected $renameTableStr;
+    protected $renameTableStr = 'EXEC sp_rename %s , %s ;';
 
     /**
      * UNSIGNED support
@@ -88,33 +80,21 @@ class Forge extends BaseForge
      *
      * @var string
      */
-    protected $createTableIfStr;
+    protected $createTableIfStr = "IF NOT EXISTS (SELECT * FROM sysobjects WHERE ID = object_id(N'%s') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)\nCREATE TABLE";
 
     /**
      * CREATE TABLE statement
      *
      * @var string
      */
-    protected $createTableStr;
+    protected $createTableStr = "%s %s (%s\n) ";
 
-    public function __construct(BaseConnection $db)
-    {
-        parent::__construct($db);
-
-        $this->createTableIfStr = 'IF NOT EXISTS'
-            . '(SELECT t.name, s.name as schema_name, t.type_desc '
-            . 'FROM sys.tables t '
-            . 'INNER JOIN sys.schemas s on s.schema_id = t.schema_id '
-            . "WHERE s.name=N'" . $this->db->schema . "' "
-            . "AND t.name=REPLACE(N'%s', '\"', '') "
-            . "AND t.type_desc='USER_TABLE')\nCREATE TABLE ";
-
-        $this->createTableStr = '%s ' . $this->db->escapeIdentifiers($this->db->schema) . ".%s (%s\n) ";
-        $this->renameTableStr = 'EXEC sp_rename [' . $this->db->escapeIdentifiers($this->db->schema) . '.%s] , %s ;';
-
-        $this->dropConstraintStr = 'ALTER TABLE ' . $this->db->escapeIdentifiers($this->db->schema) . '.%s DROP CONSTRAINT %s';
-        $this->dropIndexStr      = 'DROP INDEX %s ON ' . $this->db->escapeIdentifiers($this->db->schema) . '.%s';
-    }
+    /**
+     * DROP TABLE IF statement
+     *
+     * @var string
+     */
+    protected $_drop_table_if = "IF EXISTS (SELECT * FROM sysobjects WHERE ID = object_id(N'%s') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)\nDROP TABLE";
 
     /**
      * CREATE TABLE attributes
@@ -131,6 +111,9 @@ class Forge extends BaseForge
      */
     protected function _alterTable(string $alterType, string $table, $field)
     {
+        if ($alterType === 'ADD') {
+            return parent::_alterTable($alterType, $table, $field);
+        }
 
         // Handle DROP here
         if ($alterType === 'DROP') {
@@ -150,7 +133,7 @@ class Forge extends BaseForge
                 }
             }
 
-            $sql = 'ALTER TABLE ' . $this->db->escapeIdentifiers($this->db->schema) . '.' . $this->db->escapeIdentifiers($table) . ' DROP ';
+            $sql = 'ALTER TABLE [' . $table . '] DROP ';
 
             $fields = array_map(static function ($item) {
                 return 'COLUMN [' . trim($item) . ']';
@@ -159,18 +142,9 @@ class Forge extends BaseForge
             return $sql . implode(',', $fields);
         }
 
-        $sql = 'ALTER TABLE ' . $this->db->escapeIdentifiers($this->db->schema) . '.' . $this->db->escapeIdentifiers($table);
-        $sql .= ($alterType === 'ADD') ? 'ADD ' : ' ';
+        $sql = 'ALTER TABLE ' . $this->db->escapeIdentifiers($table);
 
         $sqls = [];
-
-        if ($alterType === 'ADD') {
-            foreach ($field as $data) {
-                $sqls[] = $sql . ($data['_literal'] !== false ? $data['_literal'] : $this->_processColumn($data));
-            }
-
-            return $sqls;
-        }
 
         foreach ($field as $data) {
             if ($data['_literal'] !== false) {
@@ -225,46 +199,6 @@ class Forge extends BaseForge
     }
 
     /**
-     * Process indexes
-     *
-     * @return array|string
-     */
-    protected function _processIndexes(string $table)
-    {
-        $sqls = [];
-
-        for ($i = 0, $c = count($this->keys); $i < $c; $i++) {
-            $this->keys[$i] = (array) $this->keys[$i];
-
-            for ($i2 = 0, $c2 = count($this->keys[$i]); $i2 < $c2; $i2++) {
-                if (! isset($this->fields[$this->keys[$i][$i2]])) {
-                    unset($this->keys[$i][$i2]);
-                }
-            }
-
-            if (count($this->keys[$i]) <= 0) {
-                continue;
-            }
-
-            if (in_array($i, $this->uniqueKeys, true)) {
-                $sqls[] = 'ALTER TABLE '
-                    . $this->db->escapeIdentifiers($this->db->schema) . '.' . $this->db->escapeIdentifiers($table)
-                    . ' ADD CONSTRAINT ' . $this->db->escapeIdentifiers($table . '_' . implode('_', $this->keys[$i]))
-                    . ' UNIQUE (' . implode(', ', $this->db->escapeIdentifiers($this->keys[$i])) . ');';
-
-                continue;
-            }
-
-            $sqls[] = 'CREATE INDEX '
-                . $this->db->escapeIdentifiers($table . '_' . implode('_', $this->keys[$i]))
-                . ' ON ' . $this->db->escapeIdentifiers($this->db->schema) . '.' . $this->db->escapeIdentifiers($table)
-                . ' (' . implode(', ', $this->db->escapeIdentifiers($this->keys[$i])) . ');';
-        }
-
-        return $sqls;
-    }
-
-    /**
      * Process column
      */
     protected function _processColumn(array $field): string
@@ -290,15 +224,12 @@ class Forge extends BaseForge
 
         $allowActions = ['CASCADE', 'SET NULL', 'NO ACTION', 'RESTRICT', 'SET DEFAULT'];
 
-        foreach ($this->foreignKeys as $fkey) {
-            $nameIndex            = $table . '_' . implode('_', $fkey['field']) . '_foreign';
-            $nameIndexFilled      = $this->db->escapeIdentifiers($nameIndex);
-            $foreignKeyFilled     = implode(', ', $this->db->escapeIdentifiers($fkey['field']));
-            $referenceTableFilled = $this->db->escapeIdentifiers($this->db->DBPrefix . $fkey['referenceTable']);
-            $referenceFieldFilled = implode(', ', $this->db->escapeIdentifiers($fkey['referenceField']));
+        foreach ($this->foreignKeys as $field => $fkey) {
+            $nameIndex = $table . '_' . $field . '_foreign';
 
-            $formatSql = ",\n\tCONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s)";
-            $sql .= sprintf($formatSql, $nameIndexFilled, $foreignKeyFilled, $referenceTableFilled, $referenceFieldFilled);
+            $sql .= ",\n\t CONSTRAINT " . $this->db->escapeIdentifiers($nameIndex)
+                . ' FOREIGN KEY (' . $this->db->escapeIdentifiers($field) . ') '
+                . ' REFERENCES ' . $this->db->escapeIdentifiers($this->db->getPrefix() . $fkey['table']) . ' (' . $this->db->escapeIdentifiers($fkey['field']) . ')';
 
             if ($fkey['onDelete'] !== false && in_array($fkey['onDelete'], $allowActions, true)) {
                 $sql .= ' ON DELETE ' . $fkey['onDelete'];
@@ -314,6 +245,8 @@ class Forge extends BaseForge
 
     /**
      * Process primary keys
+     *
+     * @param string $table Table name
      */
     protected function _processPrimaryKeys(string $table): string
     {
@@ -358,10 +291,6 @@ class Forge extends BaseForge
 
             case 'TIMESTAMP':
                 $attributes['TYPE'] = 'DATETIME';
-                break;
-
-            case 'BOOLEAN':
-                $attributes['TYPE'] = 'BIT';
                 break;
 
             default:

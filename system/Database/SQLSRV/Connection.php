@@ -215,7 +215,7 @@ class Connection extends BaseConnection
      */
     protected function _indexData(string $table): array
     {
-        $sql = 'EXEC sp_helpindex ' . $this->escape($this->schema . '.' . $table);
+        $sql = 'EXEC sp_helpindex ' . $this->escape($table);
 
         if (($query = $this->query($sql)) === false) {
             throw new DatabaseException(lang('Database.failGetIndexData'));

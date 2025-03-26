@@ -12,7 +12,6 @@
 namespace CodeIgniter;
 
 use Closure;
-use CodeIgniter\Debug\Kint\RichRenderer;
 use CodeIgniter\Debug\Timer;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
@@ -20,7 +19,6 @@ use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\CLIRequest;
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\Request;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -34,6 +32,7 @@ use Config\Services;
 use Exception;
 use Kint;
 use Kint\Renderer\CliRenderer;
+use Kint\Renderer\RichRenderer;
 
 /**
  * This class is the core of the framework, and will analyse the
@@ -45,7 +44,7 @@ class CodeIgniter
     /**
      * The current version of CodeIgniter Framework
      */
-    public const CI_VERSION = '4.1.9';
+    public const CI_VERSION = '4.1.4';
 
     private const MIN_PHP_VERSION = '7.3';
 
@@ -249,7 +248,7 @@ class CodeIgniter
          */
         $config = config('Config\Kint');
 
-        Kint::$depth_limit         = $config->maxDepth;
+        Kint::$max_depth           = $config->maxDepth;
         Kint::$display_called_from = $config->displayCalledFrom;
         Kint::$expanded            = $config->expanded;
 
@@ -257,13 +256,11 @@ class CodeIgniter
             Kint::$plugins = $config->plugins;
         }
 
-        Kint::$renderers[Kint::MODE_RICH] = RichRenderer::class;
-
         RichRenderer::$theme  = $config->richTheme;
         RichRenderer::$folder = $config->richFolder;
         RichRenderer::$sort   = $config->richSort;
         if (! empty($config->richObjectPlugins) && is_array($config->richObjectPlugins)) {
-            RichRenderer::$value_plugins = $config->richObjectPlugins;
+            RichRenderer::$object_plugins = $config->richObjectPlugins;
         }
         if (! empty($config->richTabPlugins) && is_array($config->richTabPlugins)) {
             RichRenderer::$tab_plugins = $config->richTabPlugins;
@@ -298,12 +295,6 @@ class CodeIgniter
         $this->forceSecureAccess();
 
         $this->spoofRequestMethod();
-
-        if ($this->request instanceof IncomingRequest && $this->request->getMethod() === 'cli') {
-            $this->response->setStatusCode(405)->setBody('Method Not Allowed');
-
-            return $this->sendResponse();
-        }
 
         Events::trigger('pre_system');
 
@@ -358,7 +349,6 @@ class CodeIgniter
     /**
      * Handles the main request logic and fires the controller.
      *
-     * @throws PageNotFoundException
      * @throws RedirectException
      *
      * @return mixed|RequestInterface|ResponseInterface
@@ -367,31 +357,21 @@ class CodeIgniter
     {
         $routeFilter = $this->tryToRouteIt($routes);
 
-        $uri = $this->determinePath();
-
-        // Start up the filters
+        // Run "before" filters
         $filters = Services::filters();
 
         // If any filters were specified within the routes file,
         // we need to ensure it's active for the current request
         if ($routeFilter !== null) {
-            $multipleFiltersEnabled = config('Feature')->multipleFilters ?? false;
-            if ($multipleFiltersEnabled) {
-                $filters->enableFilters($routeFilter, 'before');
-                $filters->enableFilters($routeFilter, 'after');
-            } else {
-                // for backward compatibility
-                $filters->enableFilter($routeFilter, 'before');
-                $filters->enableFilter($routeFilter, 'after');
-            }
+            $filters->enableFilter($routeFilter, 'before');
+            $filters->enableFilter($routeFilter, 'after');
         }
+
+        $uri = $this->determinePath();
 
         // Never run filters when running through Spark cli
         if (! defined('SPARKED')) {
-            // Run "before" filters
-            $this->benchmark->start('before_filters');
             $possibleResponse = $filters->run($uri, 'before');
-            $this->benchmark->stop('before_filters');
 
             // If a ResponseInterface instance is returned then send it back to the client and stop
             if ($possibleResponse instanceof ResponseInterface) {
@@ -430,11 +410,8 @@ class CodeIgniter
         // Never run filters when running through Spark cli
         if (! defined('SPARKED')) {
             $filters->setResponse($this->response);
-
             // Run "after" filters
-            $this->benchmark->start('after_filters');
             $response = $filters->run($uri, 'after');
-            $this->benchmark->stop('after_filters');
         } else {
             $response = $this->response;
 
@@ -513,9 +490,7 @@ class CodeIgniter
      */
     protected function startBenchmark()
     {
-        if ($this->startTime === null) {
-            $this->startTime = microtime(true);
-        }
+        $this->startTime = microtime(true);
 
         $this->benchmark = Services::timer();
         $this->benchmark->start('total_execution', $this->startTime);
@@ -546,6 +521,7 @@ class CodeIgniter
             return;
         }
 
+        // @phpstan-ignore-next-line
         if (is_cli() && ENVIRONMENT !== 'testing') {
             // @codeCoverageIgnoreStart
             $this->request = Services::clirequest($this->config);
@@ -705,7 +681,7 @@ class CodeIgniter
      *
      * @throws RedirectException
      *
-     * @return string|string[]|null
+     * @return string|null
      */
     protected function tryToRouteIt(?RouteCollectionInterface $routes = null)
     {
@@ -729,18 +705,12 @@ class CodeIgniter
         // If a {locale} segment was matched in the final route,
         // then we need to set the correct locale on our Request.
         if ($this->router->hasLocale()) {
-            $this->request->setLocale($this->router->getLocale());
+            $this->request->setLocale($this->router->getLocale()); // @phpstan-ignore-line
         }
 
         $this->benchmark->stop('routing');
 
-        // for backward compatibility
-        $multipleFiltersEnabled = config('Feature')->multipleFilters ?? false;
-        if (! $multipleFiltersEnabled) {
-            return $this->router->getFilter();
-        }
-
-        return $this->router->getFilters();
+        return $this->router->getFilter();
     }
 
     /**
@@ -824,7 +794,7 @@ class CodeIgniter
     protected function runController($class)
     {
         // If this is a console request then use the input segments as parameters
-        $params = defined('SPARKED') ? $this->request->getSegments() : $this->router->params();
+        $params = defined('SPARKED') ? $this->request->getSegments() : $this->router->params(); // @phpstan-ignore-line
 
         if (method_exists($class, '_remap')) {
             $output = $class->_remap($this->method, ...$params);
@@ -943,16 +913,11 @@ class CodeIgniter
     public function storePreviousURL($uri)
     {
         // Ignore CLI requests
-        if (is_cli() && ENVIRONMENT !== 'testing') {
-            return; // @codeCoverageIgnore
+        if (is_cli()) {
+            return;
         }
         // Ignore AJAX requests
         if (method_exists($this->request, 'isAJAX') && $this->request->isAJAX()) {
-            return;
-        }
-
-        // Ignore unroutable responses
-        if ($this->response instanceof DownloadResponse || $this->response instanceof RedirectResponse) {
             return;
         }
 
@@ -977,16 +942,13 @@ class CodeIgniter
             return;
         }
 
-        $method = $this->request->getPost('_method');
+        $method = $this->request->getPost('_method'); // @phpstan-ignore-line
 
         if (empty($method)) {
             return;
         }
 
-        // Only allows PUT, PATCH, DELETE
-        if (in_array(strtoupper($method), ['PUT', 'PATCH', 'DELETE'], true)) {
-            $this->request = $this->request->setMethod($method);
-        }
+        $this->request = $this->request->setMethod($method);
     }
 
     /**

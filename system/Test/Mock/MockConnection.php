@@ -19,7 +19,9 @@ use CodeIgniter\Database\Query;
 class MockConnection extends BaseConnection
 {
     protected $returnValues = [];
+
     public $database;
+
     public $lastQuery;
 
     public function shouldReturn(string $method, $return)
@@ -166,7 +168,7 @@ class MockConnection extends BaseConnection
      */
     public function insertID(): int
     {
-        return $this->connID->insert_id;
+        return $this->connID->insert_id; // @phpstan-ignore-line
     }
 
     /**

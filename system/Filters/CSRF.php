@@ -39,7 +39,7 @@ class CSRF implements FilterInterface
      *
      * @throws SecurityException
      *
-     * @return mixed|void
+     * @return mixed
      */
     public function before(RequestInterface $request, $arguments = null)
     {
@@ -65,7 +65,7 @@ class CSRF implements FilterInterface
      *
      * @param array|null $arguments
      *
-     * @return mixed|void
+     * @return mixed
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {

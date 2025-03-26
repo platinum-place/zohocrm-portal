@@ -22,10 +22,8 @@ use InvalidArgumentException;
 abstract class BaseHandler implements CacheInterface
 {
     /**
-     * Reserved characters that cannot be used in a key or tag. May be overridden by the config.
+     * Reserved characters that cannot be used in a key or tag.
      * From https://github.com/symfony/cache-contracts/blob/c0446463729b89dd4fa62e9aeecc80287323615d/ItemInterface.php#L43
-     *
-     * @deprecated in favor of the Cache config
      */
     public const RESERVED_CHARACTERS = '{}()/\@:';
 
@@ -60,10 +58,8 @@ abstract class BaseHandler implements CacheInterface
         if ($key === '') {
             throw new InvalidArgumentException('Cache key cannot be empty.');
         }
-
-        $reserved = config('Cache')->reservedCharacters ?? self::RESERVED_CHARACTERS;
-        if ($reserved && strpbrk($key, $reserved) !== false) {
-            throw new InvalidArgumentException('Cache key contains reserved characters ' . $reserved);
+        if (strpbrk($key, self::RESERVED_CHARACTERS) !== false) {
+            throw new InvalidArgumentException('Cache key contains reserved characters ' . self::RESERVED_CHARACTERS);
         }
 
         // If the key with prefix exceeds the length then return the hashed version

@@ -59,17 +59,6 @@ class Connection extends BaseConnection
     public $mysqli;
 
     /**
-     * MySQLi constant
-     *
-     * For unbuffered queries use `MYSQLI_USE_RESULT`.
-     *
-     * Default mode for buffered queries uses `MYSQLI_STORE_RESULT`.
-     *
-     * @var int
-     */
-    public $resultMode = MYSQLI_STORE_RESULT;
-
-    /**
      * Connect to the database.
      *
      * @throws DatabaseException
@@ -100,19 +89,19 @@ class Connection extends BaseConnection
             if ($this->strictOn) {
                 $this->mysqli->options(
                     MYSQLI_INIT_COMMAND,
-                    "SET SESSION sql_mode = CONCAT(@@sql_mode, ',', 'STRICT_ALL_TABLES')"
+                    'SET SESSION sql_mode = CONCAT(@@sql_mode, ",", "STRICT_ALL_TABLES")'
                 );
             } else {
                 $this->mysqli->options(
                     MYSQLI_INIT_COMMAND,
-                    "SET SESSION sql_mode = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                    'SET SESSION sql_mode = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                         @@sql_mode,
-                                        'STRICT_ALL_TABLES,', ''),
-                                    ',STRICT_ALL_TABLES', ''),
-                                'STRICT_ALL_TABLES', ''),
-                            'STRICT_TRANS_TABLES,', ''),
-                        ',STRICT_TRANS_TABLES', ''),
-                    'STRICT_TRANS_TABLES', '')"
+                                        "STRICT_ALL_TABLES,", ""),
+                                    ",STRICT_ALL_TABLES", ""),
+                                "STRICT_ALL_TABLES", ""),
+                            "STRICT_TRANS_TABLES,", ""),
+                        ",STRICT_TRANS_TABLES", ""),
+                    "STRICT_TRANS_TABLES", "")'
                 );
             }
         }
@@ -154,6 +143,7 @@ class Connection extends BaseConnection
                     }
                 }
 
+                $clientFlags += MYSQLI_CLIENT_SSL;
                 $this->mysqli->ssl_set(
                     $ssl['key'] ?? null,
                     $ssl['cert'] ?? null,
@@ -162,8 +152,6 @@ class Connection extends BaseConnection
                     $ssl['cipher'] ?? null
                 );
             }
-
-            $clientFlags += MYSQLI_CLIENT_SSL;
         }
 
         try {
@@ -289,7 +277,7 @@ class Connection extends BaseConnection
         }
 
         try {
-            return $this->connID->query($this->prepQuery($sql), $this->resultMode);
+            return $this->connID->query($this->prepQuery($sql));
         } catch (mysqli_sql_exception $e) {
             log_message('error', $e->getMessage());
 
@@ -485,10 +473,8 @@ class Connection extends BaseConnection
                     FROM information_schema.TABLE_CONSTRAINTS AS tc
                     INNER JOIN information_schema.REFERENTIAL_CONSTRAINTS AS rc
                         ON tc.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
-                        AND tc.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
                     INNER JOIN information_schema.KEY_COLUMN_USAGE AS kcu
                         ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
-                        AND tc.CONSTRAINT_SCHEMA = kcu.CONSTRAINT_SCHEMA
                     WHERE
                         tc.CONSTRAINT_TYPE = ' . $this->escape('FOREIGN KEY') . ' AND
                         tc.TABLE_SCHEMA = ' . $this->escape($this->database) . ' AND

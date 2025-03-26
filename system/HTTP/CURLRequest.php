@@ -13,11 +13,13 @@ namespace CodeIgniter\HTTP;
 
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use Config\App;
-use Config\CURLRequest as ConfigCURLRequest;
 use InvalidArgumentException;
 
 /**
- * A lightweight HTTP client for sending synchronous HTTP requests via cURL.
+ * Class OutgoingRequest
+ *
+ * A lightweight HTTP client for sending synchronous HTTP requests
+ * via cURL.
  */
 class CURLRequest extends Request
 {
@@ -40,14 +42,7 @@ class CURLRequest extends Request
      *
      * @var array
      */
-    protected $config;
-
-    /**
-     * The default setting values
-     *
-     * @var array
-     */
-    protected $defaultConfig = [
+    protected $config = [
         'timeout'         => 0.0,
         'connect_timeout' => 150,
         'debug'           => false,
@@ -78,23 +73,6 @@ class CURLRequest extends Request
     protected $delay = 0.0;
 
     /**
-     * The default options from the constructor. Applied to all requests.
-     *
-     * @var array
-     */
-    private $defaultOptions;
-
-    /**
-     * Whether share options between requests or not.
-     *
-     * If true, all the options won't be reset between requests.
-     * It may cause an error request with unnecessary headers.
-     *
-     * @var bool
-     */
-    private $shareOptions;
-
-    /**
      * Takes an array of options to set the following possible class properties:
      *
      *  - baseURI
@@ -106,20 +84,17 @@ class CURLRequest extends Request
     public function __construct(App $config, URI $uri, ?ResponseInterface $response = null, array $options = [])
     {
         if (! function_exists('curl_version')) {
-            throw HTTPException::forMissingCurl(); // @codeCoverageIgnore
+            // we won't see this during travis-CI
+            // @codeCoverageIgnoreStart
+            throw HTTPException::forMissingCurl();
+            // @codeCoverageIgnoreEnd
         }
 
         parent::__construct($config);
 
-        $this->response       = $response;
-        $this->baseURI        = $uri->useRawQueryString();
-        $this->defaultOptions = $options;
+        $this->response = $response;
+        $this->baseURI  = $uri->useRawQueryString();
 
-        /** @var ConfigCURLRequest|null $configCURLRequest */
-        $configCURLRequest  = config('CURLRequest');
-        $this->shareOptions = $configCURLRequest->shareOptions ?? true;
-
-        $this->config = $this->defaultConfig;
         $this->parseOptions($options);
     }
 
@@ -135,31 +110,11 @@ class CURLRequest extends Request
 
         $url = $this->prepareURL($url);
 
-        $method = esc(strip_tags($method));
+        $method = filter_var($method, FILTER_SANITIZE_STRING);
 
         $this->send($method, $url);
 
-        if ($this->shareOptions === false) {
-            $this->resetOptions();
-        }
-
         return $this->response;
-    }
-
-    /**
-     * Reset all options to default.
-     */
-    protected function resetOptions()
-    {
-        // Reset headers
-        $this->headers   = [];
-        $this->headerMap = [];
-
-        // Reset configs
-        $this->config = $this->defaultConfig;
-
-        // Set the default options for next request
-        $this->parseOptions($this->defaultOptions);
     }
 
     /**
@@ -358,7 +313,7 @@ class CURLRequest extends Request
 
         // Do we need to delay this request?
         if ($this->delay > 0) {
-            sleep($this->delay);
+            sleep($this->delay); // @phpstan-ignore-line
         }
 
         $output = $this->sendRequest($curlOptions);
@@ -395,17 +350,27 @@ class CURLRequest extends Request
     }
 
     /**
-     * Adds $this->headers to the cURL request.
+     * Takes all headers current part of this request and adds them
+     * to the cURL request.
      */
     protected function applyRequestHeaders(array $curlOptions = []): array
     {
         if (empty($this->headers)) {
+            $this->populateHeaders();
+            // Otherwise, it will corrupt the request
+            $this->removeHeader('Host');
+            $this->removeHeader('Accept-Encoding');
+        }
+
+        $headers = $this->headers();
+
+        if (empty($headers)) {
             return $curlOptions;
         }
 
         $set = [];
 
-        foreach (array_keys($this->headers) as $name) {
+        foreach (array_keys($headers) as $name) {
             $set[] = $name . ': ' . $this->getHeaderLine($name);
         }
 
@@ -424,7 +389,7 @@ class CURLRequest extends Request
         $this->method                       = $method;
         $curlOptions[CURLOPT_CUSTOMREQUEST] = $method;
 
-        $size = strlen($this->body ?? '');
+        $size = strlen($this->body);
 
         // Have content?
         if ($size > 0) {

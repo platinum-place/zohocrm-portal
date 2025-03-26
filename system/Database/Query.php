@@ -269,29 +269,39 @@ class Query implements QueryInterface
     /**
      * Escapes and inserts any binds into the finalQueryString object.
      *
-     * @see https://regex101.com/r/EUEhay/5
+     * @see https://regex101.com/r/EUEhay/4
      */
     protected function compileBinds()
     {
-        $sql   = $this->finalQueryString;
-        $binds = $this->binds;
+        $sql = $this->finalQueryString;
 
-        if (empty($binds)) {
+        $hasNamedBinds = preg_match('/:((?!=).+):/', $sql) === 1;
+
+        if (empty($this->binds)
+            || empty($this->bindMarker)
+            || (! $hasNamedBinds && strpos($sql, $this->bindMarker) === false)
+        ) {
             return;
         }
 
-        if (is_int(array_key_first($binds))) {
-            $bindCount = count($binds);
-            $ml        = strlen($this->bindMarker);
-
-            $this->finalQueryString = $this->matchSimpleBinds($sql, $binds, $bindCount, $ml);
+        if (! is_array($this->binds)) {
+            $binds     = [$this->binds];
+            $bindCount = 1;
         } else {
-            // Reverse the binds so that duplicate named binds
-            // will be processed prior to the original binds.
-            $binds = array_reverse($binds);
-
-            $this->finalQueryString = $this->matchNamedBinds($sql, $binds);
+            $binds     = $this->binds;
+            $bindCount = count($binds);
         }
+
+        // Reverse the binds so that duplicate named binds
+        // will be processed prior to the original binds.
+        if (! is_numeric(key(array_slice($binds, 0, 1)))) {
+            $binds = array_reverse($binds);
+        }
+
+        $ml  = strlen($this->bindMarker);
+        $sql = $hasNamedBinds ? $this->matchNamedBinds($sql, $binds) : $this->matchSimpleBinds($sql, $binds, $bindCount, $ml);
+
+        $this->finalQueryString = $sql;
     }
 
     /**
@@ -355,57 +365,50 @@ class Query implements QueryInterface
     {
         // Key words we want bolded
         static $highlight = [
-            'AND',
-            'AS',
-            'ASC',
-            'AVG',
-            'BY',
-            'COUNT',
-            'DESC',
+            'SELECT',
             'DISTINCT',
             'FROM',
-            'GROUP',
-            'HAVING',
-            'IN',
-            'INNER',
+            'WHERE',
+            'AND',
+            'LEFT&nbsp;JOIN',
+            'RIGHT&nbsp;JOIN',
+            'JOIN',
+            'ORDER&nbsp;BY',
+            'GROUP&nbsp;BY',
+            'LIMIT',
             'INSERT',
             'INTO',
-            'IS',
-            'JOIN',
-            'LEFT',
+            'VALUES',
+            'UPDATE',
+            'OR&nbsp;',
+            'HAVING',
+            'OFFSET',
+            'NOT&nbsp;IN',
+            'IN',
             'LIKE',
-            'LIMIT',
+            'NOT&nbsp;LIKE',
+            'COUNT',
             'MAX',
             'MIN',
-            'NOT',
-            'NULL',
-            'OFFSET',
             'ON',
-            'OR',
-            'ORDER',
-            'RIGHT',
-            'SELECT',
+            'AS',
+            'AVG',
             'SUM',
-            'UPDATE',
-            'VALUES',
-            'WHERE',
+            '(',
+            ')',
         ];
 
         if (empty($this->finalQueryString)) {
             $this->compileBinds(); // @codeCoverageIgnore
         }
 
-        $sql = esc($this->finalQueryString);
+        $sql = $this->finalQueryString;
 
-        /**
-         * @see https://stackoverflow.com/a/20767160
-         * @see https://regex101.com/r/hUlrGN/4
-         */
-        $search = '/\b(?:' . implode('|', $highlight) . ')\b(?![^(&#039;)]*&#039;(?:(?:[^(&#039;)]*&#039;){2})*[^(&#039;)]*$)/';
+        foreach ($highlight as $term) {
+            $sql = str_replace($term, '<strong>' . $term . '</strong>', $sql);
+        }
 
-        return preg_replace_callback($search, static function ($matches) {
-            return '<strong>' . str_replace(' ', '&nbsp;', $matches[0]) . '</strong>';
-        }, $sql);
+        return $sql;
     }
 
     /**

@@ -125,7 +125,7 @@ class GenerateKey extends BaseCommand
     {
         $currentKey = env('encryption.key', '');
 
-        if ($currentKey !== '' && ! $this->confirmOverwrite($params)) {
+        if (strlen($currentKey) !== 0 && ! $this->confirmOverwrite($params)) {
             // Not yet testable since it requires keyboard input
             // @codeCoverageIgnoreStart
             return false;

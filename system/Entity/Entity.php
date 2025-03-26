@@ -41,7 +41,7 @@ class Entity implements JsonSerializable
      *
      * Example:
      *  $datamap = [
-     *      'class_name' => 'db_name'
+     *      'db_name' => 'class_name'
      *  ];
      */
     protected $datamap = [];

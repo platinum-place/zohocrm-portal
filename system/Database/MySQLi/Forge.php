@@ -220,20 +220,4 @@ class Forge extends BaseForge
 
         return $sql;
     }
-
-    /**
-     * Drop Key
-     *
-     * @return bool
-     */
-    public function dropKey(string $table, string $keyName)
-    {
-        $sql = sprintf(
-            $this->dropIndexStr,
-            $this->db->escapeIdentifiers($keyName),
-            $this->db->escapeIdentifiers($this->db->DBPrefix . $table),
-        );
-
-        return $this->db->query($sql);
-    }
 }

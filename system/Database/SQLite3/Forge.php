@@ -21,13 +21,6 @@ use CodeIgniter\Database\Forge as BaseForge;
 class Forge extends BaseForge
 {
     /**
-     * DROP INDEX statement
-     *
-     * @var string
-     */
-    protected $dropIndexStr = 'DROP INDEX %s';
-
-    /**
      * @var Connection
      */
     protected $db;
@@ -203,10 +196,6 @@ class Forge extends BaseForge
             case 'ENUM':
             case 'SET':
                 $attributes['TYPE'] = 'TEXT';
-                break;
-
-            case 'BOOLEAN':
-                $attributes['TYPE'] = 'INT';
                 break;
 
             default:

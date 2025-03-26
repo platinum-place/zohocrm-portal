@@ -51,8 +51,6 @@ class IncomingRequest extends Request
      * Set automatically based on Config setting.
      *
      * @var bool
-     *
-     * @deprecated Not used
      */
     protected $enableCSRF = false;
 
@@ -63,8 +61,6 @@ class IncomingRequest extends Request
      * everything this cares about (and the router, etc) is the portion
      * AFTER the script name. So, if hosted in a sub-folder this will
      * appear different than actual URL. If you need that use getPath().
-     *
-     * @TODO should be protected. Use getUri() instead.
      *
      * @var URI
      */
@@ -520,7 +516,7 @@ class IncomingRequest extends Request
      */
     public function getJSON(bool $assoc = false, int $depth = 512, int $options = 0)
     {
-        return json_decode($this->body ?? '', $assoc, $depth, $options);
+        return json_decode($this->body, $assoc, $depth, $options);
     }
 
     /**
@@ -537,15 +533,7 @@ class IncomingRequest extends Request
     {
         helper('array');
 
-        $json = $this->getJSON(true);
-        if (! is_array($json)) {
-            return null;
-        }
-        $data = dot_array_search($index, $json);
-
-        if ($data === null) {
-            return null;
-        }
+        $data = dot_array_search($index, $this->getJSON(true));
 
         if (! is_array($data)) {
             $filter = $filter ?? FILTER_DEFAULT;
@@ -569,7 +557,7 @@ class IncomingRequest extends Request
      */
     public function getRawInput()
     {
-        parse_str($this->body ?? '', $output);
+        parse_str($this->body, $output);
 
         return $output;
     }

@@ -68,7 +68,7 @@ class Result extends BaseResult
      */
     public function freeResult()
     {
-        if ($this->resultID !== false) {
+        if (is_resource($this->resultID)) {
             pg_free_result($this->resultID);
             $this->resultID = false;
         }
