@@ -4,7 +4,7 @@ namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
 
-class c extends BaseConfig
+class Zoho extends BaseConfig
 {
     public $user;
     public $url_token;

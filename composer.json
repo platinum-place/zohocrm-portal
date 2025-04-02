@@ -14,7 +14,10 @@
         "ext-intl": "*",
         "ext-mbstring": "*",
         "laminas/laminas-escaper": "^2.14",
-        "psr/log": "^3.0"
+        "phpoffice/phpspreadsheet": "^4.1",
+        "phpoffice/phpword": "^1.3",
+        "psr/log": "^3.0",
+        "zohocrm/php-sdk-archive": "^2.2"
     },
     "require-dev": {
         "codeigniter/coding-standard": "^1.7",
