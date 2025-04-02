@@ -10,8 +10,6 @@ class Login extends BaseController
 {
     public function index()
     {
-        $libreria = new Zoho;
-
         if ($this->request->getPost()) {
 
             $libreria = new Zoho;
