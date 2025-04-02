@@ -5,6 +5,7 @@
  * CHECK PHP VERSION
  *---------------------------------------------------------------
  */
+ini_set('memory_limit', '1024M'); //TODO
 
 $minPhpVersion = '8.1'; // If you update this, don't forget to update `spark`.
 if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
