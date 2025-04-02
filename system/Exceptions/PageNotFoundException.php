@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -11,38 +13,55 @@
 
 namespace CodeIgniter\Exceptions;
 
-use Config\Services;
-use OutOfBoundsException;
-
-class PageNotFoundException extends OutOfBoundsException implements ExceptionInterface
+class PageNotFoundException extends RuntimeException implements HTTPExceptionInterface
 {
     use DebugTraceableTrait;
 
     /**
-     * Error code
+     * HTTP status code
      *
      * @var int
      */
     protected $code = 404;
 
+    /**
+     * @return static
+     */
     public static function forPageNotFound(?string $message = null)
     {
         return new static($message ?? self::lang('HTTP.pageNotFound'));
     }
 
+    /**
+     * @return static
+     */
     public static function forEmptyController()
     {
         return new static(self::lang('HTTP.emptyController'));
     }
 
+    /**
+     * @return static
+     */
     public static function forControllerNotFound(string $controller, string $method)
     {
         return new static(self::lang('HTTP.controllerNotFound', [$controller, $method]));
     }
 
+    /**
+     * @return static
+     */
     public static function forMethodNotFound(string $method)
     {
         return new static(self::lang('HTTP.methodNotFound', [$method]));
+    }
+
+    /**
+     * @return static
+     */
+    public static function forLocaleNotSupported(string $locale)
+    {
+        return new static(self::lang('HTTP.localeNotSupported', [$locale]));
     }
 
     /**
@@ -56,7 +75,7 @@ class PageNotFoundException extends OutOfBoundsException implements ExceptionInt
      */
     private static function lang(string $line, array $args = []): string
     {
-        $lang = Services::language(null, false);
+        $lang = service('language', null, false);
 
         return $lang->getLine($line, $args);
     }

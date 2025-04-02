@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -11,6 +13,7 @@
 
 namespace CodeIgniter\Filters;
 
+use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Security\Exceptions\SecurityException;
@@ -22,6 +25,8 @@ use CodeIgniter\Security\Exceptions\SecurityException;
  * invalid characters:
  *   - invalid UTF-8 characters
  *   - control characters except line break and tab code
+ *
+ * @see \CodeIgniter\Filters\InvalidCharsTest
  */
 class InvalidChars implements FilterInterface
 {
@@ -42,14 +47,12 @@ class InvalidChars implements FilterInterface
     /**
      * Check invalid characters.
      *
-     * @param array|null $arguments
-     *
-     * @return void
+     * @param list<string>|null $arguments
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if ($request->isCLI()) {
-            return;
+        if (! $request instanceof IncomingRequest) {
+            return null;
         }
 
         $data = [
@@ -64,17 +67,18 @@ class InvalidChars implements FilterInterface
             $this->checkEncoding($values);
             $this->checkControl($values);
         }
+
+        return null;
     }
 
     /**
      * We don't have anything to do here.
      *
-     * @param array|null $arguments
-     *
-     * @return void
+     * @param list<string>|null $arguments
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
+        return null;
     }
 
     /**
@@ -87,7 +91,7 @@ class InvalidChars implements FilterInterface
     protected function checkEncoding($value)
     {
         if (is_array($value)) {
-            array_map([$this, 'checkEncoding'], $value);
+            array_map($this->checkEncoding(...), $value);
 
             return $value;
         }
@@ -109,7 +113,7 @@ class InvalidChars implements FilterInterface
     protected function checkControl($value)
     {
         if (is_array($value)) {
-            array_map([$this, 'checkControl'], $value);
+            array_map($this->checkControl(...), $value);
 
             return $value;
         }
