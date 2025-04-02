@@ -55,7 +55,6 @@ class Filters extends BaseFilters
         'before' => [
             'forcehttps', // Force Global Secure Requests
             'pagecache',  // Web Page Caching
-            'sesion' => ['except' => ['plantillas/*', 'login']],
         ],
         'after' => [
             'pagecache',   // Web Page Caching
@@ -75,6 +74,7 @@ class Filters extends BaseFilters
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
+            'sesion' => ['except' => ['plantillas/*', 'login']],
         ],
         'after' => [
             // 'honeypot',
