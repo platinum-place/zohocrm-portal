@@ -10,12 +10,13 @@
     "ext-intl": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
+    "bshaffer/oauth2-server-php": "^1.10",
     "kint-php/kint": "^4.0",
     "laminas/laminas-escaper": "^2.9",
-    "psr/log": "^1.1",
-    "zohocrm/php-sdk-archive": "^2.2",
     "phpoffice/phpspreadsheet": "^1.18",
-    "phpoffice/phpword": "^0.18.2"
+    "phpoffice/phpword": "^0.18.2",
+    "psr/log": "^1.1",
+    "zohocrm/php-sdk-archive": "^2.2"
   },
   "require-dev": {
     "codeigniter/coding-standard": "1.2.*",
