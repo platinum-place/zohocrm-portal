@@ -1,5 +1,15 @@
 FROM php:7.3.12-apache
 
+ARG GROUPID
+ARG GROUP
+ARG USERID
+ARG USER
+
+ENV GROUPID=${GROUPID} \
+    GROUP=${GROUP} \
+    USERID=${USERID} \
+    USER=${USER}
+
 # Configuraciones iniciales
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
@@ -24,22 +34,23 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 COPY ["composer.json","composer.lock", "/var/www/html/"]
 RUN composer install
 
-# Copia de archivos dentro del contenedor
+# Crear el grupo y el usuario
+RUN groupadd --gid ${GROUPID} ${GROUP} \
+    && useradd --uid ${USERID} --gid ${GROUPID} --home-dir /home/${USER} --create-home ${USER} \
+    && mkdir -p /home/${USER}/.composer \
+    && chown -R ${USER}:${GROUP} /home/${USER}
+
+# Copiar archivos dentro del contenedor
 WORKDIR /var/www/html/
 COPY [".", "/var/www/html/"]
 
-# Permisos de carpetas por usuario
-RUN chown www-data:www-data /var/www/html/writable/cache
-RUN chown www-data:www-data /var/www/html/writable/session
-RUN chown www-data:www-data /var/www/html/writable/uploads
-RUN chown www-data:www-data /var/www/html/writable/logs
+# Cambiar los permisos de las carpetas necesarias
+RUN chown -R ${USER}:${GROUP} /var/www/html/writable \
+    && chmod -R 777 /var/www/html/writable
 
-# Permisos de de carpetas
-RUN chmod 777 -R /var/www/html/writable/cache/
-RUN chmod 777 -R /var/www/html/writable/session/
-RUN chmod 777 -R /var/www/html/writable/uploads/
-RUN chmod 777 -R /var/www/html/writable/logs/
+# Configuración de php.ini para tamaños de archivos
+RUN sed -E -i 's/(;?)(post_max_size\s*=\s*)[0-9]+M/\220M/g' /usr/local/etc/php/php.ini \
+    && sed -E -i 's/(;?)(upload_max_filesize\s*=\s*)[0-9]+M/\220M/g' /usr/local/etc/php/php.ini
 
-# Configuraciones de php.ini para tamaños de archivos
-RUN sed -E -i 's/(;?)(post_max_size\s*=\s*)[0-9]+M/\220M/g' /usr/local/etc/php/php.ini
-RUN sed -E -i 's/(;?)(upload_max_filesize\s*=\s*)[0-9]+M/\220M/g' /usr/local/etc/php/php.ini
+# Cambiar al usuario PHP
+USER ${USER}
