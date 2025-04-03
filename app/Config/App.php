@@ -36,7 +36,7 @@ class App extends BaseConfig
      *
      * @var string
      */
-    public $indexPage = '';
+    public $indexPage = 'index.php';
 
     /**
      * --------------------------------------------------------------------------
@@ -69,7 +69,7 @@ class App extends BaseConfig
      *
      * @var string
      */
-    public $defaultLocale = 'es';
+    public $defaultLocale = 'en';
 
     /**
      * --------------------------------------------------------------------------
@@ -108,7 +108,7 @@ class App extends BaseConfig
      *
      * @var string
      */
-    public $appTimezone = 'America/Santo_Domingo';
+    public $appTimezone = 'America/Chicago';
 
     /**
      * --------------------------------------------------------------------------

@@ -4,7 +4,6 @@ namespace Config;
 
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
-use CodeIgniter\HotReloader\HotReloader;
 
 /*
  * --------------------------------------------------------------------
@@ -23,7 +22,7 @@ use CodeIgniter\HotReloader\HotReloader;
  *      Events::on('create', [$myInstance, 'myMethod']);
  */
 
-Events::on('pre_system', static function (): void {
+Events::on('pre_system', static function () {
     if (ENVIRONMENT !== 'testing') {
         if (ini_get('zlib.output_compression')) {
             throw FrameworkException::forEnabledZlibOutputCompression();
@@ -33,7 +32,9 @@ Events::on('pre_system', static function (): void {
             ob_end_flush();
         }
 
-        ob_start(static fn ($buffer) => $buffer);
+        ob_start(static function ($buffer) {
+            return $buffer;
+        });
     }
 
     /*
@@ -44,12 +45,6 @@ Events::on('pre_system', static function (): void {
      */
     if (CI_DEBUG && ! is_cli()) {
         Events::on('DBQuery', 'CodeIgniter\Debug\Toolbar\Collectors\Database::collect');
-        service('toolbar')->respond();
-        // Hot Reload route - for framework use on the hot reloader.
-        if (ENVIRONMENT === 'development') {
-            service('routes')->get('__hot-reload', static function (): void {
-                (new HotReloader())->run();
-            });
-        }
+        Services::toolbar()->respond();
     }
 });
