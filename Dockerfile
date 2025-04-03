@@ -21,13 +21,12 @@ RUN a2enmod rewrite
 
 # Instalamos composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY ["composer.json","composer.lock", "/var/www/html/"]
+RUN composer install
 
 # Copia de archivos dentro del contenedor
 WORKDIR /var/www/html/
 COPY [".", "/var/www/html/"]
-
-# Instalamos depdnencias
-RUN composer install
 
 # Permisos de carpetas por usuario
 RUN chown www-data:www-data /var/www/html/writable/cache
