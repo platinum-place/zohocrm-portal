@@ -4,8 +4,27 @@ namespace App\Controllers;
 
 class Home extends BaseController
 {
-    public function index()
+    public function index(): string
     {
-        return view('welcome_message');
+        $libreria = new \App\Libraries\Cotizaciones();
+        $emisiones = $libreria->lista_emisiones();
+
+        $lista = array();
+        $polizas = 0;
+
+        foreach ((array)$emisiones as $emision) {
+            //filtrar por  mes y año actual
+            if (date("Y-m", strtotime($emision->getFieldValue("Vigencia_desde"))) == date("Y-m")) {
+                $lista[] = $emision->getFieldValue('Coberturas')->getLookupLabel();
+                $polizas++;
+            }
+        }
+
+        return view('index', [
+            "titulo" => "Panel de Control",
+            "lista" => array_count_values($lista),
+            "polizas" => $polizas,
+            "cotizaciones" => $emisiones,
+        ]);
     }
 }
