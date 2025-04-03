@@ -23,6 +23,7 @@ class Filters extends BaseConfig
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
+        'sesion'        => Sesion::class, //TODO
     ];
 
     /**
@@ -36,6 +37,7 @@ class Filters extends BaseConfig
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
+            'sesion' => ['except' => ['plantillas/*', 'login']],
         ],
         'after' => [
             'toolbar',
