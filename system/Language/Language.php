@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,15 +11,13 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Language;
 
-use IntlException;
+use Config\Services;
 use MessageFormatter;
 
 /**
  * Handle system messages and localization.
  *
  * Locale-based, built on top of PHP internationalization.
- *
- * @see \CodeIgniter\Language\LanguageTest
  */
 class Language
 {
@@ -61,7 +57,7 @@ class Language
     {
         $this->locale = $locale;
 
-        if (class_exists(MessageFormatter::class)) {
+        if (class_exists('MessageFormatter')) {
             $this->intlSupport = true;
         }
     }
@@ -89,12 +85,12 @@ class Language
      * Parses the language string for a file, loads the file, if necessary,
      * getting the line.
      *
-     * @return list<string>|string
+     * @return string|string[]
      */
     public function getLine(string $line, array $args = [])
     {
         // if no file is given, just parse the line
-        if (! str_contains($line, '.')) {
+        if (strpos($line, '.') === false) {
             return $this->formatMessage($line, $args);
         }
 
@@ -119,7 +115,7 @@ class Language
             $output = $this->getTranslationOutput('en', $file, $parsedLine);
         }
 
-        $output ??= $line;
+        $output = $output ?? $line;
 
         return $this->formatMessage($output, $args);
     }
@@ -175,7 +171,7 @@ class Language
      * Advanced message formatting.
      *
      * @param array|string $message
-     * @param list<string> $args
+     * @param string[]     $args
      *
      * @return array|string
      */
@@ -193,38 +189,7 @@ class Language
             return $message;
         }
 
-        $formatted = MessageFormatter::formatMessage($this->locale, $message, $args);
-        if ($formatted === false) {
-            // Format again to get the error message.
-            try {
-                $fmt       = new MessageFormatter($this->locale, $message);
-                $formatted = $fmt->format($args);
-                $fmtError  = '"' . $fmt->getErrorMessage() . '" (' . $fmt->getErrorCode() . ')';
-            } catch (IntlException $e) {
-                $fmtError = '"' . $e->getMessage() . '" (' . $e->getCode() . ')';
-            }
-
-            $argsString = implode(
-                ', ',
-                array_map(static fn ($element): string => '"' . $element . '"', $args),
-            );
-            $argsUrlEncoded = implode(
-                ', ',
-                array_map(static fn ($element): string => '"' . rawurlencode($element) . '"', $args),
-            );
-
-            log_message(
-                'error',
-                'Language.invalidMessageFormat: $message: "' . $message
-                . '", $args: ' . $argsString
-                . ' (urlencoded: ' . $argsUrlEncoded . '),'
-                . ' MessageFormatter Error: ' . $fmtError,
-            );
-
-            return $message . "\n【Warning】Also, invalid string(s) was passed to the Language class. See log file for details.";
-        }
-
-        return $formatted;
+        return MessageFormatter::formatMessage($this->locale, $message, $args);
     }
 
     /**
@@ -232,7 +197,7 @@ class Language
      * will return the file's contents, otherwise will merge with
      * the existing language lines.
      *
-     * @return list<mixed>|null
+     * @return array|void
      */
     protected function load(string $file, string $locale, bool $return = false)
     {
@@ -265,8 +230,6 @@ class Language
 
         // Merge our string
         $this->language[$locale][$file] = $lang;
-
-        return null;
     }
 
     /**
@@ -275,7 +238,7 @@ class Language
      */
     protected function requireFile(string $path): array
     {
-        $files   = service('locator')->search($path, 'php', false);
+        $files   = Services::locator()->search($path, 'php', false);
         $strings = [];
 
         foreach ($files as $file) {
@@ -289,9 +252,7 @@ class Language
         }
 
         if (isset($strings[1])) {
-            $string = array_shift($strings);
-
-            $strings = array_replace_recursive($string, ...$strings);
+            $strings = array_replace_recursive(...$strings);
         } elseif (isset($strings[0])) {
             $strings = $strings[0];
         }

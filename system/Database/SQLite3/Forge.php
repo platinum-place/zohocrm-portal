@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -58,7 +56,8 @@ class Forge extends BaseForge
         parent::__construct($db);
 
         if (version_compare($this->db->getVersion(), '3.3', '<')) {
-            $this->dropTableIfStr = false;
+            $this->createTableIfStr = false;
+            $this->dropTableIfStr   = false;
         }
     }
 
@@ -101,7 +100,7 @@ class Forge extends BaseForge
         }
 
         if (! empty($this->db->dataCache['db_names'])) {
-            $key = array_search(strtolower($dbName), array_map(strtolower(...), $this->db->dataCache['db_names']), true);
+            $key = array_search(strtolower($dbName), array_map('strtolower', $this->db->dataCache['db_names']), true);
             if ($key !== false) {
                 unset($this->db->dataCache['db_names'][$key]);
             }
@@ -111,89 +110,86 @@ class Forge extends BaseForge
     }
 
     /**
-     * @param list<string>|string $columnNames
+     * @param mixed $field
      *
-     * @throws DatabaseException
+     * @return array|string|null
      */
-    public function dropColumn(string $table, $columnNames): bool
-    {
-        $columns = is_array($columnNames) ? $columnNames : array_map(trim(...), explode(',', $columnNames));
-        $result  = (new Table($this->db, $this))
-            ->fromTable($this->db->DBPrefix . $table)
-            ->dropColumn($columns)
-            ->run();
-
-        if (! $result && $this->db->DBDebug) {
-            throw new DatabaseException(sprintf(
-                'Failed to drop column%s "%s" on "%s" table.',
-                count($columns) > 1 ? 's' : '',
-                implode('", "', $columns),
-                $table,
-            ));
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param array|string $processedFields Processed column definitions
-     *                                      or column names to DROP
-     *
-     * @return         array|string|null
-     * @return         list<string>|string|null                            SQL string or null
-     * @phpstan-return ($alterType is 'DROP' ? string : list<string>|null)
-     */
-    protected function _alterTable(string $alterType, string $table, $processedFields)
+    protected function _alterTable(string $alterType, string $table, $field)
     {
         switch ($alterType) {
-            case 'CHANGE':
-                $fieldsToModify = [];
+            case 'DROP':
+                $sqlTable = new Table($this->db, $this);
 
-                foreach ($processedFields as $processedField) {
-                    $name    = $processedField['name'];
-                    $newName = $processedField['new_name'];
-
-                    $field             = $this->fields[$name];
-                    $field['name']     = $name;
-                    $field['new_name'] = $newName;
-
-                    // Unlike when creating a table, if `null` is not specified,
-                    // the column will be `NULL`, not `NOT NULL`.
-                    if ($processedField['null'] === '') {
-                        $field['null'] = true;
-                    }
-
-                    $fieldsToModify[] = $field;
-                }
-
-                (new Table($this->db, $this))
-                    ->fromTable($table)
-                    ->modifyColumn($fieldsToModify)
+                $sqlTable->fromTable($table)
+                    ->dropColumn($field)
                     ->run();
 
-                return null; // Why null?
+                return '';
+
+            case 'CHANGE':
+                (new Table($this->db, $this))
+                    ->fromTable($table)
+                    ->modifyColumn($field)
+                    ->run();
+
+                return null;
 
             default:
-                return parent::_alterTable($alterType, $table, $processedFields);
+                return parent::_alterTable($alterType, $table, $field);
         }
     }
 
     /**
      * Process column
      */
-    protected function _processColumn(array $processedField): string
+    protected function _processColumn(array $field): string
     {
-        if ($processedField['type'] === 'TEXT' && str_starts_with($processedField['length'], "('")) {
-            $processedField['type'] .= ' CHECK(' . $this->db->escapeIdentifiers($processedField['name'])
-                . ' IN ' . $processedField['length'] . ')';
+        if ($field['type'] === 'TEXT' && strpos($field['length'], "('") === 0) {
+            $field['type'] .= ' CHECK(' . $this->db->escapeIdentifiers($field['name'])
+                . ' IN ' . $field['length'] . ')';
         }
 
-        return $this->db->escapeIdentifiers($processedField['name'])
-            . ' ' . $processedField['type']
-            . $processedField['auto_increment']
-            . $processedField['null']
-            . $processedField['unique']
-            . $processedField['default'];
+        return $this->db->escapeIdentifiers($field['name'])
+            . ' ' . $field['type']
+            . $field['auto_increment']
+            . $field['null']
+            . $field['unique']
+            . $field['default'];
+    }
+
+    /**
+     * Process indexes
+     */
+    protected function _processIndexes(string $table): array
+    {
+        $sqls = [];
+
+        for ($i = 0, $c = count($this->keys); $i < $c; $i++) {
+            $this->keys[$i] = (array) $this->keys[$i];
+
+            for ($i2 = 0, $c2 = count($this->keys[$i]); $i2 < $c2; $i2++) {
+                if (! isset($this->fields[$this->keys[$i][$i2]])) {
+                    unset($this->keys[$i][$i2]);
+                }
+            }
+            if (count($this->keys[$i]) <= 0) {
+                continue;
+            }
+
+            if (in_array($i, $this->uniqueKeys, true)) {
+                $sqls[] = 'CREATE UNIQUE INDEX ' . $this->db->escapeIdentifiers($table . '_' . implode('_', $this->keys[$i]))
+                    . ' ON ' . $this->db->escapeIdentifiers($table)
+                    . ' (' . implode(', ', $this->db->escapeIdentifiers($this->keys[$i])) . ');';
+
+                continue;
+            }
+
+            $sqls[] = 'CREATE INDEX ' . $this->db->escapeIdentifiers($table . '_' . implode('_', $this->keys[$i]))
+                . ' ON ' . $this->db->escapeIdentifiers($table)
+                . ' (' . implode(', ', $this->db->escapeIdentifiers($this->keys[$i])) . ');';
+        }
+
+        return $sqls;
     }
 
     /**
@@ -223,11 +219,8 @@ class Forge extends BaseForge
      */
     protected function _attributeAutoIncrement(array &$attributes, array &$field)
     {
-        if (
-            ! empty($attributes['AUTO_INCREMENT'])
-            && $attributes['AUTO_INCREMENT'] === true
-            && str_contains(strtolower($field['type']), 'int')
-        ) {
+        if (! empty($attributes['AUTO_INCREMENT']) && $attributes['AUTO_INCREMENT'] === true
+            && stripos($field['type'], 'int') !== false) {
             $field['type']           = 'INTEGER PRIMARY KEY';
             $field['default']        = '';
             $field['null']           = '';
@@ -257,82 +250,5 @@ class Forge extends BaseForge
         return $sqlTable->fromTable($this->db->DBPrefix . $table)
             ->dropForeignKey($foreignName)
             ->run();
-    }
-
-    /**
-     * Drop Primary Key
-     */
-    public function dropPrimaryKey(string $table, string $keyName = ''): bool
-    {
-        $sqlTable = new Table($this->db, $this);
-
-        return $sqlTable->fromTable($this->db->DBPrefix . $table)
-            ->dropPrimaryKey()
-            ->run();
-    }
-
-    public function addForeignKey($fieldName = '', string $tableName = '', $tableField = '', string $onUpdate = '', string $onDelete = '', string $fkName = ''): BaseForge
-    {
-        if ($fkName === '') {
-            return parent::addForeignKey($fieldName, $tableName, $tableField, $onUpdate, $onDelete, $fkName);
-        }
-
-        throw new DatabaseException('SQLite does not support foreign key names. CodeIgniter will refer to them in the format: prefix_table_column_referencecolumn_foreign');
-    }
-
-    /**
-     * Generates SQL to add primary key
-     *
-     * @param bool $asQuery When true recreates table with key, else partial SQL used with CREATE TABLE
-     */
-    protected function _processPrimaryKeys(string $table, bool $asQuery = false): string
-    {
-        if ($asQuery === false) {
-            return parent::_processPrimaryKeys($table, $asQuery);
-        }
-
-        $sqlTable = new Table($this->db, $this);
-
-        $sqlTable->fromTable($this->db->DBPrefix . $table)
-            ->addPrimaryKey($this->primaryKeys)
-            ->run();
-
-        return '';
-    }
-
-    /**
-     * Generates SQL to add foreign keys
-     *
-     * @param bool $asQuery When true recreates table with key, else partial SQL used with CREATE TABLE
-     */
-    protected function _processForeignKeys(string $table, bool $asQuery = false): array
-    {
-        if ($asQuery === false) {
-            return parent::_processForeignKeys($table, $asQuery);
-        }
-
-        $errorNames = [];
-
-        foreach ($this->foreignKeys as $name) {
-            foreach ($name['field'] as $f) {
-                if (! isset($this->fields[$f])) {
-                    $errorNames[] = $f;
-                }
-            }
-        }
-
-        if ($errorNames !== []) {
-            $errorNames = [implode(', ', $errorNames)];
-
-            throw new DatabaseException(lang('Database.fieldNotExists', $errorNames));
-        }
-
-        $sqlTable = new Table($this->db, $this);
-
-        $sqlTable->fromTable($this->db->DBPrefix . $table)
-            ->addForeignKey($this->foreignKeys)
-            ->run();
-
-        return [];
     }
 }

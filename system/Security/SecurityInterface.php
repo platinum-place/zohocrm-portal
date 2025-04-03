@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -24,9 +22,9 @@ interface SecurityInterface
     /**
      * CSRF Verify
      *
-     * @return $this|false
-     *
      * @throws SecurityException
+     *
+     * @return $this|false
      */
     public function verify(RequestInterface $request);
 
@@ -51,6 +49,13 @@ interface SecurityInterface
     public function getCookieName(): string;
 
     /**
+     * Check if CSRF cookie is expired.
+     *
+     * @deprecated
+     */
+    public function isExpired(): bool;
+
+    /**
      * Check if request should be redirect on failure.
      */
     public function shouldRedirect(): bool;
@@ -64,7 +69,7 @@ interface SecurityInterface
      *
      * If it is acceptable for the user input to include relative paths,
      * e.g. file/in/some/approved/folder.txt, you can set the second optional
-     * parameter, $relativePath to TRUE.
+     * parameter, $relative_path to TRUE.
      *
      * @param string $str          Input file name
      * @param bool   $relativePath Whether to preserve paths

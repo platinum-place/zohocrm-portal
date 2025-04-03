@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,11 +11,10 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Log;
 
-use CodeIgniter\Exceptions\RuntimeException;
 use CodeIgniter\Log\Exceptions\LogException;
 use CodeIgniter\Log\Handlers\HandlerInterface;
 use Psr\Log\LoggerInterface;
-use Stringable;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -31,8 +28,6 @@ use Throwable;
  * The context array can contain arbitrary data, the only assumption that
  * can be made by implementors is that if an Exception instance is given
  * to produce a stack trace, it MUST be in a key named "exception".
- *
- * @see \CodeIgniter\Log\LoggerTest
  */
 class Logger implements LoggerInterface
 {
@@ -40,7 +35,7 @@ class Logger implements LoggerInterface
      * Used by the logThreshold Config setting to define
      * which errors to show.
      *
-     * @var array<string, int>
+     * @var array<string, integer>
      */
     protected $logLevels = [
         'emergency' => 1,
@@ -96,7 +91,7 @@ class Logger implements LoggerInterface
      * value is an associative array of configuration
      * items.
      *
-     * @var array<class-string, array<string, int|list<string>|string>>
+     * @var array
      */
     protected $handlerConfig = [];
 
@@ -127,7 +122,7 @@ class Logger implements LoggerInterface
 
         // Now convert loggable levels to strings.
         // We only use numbers to make the threshold setting convenient for users.
-        if ($this->loggableLevels !== []) {
+        if ($this->loggableLevels) {
             $temp = [];
 
             foreach ($this->loggableLevels as $level) {
@@ -140,7 +135,7 @@ class Logger implements LoggerInterface
 
         $this->dateFormat = $config->dateFormat ?? $this->dateFormat;
 
-        if (! is_array($config->handlers) || $config->handlers === []) {
+        if (! is_array($config->handlers) || empty($config->handlers)) {
             throw LogException::forNoHandlers('LoggerConfig');
         }
 
@@ -159,9 +154,9 @@ class Logger implements LoggerInterface
      *
      * @param string $message
      */
-    public function emergency(string|Stringable $message, array $context = []): void
+    public function emergency($message, array $context = []): bool
     {
-        $this->log('emergency', $message, $context);
+        return $this->log('emergency', $message, $context);
     }
 
     /**
@@ -172,9 +167,9 @@ class Logger implements LoggerInterface
      *
      * @param string $message
      */
-    public function alert(string|Stringable $message, array $context = []): void
+    public function alert($message, array $context = []): bool
     {
-        $this->log('alert', $message, $context);
+        return $this->log('alert', $message, $context);
     }
 
     /**
@@ -184,9 +179,9 @@ class Logger implements LoggerInterface
      *
      * @param string $message
      */
-    public function critical(string|Stringable $message, array $context = []): void
+    public function critical($message, array $context = []): bool
     {
-        $this->log('critical', $message, $context);
+        return $this->log('critical', $message, $context);
     }
 
     /**
@@ -195,9 +190,9 @@ class Logger implements LoggerInterface
      *
      * @param string $message
      */
-    public function error(string|Stringable $message, array $context = []): void
+    public function error($message, array $context = []): bool
     {
-        $this->log('error', $message, $context);
+        return $this->log('error', $message, $context);
     }
 
     /**
@@ -208,9 +203,9 @@ class Logger implements LoggerInterface
      *
      * @param string $message
      */
-    public function warning(string|Stringable $message, array $context = []): void
+    public function warning($message, array $context = []): bool
     {
-        $this->log('warning', $message, $context);
+        return $this->log('warning', $message, $context);
     }
 
     /**
@@ -218,9 +213,9 @@ class Logger implements LoggerInterface
      *
      * @param string $message
      */
-    public function notice(string|Stringable $message, array $context = []): void
+    public function notice($message, array $context = []): bool
     {
-        $this->log('notice', $message, $context);
+        return $this->log('notice', $message, $context);
     }
 
     /**
@@ -230,9 +225,9 @@ class Logger implements LoggerInterface
      *
      * @param string $message
      */
-    public function info(string|Stringable $message, array $context = []): void
+    public function info($message, array $context = []): bool
     {
-        $this->log('info', $message, $context);
+        return $this->log('info', $message, $context);
     }
 
     /**
@@ -240,18 +235,18 @@ class Logger implements LoggerInterface
      *
      * @param string $message
      */
-    public function debug(string|Stringable $message, array $context = []): void
+    public function debug($message, array $context = []): bool
     {
-        $this->log('debug', $message, $context);
+        return $this->log('debug', $message, $context);
     }
 
     /**
      * Logs with an arbitrary level.
      *
-     * @param string $level
+     * @param mixed  $level
      * @param string $message
      */
-    public function log($level, string|Stringable $message, array $context = []): void
+    public function log($level, $message, array $context = []): bool
     {
         if (is_numeric($level)) {
             $level = array_search((int) $level, $this->logLevels, true);
@@ -264,11 +259,15 @@ class Logger implements LoggerInterface
 
         // Does the app want to log this right now?
         if (! in_array($level, $this->loggableLevels, true)) {
-            return;
+            return false;
         }
 
         // Parse our placeholders
         $message = $this->interpolate($message, $context);
+
+        if (! is_string($message)) {
+            $message = print_r($message, true);
+        }
 
         if ($this->cacheLogs) {
             $this->logCache[] = [
@@ -297,6 +296,8 @@ class Logger implements LoggerInterface
                 break;
             }
         }
+
+        return true;
     }
 
     /**
@@ -311,14 +312,14 @@ class Logger implements LoggerInterface
      * {file}
      * {line}
      *
-     * @param string $message
+     * @param mixed $message
      *
-     * @return string
+     * @return mixed
      */
     protected function interpolate($message, array $context = [])
     {
         if (! is_string($message)) {
-            return print_r($message, true);
+            return $message;
         }
 
         // build a replacement array with braces around the context keys
@@ -328,7 +329,7 @@ class Logger implements LoggerInterface
             // Verify that the 'exception' key is actually an exception
             // or error, both of which implement the 'Throwable' interface.
             if ($key === 'exception' && $val instanceof Throwable) {
-                $val = $val->getMessage() . ' ' . clean_path($val->getFile()) . ':' . $val->getLine();
+                $val = $val->getMessage() . ' ' . $this->cleanFileNames($val->getFile()) . ':' . $val->getLine();
             }
 
             // todo - sanitize input before writing to file?
@@ -341,7 +342,7 @@ class Logger implements LoggerInterface
         $replace['{env}']       = ENVIRONMENT;
 
         // Allow us to log the file/line that we are logging from
-        if (str_contains($message, '{file}')) {
+        if (strpos($message, '{file}') !== false) {
             [$file, $line] = $this->determineFile();
 
             $replace['{file}'] = $file;
@@ -349,12 +350,14 @@ class Logger implements LoggerInterface
         }
 
         // Match up environment variables in {env:foo} tags.
-        if (str_contains($message, 'env:')) {
+        if (strpos($message, 'env:') !== false) {
             preg_match('/env:[^}]+/', $message, $matches);
 
-            foreach ($matches as $str) {
-                $key                 = str_replace('env:', '', $str);
-                $replace["{{$str}}"] = $_ENV[$key] ?? 'n/a';
+            if ($matches) {
+                foreach ($matches as $str) {
+                    $key                 = str_replace('env:', '', $str);
+                    $replace["{{$str}}"] = $_ENV[$key] ?? 'n/a';
+                }
             }
         }
 
@@ -395,7 +398,7 @@ class Logger implements LoggerInterface
         // Find the first reference to a Logger class method
         foreach ($stackFrames as $frame) {
             if (\in_array($frame['function'], $logFunctions, true)) {
-                $file = isset($frame['file']) ? clean_path($frame['file']) : 'unknown';
+                $file = isset($frame['file']) ? $this->cleanFileNames($frame['file']) : 'unknown';
                 $line = $frame['line'] ?? 'unknown';
 
                 return [
@@ -409,5 +412,21 @@ class Logger implements LoggerInterface
             'unknown',
             'unknown',
         ];
+    }
+
+    /**
+     * Cleans the paths of filenames by replacing APPPATH, SYSTEMPATH, FCPATH
+     * with the actual var. i.e.
+     *
+     *  /var/www/site/app/Controllers/Home.php
+     *      becomes:
+     *  APPPATH/Controllers/Home.php
+     */
+    protected function cleanFileNames(string $file): string
+    {
+        $file = str_replace(APPPATH, 'APPPATH/', $file);
+        $file = str_replace(SYSTEMPATH, 'SYSTEMPATH/', $file);
+
+        return str_replace(FCPATH, 'FCPATH/', $file);
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,14 +11,12 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Database;
 
-use CodeIgniter\Exceptions\ConfigException;
-use CodeIgniter\Exceptions\CriticalError;
-use CodeIgniter\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 
 /**
  * Database Connection Factory
  *
- * Creates and returns an instance of the appropriate Database Connection.
+ * Creates and returns an instance of the appropriate DatabaseConnection
  */
 class Database
 {
@@ -36,11 +32,12 @@ class Database
     protected $connections = [];
 
     /**
-     * Parses the connection binds and creates a Database Connection instance.
-     *
-     * @return BaseConnection
+     * Parses the connection binds and returns an instance of the driver
+     * ready to go.
      *
      * @throws InvalidArgumentException
+     *
+     * @return mixed
      */
     public function load(array $params = [], string $alias = '')
     {
@@ -48,15 +45,13 @@ class Database
             throw new InvalidArgumentException('You must supply the parameter: alias.');
         }
 
-        if (! empty($params['DSN']) && str_contains($params['DSN'], '://')) {
+        if (! empty($params['DSN']) && strpos($params['DSN'], '://') !== false) {
             $params = $this->parseDSN($params);
         }
 
         if (empty($params['DBDriver'])) {
             throw new InvalidArgumentException('You have not selected a database type to connect to.');
         }
-
-        assert($this->checkDbExtension($params['DBDriver']));
 
         $this->connections[$alias] = $this->initDriver($params['DBDriver'], 'Connection', $params);
 
@@ -66,7 +61,7 @@ class Database
     /**
      * Creates a Forge instance for the current database type.
      */
-    public function loadForge(ConnectionInterface $db): Forge
+    public function loadForge(ConnectionInterface $db): object
     {
         if (! $db->connID) {
             $db->initialize();
@@ -76,9 +71,9 @@ class Database
     }
 
     /**
-     * Creates an instance of Utils for the current database type.
+     * Creates a Utils instance for the current database type.
      */
-    public function loadUtils(ConnectionInterface $db): BaseUtils
+    public function loadUtils(ConnectionInterface $db): object
     {
         if (! $db->connID) {
             $db->initialize();
@@ -88,7 +83,7 @@ class Database
     }
 
     /**
-     * Parses universal DSN string
+     * Parse universal DSN string
      *
      * @throws InvalidArgumentException
      */
@@ -96,7 +91,7 @@ class Database
     {
         $dsn = parse_url($params['DSN']);
 
-        if ($dsn === 0 || $dsn === '' || $dsn === '0' || $dsn === [] || $dsn === false || $dsn === null) {
+        if (! $dsn) {
             throw new InvalidArgumentException('Your DSN connection string is invalid.');
         }
 
@@ -110,7 +105,7 @@ class Database
             'database' => isset($dsn['path']) ? rawurldecode(substr($dsn['path'], 1)) : '',
         ];
 
-        if (isset($dsn['query']) && ($dsn['query'] !== '')) {
+        if (! empty($dsn['query'])) {
             parse_str($dsn['query'], $extra);
 
             foreach ($extra as $key => $val) {
@@ -126,59 +121,18 @@ class Database
     }
 
     /**
-     * Creates a database object.
+     * Initialize database driver.
      *
-     * @param string                    $driver   Driver name. FQCN can be used.
-     * @param string                    $class    'Connection'|'Forge'|'Utils'
-     * @param array|ConnectionInterface $argument The constructor parameter or DB connection
-     *
-     * @return BaseConnection|BaseUtils|Forge
+     * @param array|object $argument
      */
     protected function initDriver(string $driver, string $class, $argument): object
     {
-        $classname = (! str_contains($driver, '\\'))
-            ? "CodeIgniter\\Database\\{$driver}\\{$class}"
-            : $driver . '\\' . $class;
+        $class = $driver . '\\' . $class;
 
-        return new $classname($argument);
-    }
-
-    /**
-     * Check the PHP database extension is loaded.
-     *
-     * @param string $driver DB driver or FQCN for custom driver
-     */
-    private function checkDbExtension(string $driver): bool
-    {
-        if (str_contains($driver, '\\')) {
-            // Cannot check a fully qualified classname for a custom driver.
-            return true;
+        if (strpos($driver, '\\') === false) {
+            $class = "CodeIgniter\\Database\\{$class}";
         }
 
-        $extensionMap = [
-            // DBDriver => PHP extension
-            'MySQLi'  => 'mysqli',
-            'SQLite3' => 'sqlite3',
-            'Postgre' => 'pgsql',
-            'SQLSRV'  => 'sqlsrv',
-            'OCI8'    => 'oci8',
-        ];
-
-        $extension = $extensionMap[$driver] ?? '';
-
-        if ($extension === '') {
-            $message = 'Invalid DBDriver name: "' . $driver . '"';
-
-            throw new ConfigException($message);
-        }
-
-        if (extension_loaded($extension)) {
-            return true;
-        }
-
-        $message = 'The required PHP extension "' . $extension . '" is not loaded.'
-            . ' Install and enable it to use "' . $driver . '" driver.';
-
-        throw new CriticalError($message);
+        return new $class($argument);
     }
 }

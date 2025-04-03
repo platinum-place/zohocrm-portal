@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,42 +25,31 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\InstanceValue;
-use Kint\Value\Representation\SplFileInfoRepresentation;
-use Kint\Value\SplFileInfoValue;
+use Kint\Zval\Representation\SplFileInfoRepresentation;
+use Kint\Zval\Value;
 use SplFileInfo;
 use SplFileObject;
 
-class SplFileInfoPlugin extends AbstractPlugin implements PluginCompleteInterface
+class SplFileInfoPlugin extends Plugin
 {
-    public function getTypes(): array
+    public function getTypes()
     {
         return ['object'];
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
-        return Parser::TRIGGER_SUCCESS;
+        return Parser::TRIGGER_COMPLETE;
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, Value &$o, $trigger)
     {
-        // SplFileObject throws exceptions in normal use in places SplFileInfo doesn't
         if (!$var instanceof SplFileInfo || $var instanceof SplFileObject) {
-            return $v;
+            return;
         }
 
-        if (!$v instanceof InstanceValue) {
-            return $v;
-        }
-
-        $out = new SplFileInfoValue($v->getContext(), $var);
-        $out->setChildren($v->getChildren());
-        $out->flags = $v->flags;
-        $out->addRepresentation(new SplFileInfoRepresentation(clone $var));
-        $out->appendRepresentations($v->getRepresentations());
-
-        return $out;
+        $r = new SplFileInfoRepresentation(clone $var);
+        $o->addRepresentation($r, 0);
+        $o->size = $r->getSize();
     }
 }

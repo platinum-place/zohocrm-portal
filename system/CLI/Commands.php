@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,8 +11,7 @@ declare(strict_types=1);
 
 namespace CodeIgniter\CLI;
 
-use CodeIgniter\Autoloader\FileLocatorInterface;
-use CodeIgniter\Events\Events;
+use CodeIgniter\Autoloader\FileLocator;
 use CodeIgniter\Log\Logger;
 use ReflectionClass;
 use ReflectionException;
@@ -51,13 +48,11 @@ class Commands
 
     /**
      * Runs a command given
-     *
-     * @return int Exit code
      */
     public function run(string $command, array $params)
     {
         if (! $this->verifyCommand($command, $this->commands)) {
-            return EXIT_ERROR;
+            return;
         }
 
         // The file would have already been loaded during the
@@ -65,13 +60,7 @@ class Commands
         $className = $this->commands[$command]['class'];
         $class     = new $className($this->logger, $this);
 
-        Events::trigger('pre_command');
-
-        $exit = $class->run($params);
-
-        Events::trigger('post_command');
-
-        return $exit;
+        return $class->run($params);
     }
 
     /**
@@ -87,8 +76,6 @@ class Commands
     /**
      * Discovers all commands in the framework and within user code,
      * and collects instances of them to work with.
-     *
-     * @return void
      */
     public function discoverCommands()
     {
@@ -96,7 +83,7 @@ class Commands
             return;
         }
 
-        /** @var FileLocatorInterface $locator */
+        /** @var FileLocator $locator */
         $locator = service('locator');
         $files   = $locator->listFiles('Commands/');
 
@@ -111,7 +98,7 @@ class Commands
         foreach ($files as $file) {
             $className = $locator->findQualifiedNameFromPath($file);
 
-            if ($className === false || ! class_exists($className)) {
+            if (empty($className) || ! class_exists($className)) {
                 continue;
             }
 
@@ -125,7 +112,7 @@ class Commands
                 /** @var BaseCommand $class */
                 $class = new $className($this->logger, $this);
 
-                if (isset($class->group) && ! isset($this->commands[$class->name])) {
+                if (isset($class->group)) {
                     $this->commands[$class->name] = [
                         'class'       => $className,
                         'file'        => $file,
@@ -155,8 +142,7 @@ class Commands
 
         $message = lang('CLI.commandNotFound', [$command]);
 
-        $alternatives = $this->getCommandAlternatives($command, $commands);
-        if ($alternatives !== []) {
+        if ($alternatives = $this->getCommandAlternatives($command, $commands)) {
             if (count($alternatives) === 1) {
                 $message .= "\n\n" . lang('CLI.altCommandSingular') . "\n    ";
             } else {
@@ -183,7 +169,7 @@ class Commands
         foreach (array_keys($collection) as $commandName) {
             $lev = levenshtein($name, $commandName);
 
-            if ($lev <= strlen($commandName) / 3 || str_contains($commandName, $name)) {
+            if ($lev <= strlen($commandName) / 3 || strpos($commandName, $name) !== false) {
                 $alternatives[$commandName] = $lev;
             }
         }

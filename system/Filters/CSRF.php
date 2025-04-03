@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,12 +11,10 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Filters;
 
-use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Security\Exceptions\SecurityException;
-use CodeIgniter\Security\Security;
+use Config\Services;
 
 /**
  * CSRF filter.
@@ -26,27 +22,32 @@ use CodeIgniter\Security\Security;
  * This filter is not intended to be used from the command line.
  *
  * @codeCoverageIgnore
- * @see \CodeIgniter\Filters\CSRFTest
  */
 class CSRF implements FilterInterface
 {
     /**
-     * CSRF verification.
+     * Do whatever processing this filter needs to do.
+     * By default it should not return anything during
+     * normal execution. However, when an abnormal state
+     * is found, it should return an instance of
+     * CodeIgniter\HTTP\Response. If it does, script
+     * execution will end and that Response will be
+     * sent back to the client, allowing for error pages,
+     * redirects, etc.
      *
-     * @param list<string>|null $arguments
-     *
-     * @return RedirectResponse|null
+     * @param array|null $arguments
      *
      * @throws SecurityException
+     *
+     * @return mixed|void
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if (! $request instanceof IncomingRequest) {
-            return null;
+        if ($request->isCLI()) {
+            return;
         }
 
-        /** @var Security $security */
-        $security = service('security');
+        $security = Services::security();
 
         try {
             $security->verify($request);
@@ -57,17 +58,16 @@ class CSRF implements FilterInterface
 
             throw $e;
         }
-
-        return null;
     }
 
     /**
      * We don't have anything to do here.
      *
-     * @param list<string>|null $arguments
+     * @param array|null $arguments
+     *
+     * @return mixed|void
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        return null;
     }
 }

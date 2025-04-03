@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,31 +25,25 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\Representation\BinaryRepresentation;
-use Kint\Value\Representation\RepresentationInterface;
+use Kint\Zval\Representation\Representation;
 
-class BinaryPlugin extends AbstractPlugin implements TabPluginInterface
+class BinaryPlugin extends Plugin implements TabPluginInterface
 {
-    /** @psalm-var positive-int */
-    public static int $line_length = 0x10;
-    /** @psalm-var positive-int */
-    public static int $chunk_length = 0x2;
+    public static $line_length = 0x10;
+    public static $chunk_length = 0x4;
 
-    public function renderTab(RepresentationInterface $r, AbstractValue $v): ?string
+    public function renderTab(Representation $r)
     {
-        if (!$r instanceof BinaryRepresentation) {
-            return null;
-        }
-
         $out = '<pre>';
 
-        $lines = \str_split($r->getValue(), self::$line_length);
+        /** @var string[] Psalm bug workaround */
+        $lines = \str_split($r->contents, self::$line_length);
 
         foreach ($lines as $index => $line) {
             $out .= \sprintf('%08X', $index * self::$line_length).":\t";
 
-            $chunks = \str_split(\str_pad(\bin2hex($line), 2 * self::$line_length, ' '), 2 * self::$chunk_length);
+            /** @var string[] Psalm bug workaround */
+            $chunks = \str_split(\str_pad(\bin2hex($line), 2 * self::$line_length, ' '), self::$chunk_length);
 
             $out .= \implode(' ', $chunks);
             $out .= "\t".\preg_replace('/[^\\x20-\\x7E]/', '.', $line)."\n";

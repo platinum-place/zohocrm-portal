@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,9 +11,8 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Cache\Handlers;
 
-use CodeIgniter\Exceptions\BadMethodCallException;
-use CodeIgniter\I18n\Time;
 use Config\Cache;
+use Exception;
 
 /**
  * Cache handler for WinCache from Microsoft & IIS.
@@ -24,9 +21,6 @@ use Config\Cache;
  */
 class WincacheHandler extends BaseHandler
 {
-    /**
-     * Note: Use `CacheFactory::getHandler()` to instantiate.
-     */
     public function __construct(Cache $config)
     {
         $this->prefix = $config->prefix;
@@ -75,12 +69,10 @@ class WincacheHandler extends BaseHandler
 
     /**
      * {@inheritDoc}
-     *
-     * @return never
      */
     public function deleteMatching(string $pattern)
     {
-        throw new BadMethodCallException('The deleteMatching method is not implemented for Wincache. You must select File, Redis or Predis handlers to use it.');
+        throw new Exception('The deleteMatching method is not implemented for Wincache. You must select File, Redis or Predis handlers to use it.');
     }
 
     /**
@@ -132,7 +124,7 @@ class WincacheHandler extends BaseHandler
             $hitcount = $stored['ucache_entries'][1]['hitcount'];
 
             return [
-                'expire'   => $ttl > 0 ? Time::now()->getTimestamp() + $ttl : null,
+                'expire'   => $ttl > 0 ? time() + $ttl : null,
                 'hitcount' => $hitcount,
                 'age'      => $age,
                 'ttl'      => $ttl,

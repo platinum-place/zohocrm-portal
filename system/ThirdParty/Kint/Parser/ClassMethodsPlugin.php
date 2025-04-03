@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,199 +25,89 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\Context\MethodContext;
-use Kint\Value\DeclaredCallableBag;
-use Kint\Value\InstanceValue;
-use Kint\Value\MethodValue;
-use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Zval\InstanceValue;
+use Kint\Zval\MethodValue;
+use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 use ReflectionClass;
-use ReflectionMethod;
 
-class ClassMethodsPlugin extends AbstractPlugin implements PluginCompleteInterface
+class ClassMethodsPlugin extends Plugin
 {
-    public static bool $show_access_path = true;
+    private static $cache = [];
 
-    /**
-     * Whether to go out of the way to show constructor paths
-     * when the instance isn't accessible.
-     *
-     * Disabling this improves performance.
-     */
-    public static bool $show_constructor_path = false;
-
-    /** @psalm-var array<class-string, MethodValue[]> */
-    private array $instance_cache = [];
-
-    /** @psalm-var array<class-string, MethodValue[]> */
-    private array $static_cache = [];
-
-    public function getTypes(): array
+    public function getTypes()
     {
         return ['object'];
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    /**
-     * @psalm-template T of AbstractValue
-     *
-     * @psalm-param mixed $var
-     * @psalm-param T $v
-     *
-     * @psalm-return T
-     */
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, Value &$o, $trigger)
     {
-        if (!$v instanceof InstanceValue) {
-            return $v;
-        }
+        $class = \get_class($var);
 
-        $class = $v->getClassName();
-        $scope = $this->getParser()->getCallerClass();
-
-        if ($contents = $this->getCachedMethods($class)) {
-            if (self::$show_access_path) {
-                if (null !== $v->getContext()->getAccessPath()) {
-                    // If we have an access path we can generate them for the children
-                    foreach ($contents as $key => $val) {
-                        if ($val->getContext()->isAccessible($scope)) {
-                            $val = clone $val;
-                            $val->getContext()->setAccessPathFromParent($v);
-                            $contents[$key] = $val;
-                        }
-                    }
-                } elseif (self::$show_constructor_path && isset($contents['__construct'])) {
-                    // __construct is the only exception: The only non-static method
-                    // that can be called without access to the parent instance.
-                    // Technically I guess it really is a static method but so long
-                    // as PHP continues to refer to it as a normal one so will we.
-                    $val = $contents['__construct'];
-                    if ($val->getContext()->isAccessible($scope)) {
-                        $val = clone $val;
-                        $val->getContext()->setAccessPathFromParent($v);
-                        $contents['__construct'] = $val;
-                    }
-                }
-            }
-
-            $v->addRepresentation(new ContainerRepresentation('Methods', $contents));
-        }
-
-        if ($contents = $this->getCachedStaticMethods($class)) {
-            $v->addRepresentation(new ContainerRepresentation('Static methods', $contents));
-        }
-
-        return $v;
-    }
-
-    /**
-     * @psalm-param class-string $class
-     *
-     * @psalm-return MethodValue[]
-     */
-    private function getCachedMethods(string $class): array
-    {
-        if (!isset($this->instance_cache[$class])) {
+        // assuming class definition will not change inside one request
+        if (!isset(self::$cache[$class])) {
             $methods = [];
 
-            $r = new ReflectionClass($class);
+            $reflection = new ReflectionClass($class);
 
-            $parent_methods = [];
-            if ($parent = \get_parent_class($class)) {
-                $parent_methods = $this->getCachedMethods($parent);
+            foreach ($reflection->getMethods() as $method) {
+                $methods[] = new MethodValue($method);
             }
 
-            foreach ($r->getMethods() as $mr) {
-                if ($mr->isStatic()) {
-                    continue;
-                }
+            \usort($methods, ['Kint\\Parser\\ClassMethodsPlugin', 'sort']);
 
-                $canon_name = \strtolower($mr->name);
-                if ($mr->isPrivate() && '__construct' !== $canon_name) {
-                    $canon_name = \strtolower($mr->getDeclaringClass()->name).'::'.$canon_name;
-                }
+            self::$cache[$class] = $methods;
+        }
 
-                if ($mr->getDeclaringClass()->name === $class) {
-                    $method = new MethodValue(new MethodContext($mr), new DeclaredCallableBag($mr));
-                    $methods[$canon_name] = $method;
-                    unset($parent_methods[$canon_name]);
-                } elseif (isset($parent_methods[$canon_name])) {
-                    $method = $parent_methods[$canon_name];
-                    unset($parent_methods[$canon_name]);
+        if (!empty(self::$cache[$class])) {
+            $rep = new Representation('Available methods', 'methods');
 
-                    if (!$method->getContext()->inherited) {
-                        $method = clone $method;
-                        $method->getContext()->inherited = true;
-                    }
+            // Can't cache access paths
+            foreach (self::$cache[$class] as $m) {
+                $method = clone $m;
+                $method->depth = $o->depth + 1;
 
-                    $methods[$canon_name] = $method;
-                } elseif ($mr->getDeclaringClass()->isInterface()) {
-                    $c = new MethodContext($mr);
-                    $c->inherited = true;
-                    $methods[$canon_name] = new MethodValue($c, new DeclaredCallableBag($mr));
-                }
-            }
-
-            foreach ($parent_methods as $name => $method) {
-                if (!$method->getContext()->inherited) {
-                    $method = clone $method;
-                    $method->getContext()->inherited = true;
-                }
-
-                if ('__construct' === $name) {
-                    $methods['__construct'] = $method;
+                if (!$this->parser->childHasPath($o, $method)) {
+                    $method->access_path = null;
                 } else {
-                    $methods[] = $method;
+                    $method->setAccessPathFrom($o);
                 }
+
+                if ($method->owner_class !== $class && $ds = $method->getRepresentation('docstring')) {
+                    $ds = clone $ds;
+                    $ds->class = $method->owner_class;
+                    $method->replaceRepresentation($ds);
+                }
+
+                $rep->contents[] = $method;
             }
 
-            $this->instance_cache[$class] = $methods;
+            $o->addRepresentation($rep);
         }
-
-        return $this->instance_cache[$class];
     }
 
-    /**
-     * @psalm-param class-string $class
-     *
-     * @psalm-return MethodValue[]
-     */
-    private function getCachedStaticMethods(string $class): array
+    private static function sort(MethodValue $a, MethodValue $b)
     {
-        if (!isset($this->static_cache[$class])) {
-            $methods = [];
-
-            $r = new ReflectionClass($class);
-
-            $parent_methods = [];
-            if ($parent = \get_parent_class($class)) {
-                $parent_methods = $this->getCachedStaticMethods($parent);
-            }
-
-            foreach ($r->getMethods(ReflectionMethod::IS_STATIC) as $mr) {
-                $canon_name = \strtolower($mr->getDeclaringClass()->name.'::'.$mr->name);
-
-                if ($mr->getDeclaringClass()->name === $class) {
-                    $method = new MethodValue(new MethodContext($mr), new DeclaredCallableBag($mr));
-                    $methods[$canon_name] = $method;
-                } elseif (isset($parent_methods[$canon_name])) {
-                    $methods[$canon_name] = $parent_methods[$canon_name];
-                } elseif ($mr->getDeclaringClass()->isInterface()) {
-                    $c = new MethodContext($mr);
-                    $c->inherited = true;
-                    $methods[$canon_name] = new MethodValue($c, new DeclaredCallableBag($mr));
-                }
-
-                unset($parent_methods[$canon_name]);
-            }
-
-            $this->static_cache[$class] = $methods + $parent_methods;
+        $sort = ((int) $a->static) - ((int) $b->static);
+        if ($sort) {
+            return $sort;
         }
 
-        return $this->static_cache[$class];
+        $sort = Value::sortByAccess($a, $b);
+        if ($sort) {
+            return $sort;
+        }
+
+        $sort = InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
+        if ($sort) {
+            return $sort;
+        }
+
+        return $a->startline - $b->startline;
     }
 }

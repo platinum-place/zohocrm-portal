@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -20,8 +18,6 @@ use RecursiveIteratorIterator;
  * Class FileCollection
  *
  * Provides easy access to uploaded files for a request.
- *
- * @see \CodeIgniter\HTTP\Files\FileCollectionTest
  */
 class FileCollection
 {
@@ -59,7 +55,7 @@ class FileCollection
         $this->populateFiles();
 
         if ($this->hasFile($name)) {
-            if (str_contains($name, '.')) {
+            if (strpos($name, '.') !== false) {
                 $name         = explode('.', $name);
                 $uploadedFile = $this->getValueDotNotationSyntax($name, $this->files);
 
@@ -79,14 +75,14 @@ class FileCollection
     /**
      * Verify if a file exist in the collection of uploaded files and is have been uploaded with multiple option.
      *
-     * @return list<UploadedFile>|null
+     * @return array|null
      */
     public function getFileMultiple(string $name)
     {
         $this->populateFiles();
 
         if ($this->hasFile($name)) {
-            if (str_contains($name, '.')) {
+            if (strpos($name, '.') !== false) {
                 $name         = explode('.', $name);
                 $uploadedFile = $this->getValueDotNotationSyntax($name, $this->files);
 
@@ -115,7 +111,7 @@ class FileCollection
     {
         $this->populateFiles();
 
-        if (str_contains($fileID, '.')) {
+        if (strpos($fileID, '.') !== false) {
             $segments = explode('.', $fileID);
 
             $el = $this->files;
@@ -139,8 +135,6 @@ class FileCollection
      * of UploadedFile for each one, saving the results to this->files.
      *
      * Called by files(), file(), and hasFile()
-     *
-     * @return void
      */
     protected function populateFiles()
     {
@@ -150,7 +144,7 @@ class FileCollection
 
         $this->files = [];
 
-        if ($_FILES === []) {
+        if (empty($_FILES)) {
             return;
         }
 
@@ -165,7 +159,7 @@ class FileCollection
      * Given a file array, will create UploadedFile instances. Will
      * loop over an array and create objects for each.
      *
-     * @return list<UploadedFile>|UploadedFile
+     * @return array|UploadedFile
      */
     protected function createFileObject(array $array)
     {
@@ -187,9 +181,8 @@ class FileCollection
             $array['tmp_name'] ?? null,
             $array['name'] ?? null,
             $array['type'] ?? null,
-            ($array['size'] ?? null) === null ? null : (int) $array['size'],
-            $array['error'] ?? null,
-            $array['full_path'] ?? null,
+            $array['size'] ?? null,
+            $array['error'] ?? null
         );
     }
 
@@ -219,7 +212,7 @@ class FileCollection
                 $stack    = [&$pointer];
                 $iterator = new RecursiveIteratorIterator(
                     new RecursiveArrayIterator($value),
-                    RecursiveIteratorIterator::SELF_FIRST,
+                    RecursiveIteratorIterator::SELF_FIRST
                 );
 
                 foreach ($iterator as $key => $val) {
@@ -227,10 +220,6 @@ class FileCollection
                     $pointer = &$stack[count($stack) - 1];
                     $pointer = &$pointer[$key];
                     $stack[] = &$pointer;
-
-                    // RecursiveIteratorIterator::hasChildren() can be used. RecursiveIteratorIterator
-                    // forwards all unknown method calls to the underlying RecursiveIterator internally.
-                    // See https://github.com/php/doc-en/issues/787#issuecomment-881446121
                     if (! $iterator->hasChildren()) {
                         $pointer[$field] = $val;
                     }
@@ -242,18 +231,18 @@ class FileCollection
     }
 
     /**
-     * Navigate through an array looking for a particular index
+     * Navigate through a array looking for a particular index
      *
      * @param array $index The index sequence we are navigating down
      * @param array $value The portion of the array to process
      *
-     * @return list<UploadedFile>|UploadedFile|null
+     * @return mixed
      */
     protected function getValueDotNotationSyntax(array $index, array $value)
     {
         $currentIndex = array_shift($index);
 
-        if (isset($currentIndex) && is_array($index) && $index !== [] && array_key_exists($currentIndex, $value) && is_array($value[$currentIndex])) {
+        if (isset($currentIndex) && is_array($index) && $index && is_array($value[$currentIndex]) && $value[$currentIndex]) {
             return $this->getValueDotNotationSyntax($index, $value[$currentIndex]);
         }
 

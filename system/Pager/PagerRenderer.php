@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -21,20 +19,18 @@ use CodeIgniter\HTTP\URI;
  * This class is passed to the view that describes the pagination,
  * and is used to get the link information and provide utility
  * methods needed to work with pagination.
- *
- * @see \CodeIgniter\Pager\PagerRendererTest
  */
 class PagerRenderer
 {
     /**
-     * First page number in the set of links to be displayed.
+     * First page number.
      *
      * @var int
      */
     protected $first;
 
     /**
-     * Last page number in the set of links to be displayed.
+     * Last page number.
      *
      * @var int
      */
@@ -83,38 +79,18 @@ class PagerRenderer
     protected $pageSelector;
 
     /**
-     * Returns the number of results per page that should be shown.
-     */
-    protected ?int $perPage;
-
-    /**
-     * The number of items the page starts with.
-     */
-    protected ?int $perPageStart = null;
-
-    /**
-     * The number of items the page ends with.
-     */
-    protected ?int $perPageEnd = null;
-
-    /**
      * Constructor.
      */
     public function __construct(array $details)
     {
-        // `first` and `last` will be updated by `setSurroundCount()`.
-        // You must call `setSurroundCount()` after instantiation.
-        $this->first = 1;
-        $this->last  = $details['pageCount'];
-
+        $this->first        = 1;
+        $this->last         = $details['pageCount'];
         $this->current      = $details['currentPage'];
         $this->total        = $details['total'];
         $this->uri          = $details['uri'];
         $this->pageCount    = $details['pageCount'];
         $this->segment      = $details['segment'] ?? 0;
         $this->pageSelector = $details['pageSelector'] ?? 'page';
-        $this->perPage      = $details['perPage'] ?? null;
-        $this->updatePerPages();
     }
 
     /**
@@ -144,6 +120,8 @@ class PagerRenderer
      * page before the current page, but is the page just before the
      * "first" page.
      *
+     * You MUST call hasPrevious() first, or this value may be invalid.
+     *
      * @return string|null
      */
     public function getPrevious()
@@ -160,13 +138,7 @@ class PagerRenderer
             $uri->setSegment($this->segment, $this->first - 1);
         }
 
-        return URI::createURIString(
-            $uri->getScheme(),
-            $uri->getAuthority(),
-            $uri->getPath(),
-            $uri->getQuery(),
-            $uri->getFragment(),
-        );
+        return URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment());
     }
 
     /**
@@ -181,6 +153,8 @@ class PagerRenderer
      * Returns a URL to the "next" page. The next page is NOT, the
      * page after the current page, but is the page that follows the
      * "last" page.
+     *
+     * You MUST call hasNext() first, or this value may be invalid.
      *
      * @return string|null
      */
@@ -198,13 +172,7 @@ class PagerRenderer
             $uri->setSegment($this->segment, $this->last + 1);
         }
 
-        return URI::createURIString(
-            $uri->getScheme(),
-            $uri->getAuthority(),
-            $uri->getPath(),
-            $uri->getQuery(),
-            $uri->getFragment(),
-        );
+        return URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment());
     }
 
     /**
@@ -220,13 +188,7 @@ class PagerRenderer
             $uri->setSegment($this->segment, 1);
         }
 
-        return URI::createURIString(
-            $uri->getScheme(),
-            $uri->getAuthority(),
-            $uri->getPath(),
-            $uri->getQuery(),
-            $uri->getFragment(),
-        );
+        return URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment());
     }
 
     /**
@@ -242,13 +204,7 @@ class PagerRenderer
             $uri->setSegment($this->segment, $this->pageCount);
         }
 
-        return URI::createURIString(
-            $uri->getScheme(),
-            $uri->getAuthority(),
-            $uri->getPath(),
-            $uri->getQuery(),
-            $uri->getFragment(),
-        );
+        return URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment());
     }
 
     /**
@@ -264,13 +220,7 @@ class PagerRenderer
             $uri->setSegment($this->segment, $this->current);
         }
 
-        return URI::createURIString(
-            $uri->getScheme(),
-            $uri->getAuthority(),
-            $uri->getPath(),
-            $uri->getQuery(),
-            $uri->getFragment(),
-        );
+        return URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment());
     }
 
     /**
@@ -278,8 +228,6 @@ class PagerRenderer
      * is represented by another array containing of the URI the link
      * should go to, the title (number) of the link, and a boolean
      * value representing whether this link is active or not.
-     *
-     * @return list<array{uri:string, title:int, active:bool}>
      */
     public function links(): array
     {
@@ -290,13 +238,7 @@ class PagerRenderer
         for ($i = $this->first; $i <= $this->last; $i++) {
             $uri     = $this->segment === 0 ? $uri->addQuery($this->pageSelector, $i) : $uri->setSegment($this->segment, $i);
             $links[] = [
-                'uri' => URI::createURIString(
-                    $uri->getScheme(),
-                    $uri->getAuthority(),
-                    $uri->getPath(),
-                    $uri->getQuery(),
-                    $uri->getFragment(),
-                ),
+                'uri'    => URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment()),
                 'title'  => $i,
                 'active' => ($i === $this->current),
             ];
@@ -311,8 +253,6 @@ class PagerRenderer
      * to show.
      *
      * @param int|null $count The new "surroundCount"
-     *
-     * @return void
      */
     protected function updatePages(?int $count = null)
     {
@@ -322,28 +262,6 @@ class PagerRenderer
 
         $this->first = $this->current - $count > 0 ? $this->current - $count : 1;
         $this->last  = $this->current + $count <= $this->pageCount ? $this->current + $count : (int) $this->pageCount;
-    }
-
-    /**
-     * Updates the start and end items per pages, which is
-     * the number of items displayed on the active page.
-     */
-    protected function updatePerPages(): void
-    {
-        if ($this->total === null || $this->perPage === null) {
-            return;
-        }
-
-        // When the page is the last, perform a different calculation.
-        if ($this->last === $this->current) {
-            $this->perPageStart = $this->perPage * ($this->current - 1) + 1;
-            $this->perPageEnd   = $this->total;
-
-            return;
-        }
-
-        $this->perPageStart = $this->current === 1 ? 1 : ($this->perPage * $this->current) - $this->perPage + 1;
-        $this->perPageEnd   = $this->perPage * $this->current;
     }
 
     /**
@@ -375,13 +293,7 @@ class PagerRenderer
             $uri->setSegment($this->segment, $this->current - 1);
         }
 
-        return URI::createURIString(
-            $uri->getScheme(),
-            $uri->getAuthority(),
-            $uri->getPath(),
-            $uri->getQuery(),
-            $uri->getFragment(),
-        );
+        return URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment());
     }
 
     /**
@@ -413,17 +325,11 @@ class PagerRenderer
             $uri->setSegment($this->segment, $this->current + 1);
         }
 
-        return URI::createURIString(
-            $uri->getScheme(),
-            $uri->getAuthority(),
-            $uri->getPath(),
-            $uri->getQuery(),
-            $uri->getFragment(),
-        );
+        return URI::createURIString($uri->getScheme(), $uri->getAuthority(), $uri->getPath(), $uri->getQuery(), $uri->getFragment());
     }
 
     /**
-     * Returns the page number of the first page in the set of links to be displayed.
+     * Returns the page number of the first page.
      */
     public function getFirstPageNumber(): int
     {
@@ -439,7 +345,7 @@ class PagerRenderer
     }
 
     /**
-     * Returns the page number of the last page in the set of links to be displayed.
+     * Returns the page number of the last page.
      */
     public function getLastPageNumber(): int
     {
@@ -468,37 +374,5 @@ class PagerRenderer
     public function getNextPageNumber(): ?int
     {
         return ($this->current === $this->pageCount) ? null : $this->current + 1;
-    }
-
-    /**
-     * Returns the total items of the page.
-     */
-    public function getTotal(): ?int
-    {
-        return $this->total;
-    }
-
-    /**
-     * Returns the number of items to be displayed on the page.
-     */
-    public function getPerPage(): ?int
-    {
-        return $this->perPage;
-    }
-
-    /**
-     * Returns the number of items the page starts with.
-     */
-    public function getPerPageStart(): ?int
-    {
-        return $this->perPageStart;
-    }
-
-    /**
-     * Returns the number of items the page ends with.
-     */
-    public function getPerPageEnd(): ?int
-    {
-        return $this->perPageEnd;
     }
 }

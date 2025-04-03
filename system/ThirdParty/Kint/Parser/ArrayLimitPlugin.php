@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -29,140 +27,115 @@ namespace Kint\Parser;
 
 use InvalidArgumentException;
 use Kint\Utils;
-use Kint\Value\AbstractValue;
-use Kint\Value\ArrayValue;
-use Kint\Value\Context\BaseContext;
-use Kint\Value\Context\ContextInterface;
-use Kint\Value\Representation\ContainerRepresentation;
-use Kint\Value\Representation\ProfileRepresentation;
-use Kint\Value\Representation\ValueRepresentation;
+use Kint\Zval\Value;
 
-class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
+class ArrayLimitPlugin extends Plugin
 {
     /**
      * Maximum size of arrays before limiting.
+     *
+     * @var int
      */
-    public static int $trigger = 1000;
+    public static $trigger = 1000;
 
     /**
      * Maximum amount of items to show in a limited array.
+     *
+     * @var int
      */
-    public static int $limit = 50;
+    public static $limit = 50;
 
     /**
      * Don't limit arrays with string keys.
+     *
+     * @var bool
      */
-    public static bool $numeric_only = true;
+    public static $numeric_only = true;
 
-    public function __construct(Parser $p)
-    {
-        if (self::$limit < 0) {
-            throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than 0');
-        }
-
-        if (self::$limit >= self::$trigger) {
-            throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
-        }
-
-        parent::__construct($p);
-    }
-
-    public function getTypes(): array
+    public function getTypes()
     {
         return ['array'];
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
+    public function parse(&$var, Value &$o, $trigger)
     {
-        $parser = $this->getParser();
-        $pdepth = $parser->getDepthLimit();
-
-        if (!$pdepth) {
-            return null;
+        if (self::$limit >= self::$trigger) {
+            throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
         }
 
-        $cdepth = $c->getDepth();
+        $depth = $this->parser->getDepthLimit();
 
-        if ($cdepth >= $pdepth - 1) {
-            return null;
+        if (!$depth) {
+            return;
+        }
+
+        if ($o->depth >= $depth - 1) {
+            return;
         }
 
         if (\count($var) < self::$trigger) {
-            return null;
+            return;
         }
 
         if (self::$numeric_only && Utils::isAssoc($var)) {
-            return null;
+            return;
         }
 
-        $slice = \array_slice($var, 0, self::$limit, true);
-        $array = $parser->parse($slice, $c);
+        $base = clone $o;
+        $base->depth = $depth - 1;
+        $obj = $this->parser->parse($var, $base);
 
-        if (!$array instanceof ArrayValue) {
-            return null;
+        if (!$obj instanceof Value || 'array' != $obj->type) {
+            return; // @codeCoverageIgnore
         }
 
-        $base = new BaseContext($c->getName());
-        $base->depth = $pdepth - 1;
-        $base->access_path = $c->getAccessPath();
+        $obj->depth = $o->depth;
+        $i = 0;
 
-        $slice = \array_slice($var, self::$limit, null, true);
-        $slice = $parser->parse($slice, $base);
-
-        if (!$slice instanceof ArrayValue) {
-            return null;
+        foreach ($obj->value->contents as $child) {
+            // We only bother setting the correct depth for the first child,
+            // any deeper children should be cancelled by the depth limit
+            $child->depth = $o->depth + 1;
+            $this->recalcDepthLimit($child);
         }
 
-        foreach ($slice->getContents() as $child) {
-            $this->replaceDepthLimit($child, $cdepth + 1);
-        }
+        $var2 = \array_slice($var, 0, self::$limit, true);
+        $base = clone $o;
+        $slice = $this->parser->parse($var2, $base);
 
-        $out = new ArrayValue($c, \count($var), \array_merge($array->getContents(), $slice->getContents()));
-        $out->flags = $array->flags;
+        \array_splice($obj->value->contents, 0, self::$limit, $slice->value->contents);
 
-        // Explicitly copy over profile plugin
-        $arrayp = $array->getRepresentation('profiling');
-        $slicep = $slice->getRepresentation('profiling');
-        if ($arrayp instanceof ProfileRepresentation && $slicep instanceof ProfileRepresentation) {
-            $out->addRepresentation(new ProfileRepresentation($arrayp->complexity + $slicep->complexity));
-        }
+        $o = $obj;
 
-        // Add contents. Check is in case some bad plugin empties both $slice and $array
-        if ($contents = $out->getContents()) {
-            $out->addRepresentation(new ContainerRepresentation('Contents', $contents, null, true));
-        }
-
-        return $out;
+        $this->parser->haltParse();
     }
 
-    protected function replaceDepthLimit(AbstractValue $v, int $depth): void
+    protected function recalcDepthLimit(Value $o)
     {
-        $c = $v->getContext();
-
-        if ($c instanceof BaseContext) {
-            $c->depth = $depth;
+        $hintkey = \array_search('depth_limit', $o->hints, true);
+        if (false !== $hintkey) {
+            $o->hints[$hintkey] = 'array_limit';
         }
 
-        $pdepth = $this->getParser()->getDepthLimit();
-
-        if (($v->flags & AbstractValue::FLAG_DEPTH_LIMIT) && $pdepth && $depth < $pdepth) {
-            $v->flags = $v->flags & ~AbstractValue::FLAG_DEPTH_LIMIT | AbstractValue::FLAG_ARRAY_LIMIT;
+        $reps = $o->getRepresentations();
+        if ($o->value) {
+            $reps[] = $o->value;
         }
-
-        $reps = $v->getRepresentations();
 
         foreach ($reps as $rep) {
-            if ($rep instanceof ContainerRepresentation) {
-                foreach ($rep->getContents() as $child) {
-                    $this->replaceDepthLimit($child, $depth + 1);
+            if ($rep->contents instanceof Value) {
+                $this->recalcDepthLimit($rep->contents);
+            } elseif (\is_array($rep->contents)) {
+                foreach ($rep->contents as $child) {
+                    if ($child instanceof Value) {
+                        $this->recalcDepthLimit($child);
+                    }
                 }
-            } elseif ($rep instanceof ValueRepresentation) {
-                $this->replaceDepthLimit($rep->getValue(), $depth + 1);
             }
         }
     }

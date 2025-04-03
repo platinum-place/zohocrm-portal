@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -11,40 +9,29 @@ declare(strict_types=1);
  * the LICENSE file that was distributed with this source code.
  */
 
-use CodeIgniter\I18n\Time;
-
 // CodeIgniter Date Helpers
 
 if (! function_exists('now')) {
     /**
      * Get "now" time
      *
-     * Returns Time::now()->getTimestamp() based on the timezone parameter or on the
+     * Returns time() based on the timezone parameter or on the
      * app_timezone() setting
      *
-     * @param non-empty-string|null $timezone
+     * @param string $timezone
      *
      * @throws Exception
      */
     function now(?string $timezone = null): int
     {
-        $timezone = ($timezone === null || $timezone === '') ? app_timezone() : $timezone;
+        $timezone = empty($timezone) ? app_timezone() : $timezone;
 
         if ($timezone === 'local' || $timezone === date_default_timezone_get()) {
-            return Time::now()->getTimestamp();
+            return time();
         }
 
-        $time = Time::now($timezone);
-        sscanf(
-            $time->format('j-n-Y G:i:s'),
-            '%d-%d-%d %d:%d:%d',
-            $day,
-            $month,
-            $year,
-            $hour,
-            $minute,
-            $second,
-        );
+        $datetime = new DateTime('now', new DateTimeZone($timezone));
+        sscanf($datetime->format('j-n-Y G:i:s'), '%d-%d-%d %d:%d:%d', $day, $month, $year, $hour, $minute, $second);
 
         return mktime($hour, $minute, $second, $month, $day, $year);
     }
@@ -67,13 +54,13 @@ if (! function_exists('timezone_select')) {
     {
         $timezones = DateTimeZone::listIdentifiers($what, $country);
 
-        $buffer = "<select name='timezone' class='{$class}'>\n";
+        $buffer = "<select name='timezone' class='{$class}'>" . PHP_EOL;
 
         foreach ($timezones as $timezone) {
             $selected = ($timezone === $default) ? 'selected' : '';
-            $buffer .= "<option value='{$timezone}' {$selected}>{$timezone}</option>\n";
+            $buffer .= "<option value='{$timezone}' {$selected}>{$timezone}</option>" . PHP_EOL;
         }
 
-        return $buffer . ("</select>\n");
+        return $buffer . ('</select>' . PHP_EOL);
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -31,9 +29,9 @@ interface FilterInterface
      * sent back to the client, allowing for error pages,
      * redirects, etc.
      *
-     * @param list<string>|null $arguments
+     * @param null $arguments
      *
-     * @return RequestInterface|ResponseInterface|string|null
+     * @return mixed
      */
     public function before(RequestInterface $request, $arguments = null);
 
@@ -43,9 +41,9 @@ interface FilterInterface
      * to stop execution of other after filters, short of
      * throwing an Exception or Error.
      *
-     * @param list<string>|null $arguments
+     * @param null $arguments
      *
-     * @return ResponseInterface|null
+     * @return mixed
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null);
 }

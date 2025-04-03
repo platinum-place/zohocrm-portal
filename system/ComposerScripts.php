@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -32,8 +30,10 @@ final class ComposerScripts
 {
     /**
      * Path to the ThirdParty directory.
+     *
+     * @var string
      */
-    private static string $path = __DIR__ . '/ThirdParty/';
+    private static $path = __DIR__ . '/ThirdParty/';
 
     /**
      * Direct dependencies of CodeIgniter to copy
@@ -41,7 +41,7 @@ final class ComposerScripts
      *
      * @var array<string, array<string, string>>
      */
-    private static array $dependencies = [
+    private static $dependencies = [
         'kint-src' => [
             'license' => __DIR__ . '/../vendor/kint-php/kint/LICENSE',
             'from'    => __DIR__ . '/../vendor/kint-php/kint/src/',
@@ -58,7 +58,7 @@ final class ComposerScripts
         ],
         'psr-log' => [
             'license' => __DIR__ . '/../vendor/psr/log/LICENSE',
-            'from'    => __DIR__ . '/../vendor/psr/log/src/',
+            'from'    => __DIR__ . '/../vendor/psr/log/Psr/Log/',
             'to'      => __DIR__ . '/ThirdParty/PSR/Log/',
         ],
     ];
@@ -71,14 +71,8 @@ final class ComposerScripts
     {
         self::recursiveDelete(self::$path);
 
-        foreach (self::$dependencies as $key => $dependency) {
-            // Kint may be removed.
-            if (! is_dir($dependency['from']) && str_starts_with($key, 'kint')) {
-                continue;
-            }
-
+        foreach (self::$dependencies as $dependency) {
             self::recursiveMirror($dependency['from'], $dependency['to']);
-
             if (isset($dependency['license'])) {
                 $license = basename($dependency['license']);
                 copy($dependency['license'], $dependency['to'] . '/' . $license);
@@ -86,6 +80,7 @@ final class ComposerScripts
         }
 
         self::copyKintInitFiles();
+        self::recursiveDelete(self::$dependencies['psr-log']['to'] . 'Test/');
     }
 
     /**
@@ -94,15 +89,13 @@ final class ComposerScripts
     private static function recursiveDelete(string $directory): void
     {
         if (! is_dir($directory)) {
-            echo sprintf('Cannot recursively delete "%s" as it does not exist.', $directory) . PHP_EOL;
-
-            return;
+            echo sprintf('Cannot recursively delete "%s" as it does not exist.', $directory);
         }
 
         /** @var SplFileInfo $file */
         foreach (new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(rtrim($directory, '\\/'), FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST,
+            RecursiveIteratorIterator::CHILD_FIRST
         ) as $file) {
             $path = $file->getPathname();
 
@@ -135,18 +128,14 @@ final class ComposerScripts
             exit(1);
         }
 
-        if (! @mkdir($targetDir, 0755, true)) {
-            echo sprintf('Cannot create the target directory: "%s"', $targetDir) . PHP_EOL;
-
-            exit(1);
-        }
+        @mkdir($targetDir, 0755, true);
 
         $dirLen = strlen($originDir);
 
         /** @var SplFileInfo $file */
         foreach (new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($originDir, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST,
+            RecursiveIteratorIterator::SELF_FIRST
         ) as $file) {
             $origin = $file->getPathname();
             $target = $targetDir . substr($origin, $dirLen);

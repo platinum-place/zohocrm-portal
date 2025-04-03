@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,21 +12,12 @@ declare(strict_types=1);
 namespace CodeIgniter\RESTful;
 
 use CodeIgniter\Controller;
-use CodeIgniter\HTTP\CLIRequest;
-use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 abstract class BaseResource extends Controller
 {
-    /**
-     * Instance of the main Request object.
-     *
-     * @var CLIRequest|IncomingRequest
-     */
-    protected $request;
-
     /**
      * @var string|null The model that holding this resource's data
      */
@@ -41,13 +30,10 @@ abstract class BaseResource extends Controller
 
     /**
      * Constructor.
-     *
-     * @return void
      */
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
-
         $this->setModel($this->modelName);
     }
 
@@ -56,12 +42,10 @@ abstract class BaseResource extends Controller
      * Given either the name or the object, determine the other.
      *
      * @param object|string|null $which
-     *
-     * @return void
      */
     public function setModel($which = null)
     {
-        if ($which !== null) {
+        if ($which) {
             $this->model     = is_object($which) ? $which : null;
             $this->modelName = is_object($which) ? null : $which;
         }
@@ -71,7 +55,7 @@ abstract class BaseResource extends Controller
         }
 
         if (! empty($this->model) && empty($this->modelName)) {
-            $this->modelName = $this->model::class;
+            $this->modelName = get_class($this->model);
         }
     }
 }

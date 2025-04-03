@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -44,14 +42,14 @@ interface PagerInterface
      * Stores a set of pagination data for later display. Most commonly used
      * by the model to automate the process.
      *
-     * @return $this
+     * @return mixed
      */
     public function store(string $group, int $page, int $perPage, int $total);
 
     /**
      * Sets the path that an aliased group of links will use.
      *
-     * @return $this
+     * @return mixed
      */
     public function setPath(string $path, string $group = 'default');
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,50 +25,47 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\MicrotimeValue;
-use Kint\Value\Representation\MicrotimeRepresentation;
+use Kint\Zval\Representation\MicrotimeRepresentation;
+use Kint\Zval\Value;
 
-class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
+class MicrotimePlugin extends Plugin
 {
-    private static ?array $last = null;
-    private static ?float $start = null;
-    private static int $times = 0;
-    private static ?string $group = null;
+    private static $last = null;
+    private static $start = null;
+    private static $times = 0;
+    private static $group = 0;
 
-    public function getTypes(): array
+    public function getTypes()
     {
         return ['string', 'double'];
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, Value &$o, $trigger)
     {
-        $c = $v->getContext();
-
-        if ($c->getDepth() > 0) {
-            return $v;
+        if (0 !== $o->depth) {
+            return;
         }
 
         if (\is_string($var)) {
-            if ('microtime()' !== $c->getName() || !\preg_match('/^0\\.[0-9]{8} [0-9]{10}$/', $var)) {
-                return $v;
+            if ('microtime()' !== $o->name || !\preg_match('/^0\\.[0-9]{8} [0-9]{10}$/', $var)) {
+                return;
             }
 
             $usec = (int) \substr($var, 2, 6);
             $sec = (int) \substr($var, 11, 10);
         } else {
-            if ('microtime(...)' !== $c->getName()) {
-                return $v;
+            if ('microtime(...)' !== $o->name) {
+                return;
             }
 
-            $sec = (int) \floor($var);
+            $sec = \floor($var);
             $usec = $var - $sec;
-            $usec = (int) \floor($usec * 1000000);
+            $usec = \floor($usec * 1000000);
         }
 
         $time = $sec + ($usec / 1000000);
@@ -88,38 +83,23 @@ class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
 
         if (null !== $lap) {
             $total = $time - self::$start;
-            $r = new MicrotimeRepresentation($sec, $usec, self::getGroup(), $lap, $total, self::$times);
+            $r = new MicrotimeRepresentation($sec, $usec, self::$group, $lap, $total, self::$times);
         } else {
-            $r = new MicrotimeRepresentation($sec, $usec, self::getGroup());
+            $r = new MicrotimeRepresentation($sec, $usec, self::$group);
         }
+        $r->contents = $var;
+        $r->implicit_label = true;
 
-        $out = new MicrotimeValue($v);
-        $out->removeRepresentation('contents');
-        $out->addRepresentation($r);
-
-        return $out;
+        $o->removeRepresentation($o->value);
+        $o->addRepresentation($r);
+        $o->hints[] = 'microtime';
     }
 
-    /** @psalm-api */
-    public static function clean(): void
+    public static function clean()
     {
         self::$last = null;
         self::$start = null;
         self::$times = 0;
-        self::newGroup();
-    }
-
-    private static function getGroup(): string
-    {
-        if (null === self::$group) {
-            return self::newGroup();
-        }
-
-        return self::$group;
-    }
-
-    private static function newGroup(): string
-    {
-        return self::$group = \bin2hex(\random_bytes(4));
+        ++self::$group;
     }
 }

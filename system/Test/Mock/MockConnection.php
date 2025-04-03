@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -17,33 +15,13 @@ use CodeIgniter\CodeIgniter;
 use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Database\BaseResult;
 use CodeIgniter\Database\Query;
-use CodeIgniter\Database\TableName;
 
-/**
- * @extends BaseConnection<object|resource, object|resource>
- */
 class MockConnection extends BaseConnection
 {
-    /**
-     * @var array{connect?: mixed, execute?: bool|object}
-     */
     protected $returnValues = [];
-
-    /**
-     * Database schema for Postgre and SQLSRV
-     *
-     * @var string
-     */
-    protected $schema;
-
     public $database;
     public $lastQuery;
 
-    /**
-     * @param mixed $return
-     *
-     * @return $this
-     */
     public function shouldReturn(string $method, $return)
     {
         $this->returnValues[$method] = $return;
@@ -73,7 +51,7 @@ class MockConnection extends BaseConnection
 
         $query->setQuery($sql, $binds, $setEscapeFlags);
 
-        if ($this->swapPre !== '' && $this->DBPrefix !== '') {
+        if (! empty($this->swapPre) && ! empty($this->DBPrefix)) {
             $query->swapPrefix($this->DBPrefix, $this->swapPre);
         }
 
@@ -93,7 +71,7 @@ class MockConnection extends BaseConnection
         $query->setDuration($startTime);
 
         // resultID is not false, so it must be successful
-        if ($query->isWriteType($sql)) {
+        if ($query->isWriteType()) {
             return true;
         }
 
@@ -133,13 +111,13 @@ class MockConnection extends BaseConnection
     /**
      * Select a specific database table to use.
      *
-     * @return bool
+     * @return mixed
      */
     public function setDatabase(string $databaseName)
     {
         $this->database = $databaseName;
 
-        return true;
+        return $this;
     }
 
     /**
@@ -153,7 +131,7 @@ class MockConnection extends BaseConnection
     /**
      * Executes the query against the database.
      *
-     * @return bool|object
+     * @return mixed
      */
     protected function execute(string $sql)
     {
@@ -193,20 +171,16 @@ class MockConnection extends BaseConnection
 
     /**
      * Generates the SQL for listing tables in a platform-dependent manner.
-     *
-     * @param string|null $tableName If $tableName is provided will return only this table if exists.
      */
-    protected function _listTables(bool $constrainByPrefix = false, ?string $tableName = null): string
+    protected function _listTables(bool $constrainByPrefix = false): string
     {
         return '';
     }
 
     /**
      * Generates a platform-specific query string so that the column names can be fetched.
-     *
-     * @param string|TableName $table
      */
-    protected function _listColumns($table = ''): string
+    protected function _listColumns(string $table = ''): string
     {
         return '';
     }
@@ -228,8 +202,6 @@ class MockConnection extends BaseConnection
 
     /**
      * Close the connection.
-     *
-     * @return void
      */
     protected function _close()
     {

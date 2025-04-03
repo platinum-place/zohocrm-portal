@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -31,17 +29,19 @@ trait ReflectionHelper
      * @param object|string $obj    object or class name
      * @param string        $method method name
      *
-     * @return         Closure
-     * @phpstan-return Closure(mixed ...$args): mixed
-     *
      * @throws ReflectionException
+     *
+     * @return Closure
      */
     public static function getPrivateMethodInvoker($obj, $method)
     {
         $refMethod = new ReflectionMethod($obj, $method);
-        $obj       = (gettype($obj) === 'object') ? $obj : null;
+        $refMethod->setAccessible(true);
+        $obj = (gettype($obj) === 'object') ? $obj : null;
 
-        return static fn (...$args): mixed => $refMethod->invokeArgs($obj, $args);
+        return static function (...$args) use ($obj, $refMethod) {
+            return $refMethod->invokeArgs($obj, $args);
+        };
     }
 
     /**
@@ -50,15 +50,18 @@ trait ReflectionHelper
      * @param object|string $obj
      * @param string        $property
      *
-     * @return ReflectionProperty
-     *
      * @throws ReflectionException
+     *
+     * @return ReflectionProperty
      */
     private static function getAccessibleRefProperty($obj, $property)
     {
         $refClass = is_object($obj) ? new ReflectionObject($obj) : new ReflectionClass($obj);
 
-        return $refClass->getProperty($property);
+        $refProperty = $refClass->getProperty($property);
+        $refProperty->setAccessible(true);
+
+        return $refProperty;
     }
 
     /**
@@ -70,15 +73,10 @@ trait ReflectionHelper
      *
      * @throws ReflectionException
      */
-    public static function setPrivateProperty($obj, $property, $value): void
+    public static function setPrivateProperty($obj, $property, $value)
     {
         $refProperty = self::getAccessibleRefProperty($obj, $property);
-
-        if (is_object($obj)) {
-            $refProperty->setValue($obj, $value);
-        } else {
-            $refProperty->setValue(null, $value);
-        }
+        $refProperty->setValue($obj, $value);
     }
 
     /**
@@ -87,9 +85,9 @@ trait ReflectionHelper
      * @param object|string $obj      object or class name
      * @param string        $property property name
      *
-     * @return mixed
-     *
      * @throws ReflectionException
+     *
+     * @return mixed value
      */
     public static function getPrivateProperty($obj, $property)
     {

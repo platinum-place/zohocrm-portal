@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -18,8 +16,6 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 /**
  * Add Common Security Headers
- *
- * @see \CodeIgniter\Filters\SecureHeadersTest
  */
 class SecureHeaders implements FilterInterface
 {
@@ -51,24 +47,25 @@ class SecureHeaders implements FilterInterface
     /**
      * We don't have anything to do here.
      *
-     * @param list<string>|null $arguments
+     * @param array|null $arguments
+     *
+     * @return void
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        return null;
     }
 
     /**
      * Add security headers.
      *
-     * @param list<string>|null $arguments
+     * @param array|null $arguments
+     *
+     * @return void
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
         foreach ($this->headers as $header => $value) {
             $response->setHeader($header, $value);
         }
-
-        return $response;
     }
 }

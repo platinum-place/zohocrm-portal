@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,13 +11,8 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Config;
 
-use CodeIgniter\View\ViewDecoratorInterface;
-
 /**
  * View configuration
- *
- * @phpstan-type parser_callable (callable(mixed): mixed)
- * @phpstan-type parser_callable_string (callable(mixed): mixed)&string
  */
 class View extends BaseConfig
 {
@@ -38,11 +31,6 @@ class View extends BaseConfig
      *
      * To prevent potential abuse, all filters MUST be defined here
      * in order for them to be available for use within the Parser.
-     *
-     * @psalm-suppress UndefinedDocblockClass
-     *
-     * @var         array<string, string>
-     * @phpstan-var array<string, parser_callable_string>
      */
     public $filters = [];
 
@@ -50,21 +38,13 @@ class View extends BaseConfig
      * Parser Plugins provide a way to extend the functionality provided
      * by the core Parser by creating aliases that will be replaced with
      * any callable. Can be single or tag pair.
-     *
-     * @psalm-suppress UndefinedDocblockClass
-     *
-     * @var         array<string, callable|list<string>|string>
-     * @phpstan-var array<string, list<parser_callable_string>|parser_callable_string|parser_callable>
      */
     public $plugins = [];
 
     /**
      * Built-in View filters.
      *
-     * @psalm-suppress UndefinedDocblockClass
-     *
-     * @var         array<string, string>
-     * @phpstan-var array<string, parser_callable_string>
+     * @var array
      */
     protected $coreFilters = [
         'abs'            => '\abs',
@@ -93,14 +73,9 @@ class View extends BaseConfig
     /**
      * Built-in View plugins.
      *
-     * @psalm-suppress UndefinedDocblockClass
-     *
-     * @var         array<string, callable|list<string>|string>
-     * @phpstan-var array<string, array<parser_callable_string>|parser_callable_string|parser_callable>
+     * @var array
      */
     protected $corePlugins = [
-        'csp_script_nonce'  => '\CodeIgniter\View\Plugins::cspScriptNonce',
-        'csp_style_nonce'   => '\CodeIgniter\View\Plugins::cspStyleNonce',
         'current_url'       => '\CodeIgniter\View\Plugins::currentURL',
         'previous_url'      => '\CodeIgniter\View\Plugins::previousURL',
         'mailto'            => '\CodeIgniter\View\Plugins::mailto',
@@ -110,17 +85,6 @@ class View extends BaseConfig
         'route'             => '\CodeIgniter\View\Plugins::route',
         'siteURL'           => '\CodeIgniter\View\Plugins::siteURL',
     ];
-
-    /**
-     * View Decorators are class methods that will be run in sequence to
-     * have a chance to alter the generated output just prior to caching
-     * the results.
-     *
-     * All classes must implement CodeIgniter\View\ViewDecoratorInterface
-     *
-     * @var list<class-string<ViewDecoratorInterface>>
-     */
-    public array $decorators = [];
 
     /**
      * Merge the built-in and developer-configured filters and plugins,

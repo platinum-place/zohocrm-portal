@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -18,7 +16,7 @@ use CodeIgniter\Exceptions\FrameworkException;
 /**
  * Things that can go wrong with HTTP
  */
-class HTTPException extends FrameworkException implements ExceptionInterface
+class HTTPException extends FrameworkException
 {
     /**
      * For CurlRequest
@@ -75,26 +73,13 @@ class HTTPException extends FrameworkException implements ExceptionInterface
     }
 
     /**
-     * Thrown in IncomingRequest when the json_decode() produces
-     *  an error code other than JSON_ERROR_NONE.
-     *
-     * @param string $error The error message
-     *
-     * @return static
-     */
-    public static function forInvalidJSON(?string $error = null)
-    {
-        return new static(lang('HTTP.invalidJSON', [$error]));
-    }
-
-    /**
      * For Message
      *
      * @return HTTPException
      */
-    public static function forInvalidHTTPProtocol(string $invalidVersion)
+    public static function forInvalidHTTPProtocol(string $protocols)
     {
-        return new static(lang('HTTP.invalidHTTPProtocol', [$invalidVersion]));
+        return new static(lang('HTTP.invalidHTTPProtocol', [$protocols]));
     }
 
     /**
@@ -229,16 +214,5 @@ class HTTPException extends FrameworkException implements ExceptionInterface
     public static function forInvalidSameSiteSetting(string $samesite)
     {
         return new static(lang('Security.invalidSameSiteSetting', [$samesite]));
-    }
-
-    /**
-     * Thrown when the JSON format is not supported.
-     * This is specifically for cases where data validation is expected to work with key-value structures.
-     *
-     * @return HTTPException
-     */
-    public static function forUnsupportedJSONFormat()
-    {
-        return new static(lang('HTTP.unsupportedJSONFormat'));
     }
 }

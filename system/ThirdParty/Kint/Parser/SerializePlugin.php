@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,13 +25,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\ValueRepresentation;
-use Kint\Value\UninitializedValue;
+use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 
-/** @psalm-api */
-class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
+class SerializePlugin extends Plugin
 {
     /**
      * Disables automatic unserialization on arrays and objects.
@@ -46,66 +41,68 @@ class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
      *
      * The natural way to stop that from happening is to just refuse to unserialize
      * stuff by default. Which is what we're doing for anything that's not scalar.
+     *
+     * @var bool
      */
-    public static bool $safe_mode = true;
+    public static $safe_mode = true;
+    public static $options = [true];
 
-    /**
-     * @psalm-var bool|class-string[]
-     */
-    public static $allowed_classes = false;
-
-    public function getTypes(): array
+    public function getTypes()
     {
         return ['string'];
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, Value &$o, $trigger)
     {
         $trimmed = \rtrim($var);
 
         if ('N;' !== $trimmed && !\preg_match('/^(?:[COabis]:\\d+[:;]|d:\\d+(?:\\.\\d+);)/', $trimmed)) {
-            return $v;
+            return;
         }
 
-        $options = ['allowed_classes' => self::$allowed_classes];
-
-        $c = $v->getContext();
-
-        $base = new BaseContext('unserialize('.$c->getName().')');
-        $base->depth = $c->getDepth() + 1;
-
-        if (null !== ($ap = $c->getAccessPath())) {
-            $base->access_path = 'unserialize('.$ap;
-            if (true === self::$allowed_classes) {
-                $base->access_path .= ')';
+        if (!self::$safe_mode || !\in_array($trimmed[0], ['C', 'O', 'a'], true)) {
+            // Second parameter only supported on PHP 7
+            if (KINT_PHP70) {
+                // Suppress warnings on unserializeable variable
+                $data = @\unserialize($trimmed, self::$options);
             } else {
-                $base->access_path .= ', '.\var_export($options, true).')';
+                $data = @\unserialize($trimmed);
             }
-        }
-
-        if (self::$safe_mode && \in_array($trimmed[0], ['C', 'O', 'a'], true)) {
-            $data = new UninitializedValue($base);
-            $data->flags |= AbstractValue::FLAG_BLACKLIST;
-        } else {
-            // Suppress warnings on unserializeable variable
-            $data = @\unserialize($trimmed, $options);
 
             if (false === $data && 'b:0;' !== \substr($trimmed, 0, 4)) {
-                return $v;
+                return;
             }
-
-            $data = $this->getParser()->parse($data, $base);
         }
 
-        $data->flags |= AbstractValue::FLAG_GENERATED;
+        $base_obj = new Value();
+        $base_obj->depth = $o->depth + 1;
+        $base_obj->name = 'unserialize('.$o->name.')';
 
-        $v->addRepresentation(new ValueRepresentation('Serialized', $data), 0);
+        if ($o->access_path) {
+            $base_obj->access_path = 'unserialize('.$o->access_path;
+            if (!KINT_PHP70 || self::$options === [true]) {
+                $base_obj->access_path .= ')';
+            } elseif (self::$options === [false]) {
+                $base_obj->access_path .= ', false)';
+            } else {
+                $base_obj->access_path .= ', Serialize::$options)';
+            }
+        }
 
-        return $v;
+        $r = new Representation('Serialized');
+
+        if (isset($data)) {
+            $r->contents = $this->parser->parse($data, $base_obj);
+        } else {
+            $base_obj->hints[] = 'blacklist';
+            $r->contents = $base_obj;
+        }
+
+        $o->addRepresentation($r, 0);
     }
 }

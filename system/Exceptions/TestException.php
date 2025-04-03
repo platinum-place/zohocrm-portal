@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,15 +12,12 @@ declare(strict_types=1);
 namespace CodeIgniter\Exceptions;
 
 /**
- * Exception thrown when there is an error with the test code.
+ * Exception for automatic logging.
  */
-class TestException extends LogicException
+class TestException extends CriticalError
 {
     use DebugTraceableTrait;
 
-    /**
-     * @return static
-     */
     public static function forInvalidMockClass(string $name)
     {
         return new static(lang('Test.invalidMockClass', [$name]));

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,9 +11,8 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Session\Handlers;
 
-use CodeIgniter\I18n\Time;
 use CodeIgniter\Session\Exceptions\SessionException;
-use Config\Session as SessionConfig;
+use Config\App as AppConfig;
 use ReturnTypeWillChange;
 
 /**
@@ -65,22 +62,24 @@ class FileHandler extends BaseHandler
      */
     protected $sessionIDRegex = '';
 
-    public function __construct(SessionConfig $config, string $ipAddress)
+    public function __construct(AppConfig $config, string $ipAddress)
     {
         parent::__construct($config, $ipAddress);
 
-        if (! empty($this->savePath)) {
-            $this->savePath = rtrim($this->savePath, '/\\');
-            ini_set('session.save_path', $this->savePath);
+        if (! empty($config->sessionSavePath)) {
+            $this->savePath = rtrim($config->sessionSavePath, '/\\');
+            ini_set('session.save_path', $config->sessionSavePath);
         } else {
             $sessionPath = rtrim(ini_get('session.save_path'), '/\\');
 
-            if ($sessionPath === '') {
+            if (! $sessionPath) {
                 $sessionPath = WRITEPATH . 'session';
             }
 
             $this->savePath = $sessionPath;
         }
+
+        $this->matchIP = $config->sessionMatchIP;
 
         $this->configureSessionIDRegex();
     }
@@ -277,20 +276,20 @@ class FileHandler extends BaseHandler
             return false;
         }
 
-        $ts = Time::now()->getTimestamp() - $max_lifetime;
+        $ts = time() - $max_lifetime;
 
         $pattern = $this->matchIP === true ? '[0-9a-f]{32}' : '';
 
         $pattern = sprintf(
             '#\A%s' . $pattern . $this->sessionIDRegex . '\z#',
-            preg_quote($this->cookieName, '#'),
+            preg_quote($this->cookieName, '#')
         );
 
         $collected = 0;
 
         while (($file = readdir($directory)) !== false) {
             // If the filename doesn't match this pattern, it's either not a session file or is not ours
-            if (preg_match($pattern, $file) !== 1
+            if (! preg_match($pattern, $file)
                 || ! is_file($this->savePath . DIRECTORY_SEPARATOR . $file)
                 || ($mtime = filemtime($this->savePath . DIRECTORY_SEPARATOR . $file)) === false
                 || $mtime > $ts
@@ -309,25 +308,32 @@ class FileHandler extends BaseHandler
 
     /**
      * Configure Session ID regular expression
-     *
-     * To make life easier, we force the PHP defaults. Because PHP9 forces them.
-     * See https://wiki.php.net/rfc/deprecations_php_8_4#sessionsid_length_and_sessionsid_bits_per_character
      */
     protected function configureSessionIDRegex()
     {
         $bitsPerCharacter = (int) ini_get('session.sid_bits_per_character');
-        $sidLength        = (int) ini_get('session.sid_length');
+        $SIDLength        = (int) ini_get('session.sid_length');
 
-        // We force the PHP defaults.
-        if (PHP_VERSION_ID < 90000) {
-            if ($bitsPerCharacter !== 4) {
-                ini_set('session.sid_bits_per_character', '4');
-            }
-            if ($sidLength !== 32) {
-                ini_set('session.sid_length', '32');
-            }
+        if (($bits = $SIDLength * $bitsPerCharacter) < 160) {
+            // Add as many more characters as necessary to reach at least 160 bits
+            $SIDLength += (int) ceil((160 % $bits) / $bitsPerCharacter);
+            ini_set('session.sid_length', (string) $SIDLength);
         }
 
-        $this->sessionIDRegex = '[0-9a-f]{32}';
+        switch ($bitsPerCharacter) {
+            case 4:
+                $this->sessionIDRegex = '[0-9a-f]';
+                break;
+
+            case 5:
+                $this->sessionIDRegex = '[0-9a-v]';
+                break;
+
+            case 6:
+                $this->sessionIDRegex = '[0-9a-zA-Z,-]';
+                break;
+        }
+
+        $this->sessionIDRegex .= '{' . $SIDLength . '}';
     }
 }

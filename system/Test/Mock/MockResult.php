@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,11 +12,7 @@ declare(strict_types=1);
 namespace CodeIgniter\Test\Mock;
 
 use CodeIgniter\Database\BaseResult;
-use stdClass;
 
-/**
- * @extends BaseResult<object|resource, object|resource>
- */
 class MockResult extends BaseResult
 {
     /**
@@ -48,7 +42,7 @@ class MockResult extends BaseResult
     /**
      * Frees the current result.
      *
-     * @return void
+     * @return mixed
      */
     public function freeResult()
     {
@@ -61,11 +55,10 @@ class MockResult extends BaseResult
      *
      * @param int $n
      *
-     * @return bool
+     * @return mixed
      */
     public function dataSeek($n = 0)
     {
-        return true;
     }
 
     /**
@@ -77,7 +70,6 @@ class MockResult extends BaseResult
      */
     protected function fetchAssoc()
     {
-        return [];
     }
 
     /**
@@ -87,7 +79,7 @@ class MockResult extends BaseResult
      *
      * @param string $className
      *
-     * @return object|stdClass
+     * @return object
      */
     protected function fetchObject($className = 'stdClass')
     {

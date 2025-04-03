@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,11 +12,12 @@ declare(strict_types=1);
 namespace CodeIgniter\Filters\Exceptions;
 
 use CodeIgniter\Exceptions\ConfigException;
+use CodeIgniter\Exceptions\ExceptionInterface;
 
 /**
  * FilterException
  */
-class FilterException extends ConfigException
+class FilterException extends ConfigException implements ExceptionInterface
 {
     /**
      * Thrown when the provided alias is not within

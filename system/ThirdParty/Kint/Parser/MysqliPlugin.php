@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,37 +25,35 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\Context\PropertyContext;
-use Kint\Value\InstanceValue;
-use Kint\Value\Representation\ContainerRepresentation;
-use mysqli;
+use Kint\Zval\Value;
+use Mysqli;
+use ReflectionClass;
 use Throwable;
 
 /**
- * Adds support for mysqli object parsing.
+ * Adds support for Mysqli object parsing.
  *
  * Due to the way mysqli is implemented in PHP, this will cause
- * warnings on certain mysqli objects if screaming is enabled.
+ * warnings on certain Mysqli objects if screaming is enabled.
  */
-class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
+class MysqliPlugin extends Plugin
 {
     // These 'properties' are actually globals
-    public const ALWAYS_READABLE = [
+    protected $always_readable = [
         'client_version' => true,
         'connect_errno' => true,
         'connect_error' => true,
     ];
 
     // These are readable on empty mysqli objects, but not on failed connections
-    public const EMPTY_READABLE = [
+    protected $empty_readable = [
         'client_info' => true,
         'errno' => true,
         'error' => true,
     ];
 
     // These are only readable on connected mysqli objects
-    public const CONNECTED_READABLE = [
+    protected $connected_readable = [
         'affected_rows' => true,
         'error_list' => true,
         'field_count' => true,
@@ -72,37 +68,22 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
         'warning_count' => true,
     ];
 
-    public function getTypes(): array
+    public function getTypes()
     {
         return ['object'];
     }
 
-    public function getTriggers(): int
+    public function getTriggers()
     {
         return Parser::TRIGGER_COMPLETE;
     }
 
-    /**
-     * Before 8.1: Properties were nulls when cast to array
-     * After 8.1: Properties are readonly and uninitialized when cast to array (Aka missing).
-     */
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function parse(&$var, Value &$o, $trigger)
     {
-        if (!$var instanceof mysqli || !$v instanceof InstanceValue) {
-            return $v;
+        if (!$var instanceof Mysqli) {
+            return;
         }
 
-        $props = $v->getRepresentation('properties');
-
-        if (!$props instanceof ContainerRepresentation) {
-            return $v;
-        }
-
-        /**
-         * @psalm-var ?string $var->sqlstate
-         * @psalm-var ?string $var->client_info
-         * Psalm bug #4502
-         */
         try {
             $connected = \is_string(@$var->sqlstate);
         } catch (Throwable $t) {
@@ -117,60 +98,92 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
             $empty = false; // @codeCoverageIgnore
         }
 
-        $parser = $this->getParser();
-
-        $new_contents = [];
-
-        foreach ($props->getContents() as $key => $obj) {
-            $new_contents[$key] = $obj;
-
-            $c = $obj->getContext();
-
-            if (!$c instanceof PropertyContext) {
-                continue;
-            }
-
-            if (isset(self::CONNECTED_READABLE[$c->getName()])) {
-                $c->readonly = KINT_PHP81;
+        foreach ($o->value->contents as $key => $obj) {
+            if (isset($this->connected_readable[$obj->name])) {
                 if (!$connected) {
-                    // No failed connections after PHP 8.1
-                    continue; // @codeCoverageIgnore
+                    continue;
                 }
-            } elseif (isset(self::EMPTY_READABLE[$c->getName()])) {
-                $c->readonly = KINT_PHP81;
+            } elseif (isset($this->empty_readable[$obj->name])) {
                 // No failed connections after PHP 8.1
                 if (!$connected && !$empty) { // @codeCoverageIgnore
                     continue; // @codeCoverageIgnore
                 }
-            } elseif (!isset(self::ALWAYS_READABLE[$c->getName()])) {
-                continue; // @codeCoverageIgnore
-            }
-
-            $c->readonly = KINT_PHP81;
-
-            // Only handle unparsed properties
-            if ((KINT_PHP81 ? 'uninitialized' : 'null') !== $obj->getType()) {
+            } elseif (!isset($this->always_readable[$obj->name])) {
                 continue;
             }
 
-            $param = $var->{$c->getName()};
-
-            // If it really was a null
-            if (!KINT_PHP81 && null === $param) {
-                continue; // @codeCoverageIgnore
+            if ('null' !== $obj->type) {
+                continue;
             }
 
-            $new_contents[$key] = $parser->parse($param, $c);
+            // @codeCoverageIgnoreStart
+            // All of this is irellevant after 8.1,
+            // we have separate logic for that below
+
+            $param = $var->{$obj->name};
+
+            if (null === $param) {
+                continue;
+            }
+
+            $base = Value::blank($obj->name, $obj->access_path);
+
+            $base->depth = $obj->depth;
+            $base->owner_class = $obj->owner_class;
+            $base->operator = $obj->operator;
+            $base->access = $obj->access;
+            $base->reference = $obj->reference;
+
+            $o->value->contents[$key] = $this->parser->parse($param, $base);
+
+            // @codeCoverageIgnoreEnd
         }
 
-        $new_contents = \array_values($new_contents);
+        // PHP81 returns an empty array when casting a Mysqli instance
+        if (KINT_PHP81) {
+            $r = new ReflectionClass(Mysqli::class);
 
-        $v->setChildren($new_contents);
+            $basepropvalues = [];
 
-        if ($new_contents) {
-            $v->replaceRepresentation(new ContainerRepresentation('Properties', $new_contents));
+            foreach ($r->getProperties() as $prop) {
+                if ($prop->isStatic()) {
+                    continue; // @codeCoverageIgnore
+                }
+
+                $pname = $prop->getName();
+                $param = null;
+
+                if (isset($this->connected_readable[$pname])) {
+                    if ($connected) {
+                        $param = $var->{$pname};
+                    }
+                } else {
+                    $param = $var->{$pname};
+                }
+
+                $child = new Value();
+                $child->depth = $o->depth + 1;
+                $child->owner_class = Mysqli::class;
+                $child->operator = Value::OPERATOR_OBJECT;
+                $child->name = $pname;
+
+                if ($prop->isPublic()) {
+                    $child->access = Value::ACCESS_PUBLIC;
+                } elseif ($prop->isProtected()) { // @codeCoverageIgnore
+                    $child->access = Value::ACCESS_PROTECTED; // @codeCoverageIgnore
+                } elseif ($prop->isPrivate()) { // @codeCoverageIgnore
+                    $child->access = Value::ACCESS_PRIVATE; // @codeCoverageIgnore
+                }
+
+                // We only do base Mysqli properties so we don't need to worry about complex names
+                if ($this->parser->childHasPath($o, $child)) {
+                    $child->access_path .= $o->access_path.'->'.$child->name;
+                }
+
+                $basepropvalues[] = $this->parser->parse($param, $child);
+            }
+
+            $o->value->contents = \array_merge($basepropvalues, $o->value->contents);
         }
-
-        return $v;
     }
 }

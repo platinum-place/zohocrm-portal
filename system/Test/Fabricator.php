@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,24 +11,18 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Test;
 
-use Closure;
 use CodeIgniter\Exceptions\FrameworkException;
-use CodeIgniter\Exceptions\InvalidArgumentException;
-use CodeIgniter\Exceptions\RuntimeException;
-use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
-use Config\App;
 use Faker\Factory;
 use Faker\Generator;
-use InvalidArgumentException as BaseInvalidArgumentException;
+use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Fabricator
  *
  * Bridge class for using Faker to create example data based on
  * model specifications.
- *
- * @see \CodeIgniter\Test\FabricatorTest
  */
 class Fabricator
 {
@@ -91,17 +83,6 @@ class Fabricator
     protected $tempOverrides;
 
     /**
-     * Fields to be modified before applying any formatter.
-     *
-     * @var array{
-     *   unique: array<non-empty-string, array{reset: bool, maxRetries: int}>,
-     *   optional: array<non-empty-string, array{weight: float, default: mixed}>,
-     *   valid: array<non-empty-string, array{validator: Closure(mixed): bool|null, maxRetries: int}>
-     * }
-     */
-    private array $modifiedFields = ['unique' => [], 'optional' => [], 'valid' => []];
-
-    /**
      * Default formatter to use when nothing is detected
      *
      * @var string
@@ -132,7 +113,7 @@ class Fabricator
 
         // If no locale was specified then use the App default
         if ($locale === null) {
-            $locale = config(App::class)->defaultLocale;
+            $locale = config('App')->defaultLocale;
         }
 
         // There is no easy way to retrieve the locale from Faker so we will store it
@@ -143,7 +124,7 @@ class Fabricator
 
         // Determine eligible date fields
         foreach (['createdField', 'updatedField', 'deletedField'] as $field) {
-            if (isset($this->model->{$field})) {
+            if (! empty($this->model->{$field})) {
                 $this->dateFields[] = $this->model->{$field};
             }
         }
@@ -167,7 +148,7 @@ class Fabricator
      */
     public static function getCount(string $table): int
     {
-        return ! isset(self::$tableCounts[$table]) ? 0 : self::$tableCounts[$table];
+        return empty(self::$tableCounts[$table]) ? 0 : self::$tableCounts[$table];
     }
 
     /**
@@ -265,46 +246,6 @@ class Fabricator
     }
 
     /**
-     * Set a field to be unique.
-     *
-     * @param bool $reset      If set to true, resets the list of existing values
-     * @param int  $maxRetries Maximum number of retries to find a unique value,
-     *                         After which an OverflowException is thrown.
-     */
-    public function setUnique(string $field, bool $reset = false, int $maxRetries = 10000): static
-    {
-        $this->modifiedFields['unique'][$field] = compact('reset', 'maxRetries');
-
-        return $this;
-    }
-
-    /**
-     * Set a field to be optional.
-     *
-     * @param float $weight A probability between 0 and 1, 0 means that we always get the default value.
-     */
-    public function setOptional(string $field, float $weight = 0.5, mixed $default = null): static
-    {
-        $this->modifiedFields['optional'][$field] = compact('weight', 'default');
-
-        return $this;
-    }
-
-    /**
-     * Set a field to be valid using a callback.
-     *
-     * @param Closure(mixed): bool|null $validator  A function returning true for valid values
-     * @param int                       $maxRetries Maximum number of retries to find a valid value,
-     *                                              After which an OverflowException is thrown.
-     */
-    public function setValid(string $field, ?Closure $validator = null, int $maxRetries = 10000): static
-    {
-        $this->modifiedFields['valid'][$field] = compact('validator', 'maxRetries');
-
-        return $this;
-    }
-
-    /**
      * Returns the current formatters
      */
     public function getFormatters(): ?array
@@ -337,7 +278,7 @@ class Fabricator
     {
         $this->formatters = [];
 
-        if (isset($this->model->allowedFields)) {
+        if (! empty($this->model->allowedFields)) {
             foreach ($this->model->allowedFields as $field) {
                 $this->formatters[$field] = $this->guessFormatter($field);
             }
@@ -360,7 +301,7 @@ class Fabricator
             $this->faker->getFormatter($field);
 
             return $field;
-        } catch (BaseInvalidArgumentException) {
+        } catch (InvalidArgumentException $e) {
             // No match, keep going
         }
 
@@ -380,12 +321,12 @@ class Fabricator
 
         // Check some common partials
         foreach (['email', 'name', 'title', 'text', 'date', 'url'] as $term) {
-            if (str_contains(strtolower($field), strtolower($term))) {
+            if (stripos($field, $term) !== false) {
                 return $term;
             }
         }
 
-        if (str_contains(strtolower($field), 'phone')) {
+        if (stripos($field, 'phone') !== false) {
             return 'phoneNumber';
         }
 
@@ -423,9 +364,9 @@ class Fabricator
     /**
      * Generate an array of faked data
      *
-     * @return array An array of faked data
-     *
      * @throws RuntimeException
+     *
+     * @return array An array of faked data
      */
     public function makeArray()
     {
@@ -433,30 +374,7 @@ class Fabricator
             $result = [];
 
             foreach ($this->formatters as $field => $formatter) {
-                $faker = $this->faker;
-
-                if (isset($this->modifiedFields['unique'][$field])) {
-                    $faker = $faker->unique(
-                        $this->modifiedFields['unique'][$field]['reset'],
-                        $this->modifiedFields['unique'][$field]['maxRetries'],
-                    );
-                }
-
-                if (isset($this->modifiedFields['optional'][$field])) {
-                    $faker = $faker->optional(
-                        $this->modifiedFields['optional'][$field]['weight'],
-                        $this->modifiedFields['optional'][$field]['default'],
-                    );
-                }
-
-                if (isset($this->modifiedFields['valid'][$field])) {
-                    $faker = $faker->valid(
-                        $this->modifiedFields['valid'][$field]['validator'],
-                        $this->modifiedFields['valid'][$field]['maxRetries'],
-                    );
-                }
-
-                $result[$field] = $faker->format($formatter);
+                $result[$field] = $this->faker->{$formatter};
             }
         }
         // If no formatters were defined then look for a model fake() method
@@ -483,9 +401,9 @@ class Fabricator
      *
      * @param string|null $className Class name of the object to create; null to use model default
      *
-     * @return object An instance of the class with faked data
-     *
      * @throws RuntimeException
+     *
+     * @return object An instance of the class with faked data
      */
     public function makeObject(?string $className = null): object
     {
@@ -533,9 +451,9 @@ class Fabricator
      * @param int|null $count Optional number to create a collection
      * @param bool     $mock  Whether to execute or mock the insertion
      *
-     * @return array|object An array or object (based on returnType), or an array of returnTypes
-     *
      * @throws FrameworkException
+     *
+     * @return array|object An array or object (based on returnType), or an array of returnTypes
      */
     public function create(?int $count = null, bool $mock = false)
     {
@@ -575,21 +493,28 @@ class Fabricator
      */
     protected function createMock(?int $count = null)
     {
-        $datetime = match ($this->model->dateFormat) {
-            'datetime' => date('Y-m-d H:i:s'),
-            'date'     => date('Y-m-d'),
-            default    => Time::now()->getTimestamp(),
-        };
+        switch ($this->model->dateFormat) {
+            case 'datetime':
+                $datetime = date('Y-m-d H:i:s');
+                break;
+
+            case 'date':
+                $datetime = date('Y-m-d');
+                break;
+
+            default:
+                $datetime = time();
+        }
 
         // Determine which fields we will need
         $fields = [];
 
-        if ($this->model->useTimestamps) {
+        if (! empty($this->model->useTimestamps)) {
             $fields[$this->model->createdField] = $datetime;
             $fields[$this->model->updatedField] = $datetime;
         }
 
-        if ($this->model->useSoftDeletes) {
+        if (! empty($this->model->useSoftDeletes)) {
             $fields[$this->model->deletedField] = null;
         }
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,28 +11,54 @@ declare(strict_types=1);
 
 namespace CodeIgniter\HTTP;
 
-use Config\App;
+use CodeIgniter\Validation\FormatRules;
 
 /**
- * Representation of an incoming, server-side HTTP request.
- *
- * @see \CodeIgniter\HTTP\RequestTest
+ * Representation of an HTTP request.
  */
-class Request extends OutgoingRequest implements RequestInterface
+class Request extends Message implements MessageInterface, RequestInterface
 {
     use RequestTrait;
 
     /**
+     * Proxy IPs
+     *
+     * @var array|string
+     *
+     * @deprecated Check the App config directly
+     */
+    protected $proxyIPs;
+
+    /**
+     * Request method.
+     *
+     * @var string
+     */
+    protected $method;
+
+    /**
+     * A URI instance.
+     *
+     * @var URI
+     */
+    protected $uri;
+
+    /**
      * Constructor.
      *
-     * @param App $config
+     * @param object $config
+     *
+     * @deprecated The $config is no longer needed and will be removed in a future version
      */
     public function __construct($config = null)
     {
-        $this->config = $config ?? config(App::class);
+        /**
+         * @deprecated $this->proxyIps property will be removed in the future
+         */
+        $this->proxyIPs = $config->proxyIPs;
 
         if (empty($this->method)) {
-            $this->method = $this->getServer('REQUEST_METHOD') ?? Method::GET;
+            $this->method = $this->getServer('REQUEST_METHOD') ?? 'GET';
         }
 
         if (empty($this->uri)) {
@@ -43,11 +67,40 @@ class Request extends OutgoingRequest implements RequestInterface
     }
 
     /**
+     * Validate an IP address
+     *
+     * @param string $ip    IP Address
+     * @param string $which IP protocol: 'ipv4' or 'ipv6'
+     *
+     * @deprecated Use Validation instead
+     *
+     * @codeCoverageIgnore
+     */
+    public function isValidIP(?string $ip = null, ?string $which = null): bool
+    {
+        return (new FormatRules())->valid_ip($ip, $which);
+    }
+
+    /**
+     * Get the request method.
+     *
+     * @param bool $upper Whether to return in upper or lower case.
+     *
+     * @deprecated The $upper functionality will be removed and this will revert to its PSR-7 equivalent
+     *
+     * @codeCoverageIgnore
+     */
+    public function getMethod(bool $upper = false): string
+    {
+        return ($upper) ? strtoupper($this->method) : strtolower($this->method);
+    }
+
+    /**
      * Sets the request method. Used when spoofing the request.
      *
-     * @return $this
+     * @return Request
      *
-     * @deprecated 4.0.5 Use withMethod() instead for immutability
+     * @deprecated Use withMethod() instead for immutability
      *
      * @codeCoverageIgnore
      */

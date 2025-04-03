@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -29,93 +27,96 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
-use Kint\Value\AbstractValue;
-use Kint\Value\ArrayValue;
-use Kint\Value\FixedWidthValue;
-use Kint\Value\Representation\RepresentationInterface;
-use Kint\Value\Representation\TableRepresentation;
-use Kint\Value\StringValue;
+use Kint\Zval\Representation\Representation;
 
-class TablePlugin extends AbstractPlugin implements TabPluginInterface
+class TablePlugin extends Plugin implements TabPluginInterface
 {
-    public static bool $respect_str_length = true;
+    public static $respect_str_length = true;
 
-    public function renderTab(RepresentationInterface $r, AbstractValue $v): ?string
+    public function renderTab(Representation $r)
     {
-        if (!$r instanceof TableRepresentation) {
-            return null;
-        }
-
-        $contents = $r->getContents();
-
-        $firstrow = \reset($contents);
-
-        if (!$firstrow instanceof ArrayValue) {
-            return null;
-        }
-
         $out = '<pre><table><thead><tr><th></th>';
 
-        foreach ($firstrow->getContents() as $field) {
-            $out .= '<th>'.$this->renderer->escape($field->getDisplayName()).'</th>';
+        $firstrow = \reset($r->contents);
+
+        foreach ($firstrow->value->contents as $field) {
+            $out .= '<th>'.$this->renderer->escape($field->name).'</th>';
         }
 
         $out .= '</tr></thead><tbody>';
 
-        foreach ($contents as $row) {
-            if (!$row instanceof ArrayValue) {
-                return null;
-            }
+        foreach ($r->contents as $row) {
+            $out .= '<tr><th>';
+            $out .= $this->renderer->escape($row->name);
+            $out .= '</th>';
 
-            $out .= '<tr><th>'.$this->renderer->escape($row->getDisplayName()).'</th>';
+            foreach ($row->value->contents as $field) {
+                $out .= '<td';
+                $type = '';
+                $size = '';
+                $ref = '';
 
-            foreach ($row->getContents() as $field) {
-                $ref = $field->getContext()->isRef() ? '&amp;' : '';
-                $type = $this->renderer->escape($field->getDisplayType());
+                if (null !== ($s = $field->getType())) {
+                    $type = $this->renderer->escape($s);
 
-                $out .= '<td title="'.$ref.$type;
+                    if ($field->reference) {
+                        $ref = '&amp;';
+                        $type = $ref.$type;
+                    }
 
-                if (null !== ($size = $field->getDisplaySize())) {
-                    $size = $this->renderer->escape($size);
-                    $out .= ' ('.$size.')';
+                    if (null !== ($s = $field->getSize())) {
+                        $size .= ' ('.$this->renderer->escape($s).')';
+                    }
                 }
 
-                $out .= '">';
+                if ($type) {
+                    $out .= ' title="'.$type.$size.'"';
+                }
 
-                if ($field instanceof FixedWidthValue) {
-                    if (null === ($dv = $field->getDisplayValue())) {
+                $out .= '>';
+
+                switch ($field->type) {
+                    case 'boolean':
+                        $out .= $field->value->contents ? '<var>'.$ref.'true</var>' : '<var>'.$ref.'false</var>';
+                        break;
+                    case 'integer':
+                    case 'double':
+                        $out .= (string) $field->value->contents;
+                        break;
+                    case 'null':
                         $out .= '<var>'.$ref.'null</var>';
-                    } elseif ('boolean' === $field->getType()) {
-                        $out .= '<var>'.$ref.$dv.'</var>';
-                    } else {
-                        $out .= $dv;
-                    }
-                } elseif ($field instanceof StringValue) {
-                    if (false !== $field->getEncoding()) {
-                        $val = $field->getValueUtf8();
+                        break;
+                    case 'string':
+                        if ($field->encoding) {
+                            $val = $field->value->contents;
+                            if (RichRenderer::$strlen_max && self::$respect_str_length) {
+                                $val = Utils::truncateString($val, RichRenderer::$strlen_max);
+                            }
 
-                        if (RichRenderer::$strlen_max && self::$respect_str_length) {
-                            $val = Utils::truncateString($val, RichRenderer::$strlen_max, 'UTF-8');
+                            $out .= $this->renderer->escape($val);
+                        } else {
+                            $out .= '<var>'.$type.'</var>';
                         }
-
-                        $out .= $this->renderer->escape($val);
-                    } else {
-                        $out .= '<var>'.$ref.$type.'</var>';
-                    }
-                } elseif ($field instanceof ArrayValue) {
-                    $out .= '<var>'.$ref.'array</var> ('.$field->getSize().')';
-                } else {
-                    $out .= '<var>'.$ref.$type.'</var>';
-                    if (null !== $size) {
-                        $out .= ' ('.$size.')';
-                    }
+                        break;
+                    case 'array':
+                        $out .= '<var>'.$ref.'array</var>'.$size;
+                        break;
+                    case 'object':
+                        $out .= '<var>'.$ref.$this->renderer->escape($field->classname).'</var>'.$size;
+                        break;
+                    case 'resource':
+                        $out .= '<var>'.$ref.'resource</var>';
+                        break;
+                    default:
+                        $out .= '<var>'.$ref.'unknown</var>';
+                        break;
                 }
 
-                if ($field->flags & AbstractValue::FLAG_BLACKLIST) {
+                if (\in_array('blacklist', $field->hints, true)) {
                     $out .= ' <var>Blacklisted</var>';
-                } elseif ($field->flags & AbstractValue::FLAG_RECURSION) {
+                } elseif (\in_array('recursion', $field->hints, true)) {
                     $out .= ' <var>Recursion</var>';
-                } elseif ($field->flags & AbstractValue::FLAG_DEPTH_LIMIT) {
+                } elseif (\in_array('depth_limit', $field->hints, true)) {
                     $out .= ' <var>Depth Limit</var>';
                 }
 

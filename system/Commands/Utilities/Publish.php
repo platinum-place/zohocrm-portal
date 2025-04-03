@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -65,26 +63,19 @@ class Publish extends BaseCommand
     /**
      * the Command's Options
      *
-     * @var array<string, string>
+     * @var array
      */
-    protected $options = [
-        '--namespace' => 'The namespace from which to search for files to publish. By default, all namespaces are analysed.',
-    ];
+    protected $options = [];
 
     /**
      * Displays the help for the spark cli script itself.
      */
     public function run(array $params)
     {
-        $directory = $params[0] ?? 'Publishers';
-        $namespace = $params['namespace'] ?? '';
+        $directory = array_shift($params) ?? 'Publishers';
 
-        if ([] === $publishers = Publisher::discover($directory, $namespace)) {
-            if ($namespace === '') {
-                CLI::write(lang('Publisher.publishMissing', [$directory]));
-            } else {
-                CLI::write(lang('Publisher.publishMissingNamespace', [$directory, $namespace]));
-            }
+        if ([] === $publishers = Publisher::discover($directory)) {
+            CLI::write(lang('Publisher.publishMissing', [$directory]));
 
             return;
         }
@@ -92,13 +83,13 @@ class Publish extends BaseCommand
         foreach ($publishers as $publisher) {
             if ($publisher->publish()) {
                 CLI::write(lang('Publisher.publishSuccess', [
-                    $publisher::class,
+                    get_class($publisher),
                     count($publisher->getPublished()),
                     $publisher->getDestination(),
                 ]), 'green');
             } else {
                 CLI::error(lang('Publisher.publishFailure', [
-                    $publisher::class,
+                    get_class($publisher),
                     $publisher->getDestination(),
                 ]), 'light_gray', 'red');
 

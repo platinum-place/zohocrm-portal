@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -17,6 +15,8 @@ use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use Config\Mimes;
 use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Value object representing a single file uploaded through an
@@ -33,13 +33,6 @@ class UploadedFile extends File implements UploadedFileInterface
      * @var string
      */
     protected $path;
-
-    /**
-     * The webkit relative path of the file.
-     *
-     * @var string
-     */
-    protected $clientPath;
 
     /**
      * The original filename as provided by the client.
@@ -80,14 +73,13 @@ class UploadedFile extends File implements UploadedFileInterface
     /**
      * Accepts the file information as would be filled in from the $_FILES array.
      *
-     * @param string      $path         The temporary location of the uploaded file.
-     * @param string      $originalName The client-provided filename.
-     * @param string|null $mimeType     The type of file as provided by PHP
-     * @param int|null    $size         The size of the file, in bytes
-     * @param int|null    $error        The error constant of the upload (one of PHP's UPLOADERRXXX constants)
-     * @param string|null $clientPath   The webkit relative path of the uploaded file.
+     * @param string $path         The temporary location of the uploaded file.
+     * @param string $originalName The client-provided filename.
+     * @param string $mimeType     The type of file as provided by PHP
+     * @param int    $size         The size of the file, in bytes
+     * @param int    $error        The error constant of the upload (one of PHP's UPLOADERRXXX constants)
      */
-    public function __construct(string $path, string $originalName, ?string $mimeType = null, ?int $size = null, ?int $error = null, ?string $clientPath = null)
+    public function __construct(string $path, string $originalName, ?string $mimeType = null, ?int $size = null, ?int $error = null)
     {
         $this->path             = $path;
         $this->name             = $originalName;
@@ -95,7 +87,6 @@ class UploadedFile extends File implements UploadedFileInterface
         $this->originalMimeType = $mimeType;
         $this->size             = $size;
         $this->error            = $error;
-        $this->clientPath       = $clientPath;
 
         parent::__construct($path, false);
     }
@@ -122,10 +113,14 @@ class UploadedFile extends File implements UploadedFileInterface
      * @see http://php.net/is_uploaded_file
      * @see http://php.net/move_uploaded_file
      *
-     * @param string      $targetPath Path to which to move the uploaded file.
-     * @param string|null $name       the name to rename the file to.
-     * @param bool        $overwrite  State for indicating whether to overwrite the previously generated file with the same
-     *                                name or not.
+     * @param string $targetPath Path to which to move the uploaded file.
+     * @param string $name       the name to rename the file to.
+     * @param bool   $overwrite  State for indicating whether to overwrite the previously generated file with the same
+     *                           name or not.
+     *
+     * @throws InvalidArgumentException if the $path specified is invalid.
+     * @throws RuntimeException         on any error during the move operation.
+     * @throws RuntimeException         on the second or subsequent call to the method.
      *
      * @return bool
      */
@@ -142,12 +137,12 @@ class UploadedFile extends File implements UploadedFileInterface
             throw HTTPException::forInvalidFile();
         }
 
-        $name ??= $this->getName();
+        $name        = $name ?? $this->getName();
         $destination = $overwrite ? $targetPath . $name : $this->getDestination($targetPath . $name);
 
         try {
             $this->hasMoved = move_uploaded_file($this->path, $destination);
-        } catch (Exception) {
+        } catch (Exception $e) {
             $error   = error_get_last();
             $message = strip_tags($error['message'] ?? '');
 
@@ -273,15 +268,6 @@ class UploadedFile extends File implements UploadedFileInterface
     }
 
     /**
-     * (PHP 8.1+)
-     * Returns the webkit relative path of the uploaded file on directory uploads.
-     */
-    public function getClientPath(): ?string
-    {
-        return $this->clientPath;
-    }
-
-    /**
      * Gets the temporary filename where the file was uploaded to.
      */
     public function getTempName(): string
@@ -297,14 +283,12 @@ class UploadedFile extends File implements UploadedFileInterface
      * type but will return the clientExtension if it fails to do so.
      *
      * This method will always return a more or less helpfull extension
-     * but might be insecure if the mime type is not matched. Consider
+     * but might be insecure if the mime type is not machted. Consider
      * using guessExtension for a more safe version.
      */
     public function getExtension(): string
     {
-        $guessExtension = $this->guessExtension();
-
-        return $guessExtension !== '' ? $guessExtension : $this->getClientExtension();
+        return $this->guessExtension() ?: $this->getClientExtension();
     }
 
     /**
@@ -325,7 +309,7 @@ class UploadedFile extends File implements UploadedFileInterface
      */
     public function getClientExtension(): string
     {
-        return pathinfo($this->originalName, PATHINFO_EXTENSION);
+        return pathinfo($this->originalName, PATHINFO_EXTENSION) ?? '';
     }
 
     /**
@@ -343,15 +327,15 @@ class UploadedFile extends File implements UploadedFileInterface
      * By default, upload files are saved in writable/uploads directory. The YYYYMMDD folder
      * and random file name will be created.
      *
-     * @param string|null $folderName the folder name to writable/uploads directory.
-     * @param string|null $fileName   the name to rename the file to.
+     * @param string $folderName the folder name to writable/uploads directory.
+     * @param string $fileName   the name to rename the file to.
      *
      * @return string file full path
      */
     public function store(?string $folderName = null, ?string $fileName = null): string
     {
         $folderName = rtrim($folderName ?? date('Ymd'), '/') . '/';
-        $fileName ??= $this->getRandomName();
+        $fileName   = $fileName ?? $this->getRandomName();
 
         // Move the uploaded file to a new location.
         $this->move(WRITEPATH . 'uploads/' . $folderName, $fileName);

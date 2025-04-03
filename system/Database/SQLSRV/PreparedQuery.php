@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -13,14 +11,12 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Database\SQLSRV;
 
+use BadMethodCallException;
 use CodeIgniter\Database\BasePreparedQuery;
-use CodeIgniter\Database\Exceptions\DatabaseException;
-use CodeIgniter\Exceptions\BadMethodCallException;
+use Exception;
 
 /**
  * Prepared query for Postgre
- *
- * @extends BasePreparedQuery<resource, resource, resource>
  */
 class PreparedQuery extends BasePreparedQuery
 {
@@ -32,16 +28,11 @@ class PreparedQuery extends BasePreparedQuery
     protected $parameters = [];
 
     /**
-     * A reference to the db connection to use.
+     * The result boolean from a sqlsrv_execute.
      *
-     * @var Connection
+     * @var bool
      */
-    protected $db;
-
-    public function __construct(Connection $db)
-    {
-        parent::__construct($db);
-    }
+    protected $result;
 
     /**
      * Prepares the query against the database, and saves the connection
@@ -52,23 +43,21 @@ class PreparedQuery extends BasePreparedQuery
      *
      * @param array $options Options takes an associative array;
      *
-     * @throws DatabaseException
+     * @throws Exception
+     *
+     * @return mixed
      */
-    public function _prepare(string $sql, array $options = []): PreparedQuery
+    public function _prepare(string $sql, array $options = [])
     {
         // Prepare parameters for the query
         $queryString = $this->getQueryString();
 
-        $parameters = $this->parameterize($queryString, $options);
+        $parameters = $this->parameterize($queryString);
 
         // Prepare the query
         $this->statement = sqlsrv_prepare($this->db->connID, $sql, $parameters);
 
         if (! $this->statement) {
-            if ($this->db->DBDebug) {
-                throw new DatabaseException($this->db->getAllErrorMessages());
-            }
-
             $info              = $this->db->error();
             $this->errorCode   = $info['code'];
             $this->errorString = $info['message'];
@@ -79,7 +68,7 @@ class PreparedQuery extends BasePreparedQuery
 
     /**
      * Takes a new set of data and runs it against the currently
-     * prepared query.
+     * prepared query. Upon success, will return a Results object.
      */
     public function _execute(array $data): bool
     {
@@ -91,39 +80,25 @@ class PreparedQuery extends BasePreparedQuery
             $this->parameters[$key] = $value;
         }
 
-        $result = sqlsrv_execute($this->statement);
+        $this->result = sqlsrv_execute($this->statement);
 
-        if ($result === false && $this->db->DBDebug) {
-            throw new DatabaseException($this->db->getAllErrorMessages());
-        }
-
-        return $result;
+        return (bool) $this->result;
     }
 
     /**
-     * Returns the statement resource for the prepared query or false when preparing failed.
+     * Returns the result object for the prepared query.
      *
-     * @return resource|null
+     * @return mixed
      */
     public function _getResult()
     {
-        return $this->statement;
+        return $this->result;
     }
 
     /**
-     * Deallocate prepared statements.
+     * Handle parameters
      */
-    protected function _close(): bool
-    {
-        return sqlsrv_free_stmt($this->statement);
-    }
-
-    /**
-     * Handle parameters.
-     *
-     * @param array<int, mixed> $options
-     */
-    protected function parameterize(string $queryString, array $options): array
+    protected function parameterize(string $queryString): array
     {
         $numberOfVariables = substr_count($queryString, '?');
 
@@ -131,11 +106,7 @@ class PreparedQuery extends BasePreparedQuery
 
         for ($c = 0; $c < $numberOfVariables; $c++) {
             $this->parameters[$c] = null;
-            if (isset($options[$c])) {
-                $params[] = [&$this->parameters[$c], SQLSRV_PARAM_IN, $options[$c]];
-            } else {
-                $params[] = &$this->parameters[$c];
-            }
+            $params[]             = &$this->parameters[$c];
         }
 
         return $params;

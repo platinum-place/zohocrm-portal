@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -15,7 +13,7 @@ namespace CodeIgniter\Commands\Database;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
-use CodeIgniter\Database\MigrationRunner;
+use Config\Services;
 use Throwable;
 
 /**
@@ -56,10 +54,11 @@ class MigrateRollback extends BaseCommand
     /**
      * the Command's Options
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $options = [
-        '-b' => 'Specify a batch to roll back to; e.g. "3" to return to batch #3',
+        '-b' => 'Specify a batch to roll back to; e.g. "3" to return to batch #3 or "-2" to roll back twice',
+        '-g' => 'Set database group',
         '-f' => 'Force command - this option allows you to bypass the confirmation question when running this command in a production environment',
     ];
 
@@ -74,28 +73,20 @@ class MigrateRollback extends BaseCommand
             $force = array_key_exists('f', $params) || CLI::getOption('f');
 
             if (! $force && CLI::prompt(lang('Migrations.rollBackConfirm'), ['y', 'n']) === 'n') {
-                return null;
+                return;
             }
             // @codeCoverageIgnoreEnd
         }
 
-        /** @var MigrationRunner $runner */
-        $runner = service('migrations');
+        $runner = Services::migrations();
+        $group  = $params['g'] ?? CLI::getOption('g');
+
+        if (is_string($group)) {
+            $runner->setGroup($group);
+        }
 
         try {
             $batch = $params['b'] ?? CLI::getOption('b') ?? $runner->getLastBatch() - 1;
-
-            if (is_string($batch)) {
-                if (! ctype_digit($batch)) {
-                    CLI::error('Invalid batch number: ' . $batch, 'light_gray', 'red');
-                    CLI::newLine();
-
-                    return EXIT_ERROR;
-                }
-
-                $batch = (int) $batch;
-            }
-
             CLI::write(lang('Migrations.rollingBack') . ' ' . $batch, 'yellow');
 
             if (! $runner->regress($batch)) {
@@ -115,7 +106,5 @@ class MigrateRollback extends BaseCommand
             $this->showError($e);
             // @codeCoverageIgnoreEnd
         }
-
-        return null;
     }
 }

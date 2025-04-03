@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -51,17 +49,17 @@ abstract class BaseUtils
     /**
      * Class constructor
      */
-    public function __construct(ConnectionInterface $db)
+    public function __construct(ConnectionInterface &$db)
     {
-        $this->db = $db;
+        $this->db = &$db;
     }
 
     /**
      * List databases
      *
-     * @return array|bool
-     *
      * @throws DatabaseException
+     *
+     * @return array|bool
      */
     public function listDatabases()
     {
@@ -103,9 +101,9 @@ abstract class BaseUtils
     /**
      * Optimize Table
      *
-     * @return bool
-     *
      * @throws DatabaseException
+     *
+     * @return bool
      */
     public function optimizeTable(string $tableName)
     {
@@ -125,9 +123,9 @@ abstract class BaseUtils
     /**
      * Optimize Database
      *
-     * @return mixed
-     *
      * @throws DatabaseException
+     *
+     * @return mixed
      */
     public function optimizeDatabase()
     {
@@ -170,9 +168,9 @@ abstract class BaseUtils
     /**
      * Repair Table
      *
-     * @return mixed
-     *
      * @throws DatabaseException
+     *
+     * @return mixed
      */
     public function repairTable(string $tableName)
     {
@@ -214,11 +212,7 @@ abstract class BaseUtils
             $line = [];
 
             foreach ($row as $item) {
-                $line[] = $enclosure . str_replace(
-                    $enclosure,
-                    $enclosure . $enclosure,
-                    (string) $item,
-                ) . $enclosure;
+                $line[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $item ?? '') . $enclosure;
             }
 
             $out .= implode($delim, $line) . $newline;
@@ -250,7 +244,7 @@ abstract class BaseUtils
             $xml .= $tab . '<' . $element . '>' . $newline;
 
             foreach ($row as $key => $val) {
-                $val = (! empty($val)) ? xml_convert((string) $val) : '';
+                $val = (! empty($val)) ? xml_convert($val) : '';
 
                 $xml .= $tab . $tab . '<' . $key . '>' . $val . '</' . $key . '>' . $newline;
             }
@@ -266,9 +260,9 @@ abstract class BaseUtils
      *
      * @param array|string $params
      *
-     * @return false|never|string
-     *
      * @throws DatabaseException
+     *
+     * @return mixed
      */
     public function backup($params = [])
     {
@@ -315,14 +309,13 @@ abstract class BaseUtils
             return $this->_backup($prefs);
         }
 
-        // @TODO gzencode() requires `ext-zlib`, but _backup() is not implemented in all databases.
         return gzencode($this->_backup($prefs));
     }
 
     /**
      * Platform dependent version of the backup function.
      *
-     * @return false|never|string
+     * @return mixed
      */
     abstract public function _backup(?array $prefs = null);
 }

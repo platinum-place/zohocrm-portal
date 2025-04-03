@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,18 +12,17 @@ declare(strict_types=1);
 namespace CodeIgniter\Events;
 
 use Config\Modules;
+use Config\Services;
+
+define('EVENT_PRIORITY_LOW', 200);
+define('EVENT_PRIORITY_NORMAL', 100);
+define('EVENT_PRIORITY_HIGH', 10);
 
 /**
  * Events
- *
- * @see \CodeIgniter\Events\EventsTest
  */
 class Events
 {
-    public const PRIORITY_LOW    = 200;
-    public const PRIORITY_NORMAL = 100;
-    public const PRIORITY_HIGH   = 10;
-
     /**
      * The list of listeners.
      *
@@ -53,21 +50,19 @@ class Events
      * Stores information about the events
      * for display in the debug toolbar.
      *
-     * @var list<array<string, float|string>>
+     * @var array<array<string, float|string>>
      */
     protected static $performanceLog = [];
 
     /**
      * A list of found files.
      *
-     * @var list<string>
+     * @var string[]
      */
     protected static $files = [];
 
     /**
      * Ensures that we have a events file ready.
-     *
-     * @return void
      */
     public static function initialize()
     {
@@ -76,15 +71,16 @@ class Events
             return;
         }
 
-        $config = new Modules();
+        /** @var Modules $config */
+        $config = config('Modules');
         $events = APPPATH . 'Config' . DIRECTORY_SEPARATOR . 'Events.php';
         $files  = [];
 
         if ($config->shouldDiscover('events')) {
-            $files = service('locator')->search('Config/Events.php');
+            $files = Services::locator()->search('Config/Events.php');
         }
 
-        $files = array_filter(array_map(static function (string $file): false|string {
+        $files = array_filter(array_map(static function (string $file) {
             if (is_file($file)) {
                 return realpath($file) ?: $file;
             }
@@ -113,10 +109,8 @@ class Events
      * @param string   $eventName
      * @param callable $callback
      * @param int      $priority
-     *
-     * @return void
      */
-    public static function on($eventName, $callback, $priority = self::PRIORITY_NORMAL)
+    public static function on($eventName, $callback, $priority = EVENT_PRIORITY_NORMAL)
     {
         if (! isset(static::$listeners[$eventName])) {
             static::$listeners[$eventName] = [
@@ -212,7 +206,7 @@ class Events
             if ($check === $listener) {
                 unset(
                     static::$listeners[$eventName][1][$index],
-                    static::$listeners[$eventName][2][$index],
+                    static::$listeners[$eventName][2][$index]
                 );
 
                 return true;
@@ -229,8 +223,6 @@ class Events
      * removed, otherwise all listeners for all events are removed.
      *
      * @param string|null $eventName
-     *
-     * @return void
      */
     public static function removeAllListeners($eventName = null)
     {
@@ -243,8 +235,6 @@ class Events
 
     /**
      * Sets the path to the file that routes are read from.
-     *
-     * @return void
      */
     public static function setFiles(array $files)
     {
@@ -254,9 +244,9 @@ class Events
     /**
      * Returns the files that were found/loaded during this request.
      *
-     * @return list<string>
+     * @return string[]
      */
-    public static function getFiles()
+    public function getFiles()
     {
         return static::$files;
     }
@@ -265,8 +255,6 @@ class Events
      * Turns simulation on or off. When on, events will not be triggered,
      * simply logged. Useful during testing when you don't actually want
      * the tests to run.
-     *
-     * @return void
      */
     public static function simulate(bool $choice = true)
     {
@@ -276,7 +264,7 @@ class Events
     /**
      * Getter for the performance log records.
      *
-     * @return list<array<string, float|string>>
+     * @return array<array<string, float|string>>
      */
     public static function getPerformanceLogs()
     {

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -68,11 +66,6 @@ class Forge extends BaseForge
     protected $null = 'NULL';
 
     /**
-     * @var Connection
-     */
-    protected $db;
-
-    /**
      * CREATE TABLE attributes
      *
      * @param array $attributes Associative array of table attributes
@@ -83,52 +76,48 @@ class Forge extends BaseForge
     }
 
     /**
-     * @param array|string $processedFields Processed column definitions
-     *                                      or column names to DROP
+     * @param mixed $field
      *
-     * @return         false|list<string>|string                            SQL string or false
-     * @phpstan-return ($alterType is 'DROP' ? string : list<string>|false)
+     * @return array|bool|string
      */
-    protected function _alterTable(string $alterType, string $table, $processedFields)
+    protected function _alterTable(string $alterType, string $table, $field)
     {
         if (in_array($alterType, ['DROP', 'ADD'], true)) {
-            return parent::_alterTable($alterType, $table, $processedFields);
+            return parent::_alterTable($alterType, $table, $field);
         }
 
         $sql  = 'ALTER TABLE ' . $this->db->escapeIdentifiers($table);
         $sqls = [];
 
-        foreach ($processedFields as $field) {
-            if ($field['_literal'] !== false) {
+        foreach ($field as $data) {
+            if ($data['_literal'] !== false) {
                 return false;
             }
 
-            if (version_compare($this->db->getVersion(), '8', '>=') && isset($field['type'])) {
-                $sqls[] = $sql . ' ALTER COLUMN ' . $this->db->escapeIdentifiers($field['name'])
-                    . " TYPE {$field['type']}{$field['length']}";
+            if (version_compare($this->db->getVersion(), '8', '>=') && isset($data['type'])) {
+                $sqls[] = $sql . ' ALTER COLUMN ' . $this->db->escapeIdentifiers($data['name'])
+                    . " TYPE {$data['type']}{$data['length']}";
             }
 
-            if (! empty($field['default'])) {
-                $sqls[] = $sql . ' ALTER COLUMN ' . $this->db->escapeIdentifiers($field['name'])
-                    . " SET DEFAULT {$field['default']}";
+            if (! empty($data['default'])) {
+                $sqls[] = $sql . ' ALTER COLUMN ' . $this->db->escapeIdentifiers($data['name'])
+                    . " SET DEFAULT {$data['default']}";
             }
 
-            $nullable = true; // Nullable by default.
-            if (isset($field['null']) && ($field['null'] === false || $field['null'] === ' NOT ' . $this->null)) {
-                $nullable = false;
-            }
-            $sqls[] = $sql . ' ALTER COLUMN ' . $this->db->escapeIdentifiers($field['name'])
-                . ($nullable ? ' DROP' : ' SET') . ' NOT NULL';
-
-            if (! empty($field['new_name'])) {
-                $sqls[] = $sql . ' RENAME COLUMN ' . $this->db->escapeIdentifiers($field['name'])
-                    . ' TO ' . $this->db->escapeIdentifiers($field['new_name']);
+            if (isset($data['null'])) {
+                $sqls[] = $sql . ' ALTER COLUMN ' . $this->db->escapeIdentifiers($data['name'])
+                    . ($data['null'] === true ? ' DROP' : ' SET') . ' NOT NULL';
             }
 
-            if (! empty($field['comment'])) {
+            if (! empty($data['new_name'])) {
+                $sqls[] = $sql . ' RENAME COLUMN ' . $this->db->escapeIdentifiers($data['name'])
+                    . ' TO ' . $this->db->escapeIdentifiers($data['new_name']);
+            }
+
+            if (! empty($data['comment'])) {
                 $sqls[] = 'COMMENT ON COLUMN' . $this->db->escapeIdentifiers($table)
-                    . '.' . $this->db->escapeIdentifiers($field['name'])
-                    . " IS {$field['comment']}";
+                    . '.' . $this->db->escapeIdentifiers($data['name'])
+                    . " IS {$data['comment']}";
             }
         }
 
@@ -138,14 +127,14 @@ class Forge extends BaseForge
     /**
      * Process column
      */
-    protected function _processColumn(array $processedField): string
+    protected function _processColumn(array $field): string
     {
-        return $this->db->escapeIdentifiers($processedField['name'])
-            . ' ' . $processedField['type'] . ($processedField['type'] === 'text' ? '' : $processedField['length'])
-            . $processedField['default']
-            . $processedField['null']
-            . $processedField['auto_increment']
-            . $processedField['unique'];
+        return $this->db->escapeIdentifiers($field['name'])
+            . ' ' . $field['type'] . $field['length']
+            . $field['default']
+            . $field['null']
+            . $field['auto_increment']
+            . $field['unique'];
     }
 
     /**
@@ -154,7 +143,7 @@ class Forge extends BaseForge
     protected function _attributeType(array &$attributes)
     {
         // Reset field lengths for data types that don't support it
-        if (isset($attributes['CONSTRAINT']) && str_contains(strtolower($attributes['TYPE']), 'int')) {
+        if (isset($attributes['CONSTRAINT']) && stripos($attributes['TYPE'], 'int') !== false) {
             $attributes['CONSTRAINT'] = null;
         }
 
@@ -171,10 +160,6 @@ class Forge extends BaseForge
 
             case 'DATETIME':
                 $attributes['TYPE'] = 'TIMESTAMP';
-                break;
-
-            case 'BLOB':
-                $attributes['TYPE'] = 'BYTEA';
                 break;
 
             default:
@@ -199,26 +184,10 @@ class Forge extends BaseForge
     {
         $sql = parent::_dropTable($table, $ifExists, $cascade);
 
-        if ($cascade) {
+        if ($cascade === true) {
             $sql .= ' CASCADE';
         }
 
         return $sql;
-    }
-
-    /**
-     * Constructs sql to check if key is a constraint.
-     */
-    protected function _dropKeyAsConstraint(string $table, string $constraintName): string
-    {
-        return "SELECT con.conname
-               FROM pg_catalog.pg_constraint con
-                INNER JOIN pg_catalog.pg_class rel
-                           ON rel.oid = con.conrelid
-                INNER JOIN pg_catalog.pg_namespace nsp
-                           ON nsp.oid = connamespace
-               WHERE nsp.nspname = '{$this->db->schema}'
-                     AND rel.relname = '" . trim($table, '"') . "'
-                     AND con.conname = '" . trim($constraintName, '"') . "'";
     }
 }

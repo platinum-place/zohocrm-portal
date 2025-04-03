@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,14 +12,12 @@ declare(strict_types=1);
 namespace CodeIgniter\Filters;
 
 use CodeIgniter\Honeypot\Exceptions\HoneypotException;
-use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
+use Config\Services;
 
 /**
  * Honeypot filter
- *
- * @see \CodeIgniter\Filters\HoneypotTest
  */
 class Honeypot implements FilterInterface
 {
@@ -29,32 +25,24 @@ class Honeypot implements FilterInterface
      * Checks if Honeypot field is empty, if not then the
      * requester is a bot
      *
-     * @param list<string>|null $arguments
+     * @param array|null $arguments
      *
      * @throws HoneypotException
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if (! $request instanceof IncomingRequest) {
-            return null;
-        }
-
-        if (service('honeypot')->hasContent($request)) {
+        if (Services::honeypot()->hasContent($request)) {
             throw HoneypotException::isBot();
         }
-
-        return null;
     }
 
     /**
      * Attach a honeypot to the current response.
      *
-     * @param list<string>|null $arguments
+     * @param array|null $arguments
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        service('honeypot')->attachHoneypot($response);
-
-        return null;
+        Services::honeypot()->attachHoneypot($response);
     }
 }

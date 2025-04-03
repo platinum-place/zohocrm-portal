@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -18,24 +16,22 @@ use Config\Format;
 
 /**
  * JSON data formatter
- *
- * @see \CodeIgniter\Format\JSONFormatterTest
  */
 class JSONFormatter implements FormatterInterface
 {
     /**
      * Takes the given data and formats it.
      *
-     * @param array|bool|float|int|object|string|null $data
+     * @param mixed $data
      *
-     * @return false|string (JSON string | false)
+     * @return bool|string (JSON string | false)
      */
     public function format($data)
     {
         $config = new Format();
 
         $options = $config->formatterOptions['application/json'] ?? JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-        $options |= JSON_PARTIAL_OUTPUT_ON_ERROR;
+        $options = $options | JSON_PARTIAL_OUTPUT_ON_ERROR;
 
         $options = ENVIRONMENT === 'production' ? $options : $options | JSON_PRETTY_PRINT;
 

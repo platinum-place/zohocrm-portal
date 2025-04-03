@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * The MIT License (MIT)
  *
@@ -27,36 +25,36 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\Representation\ColorRepresentation;
-use Kint\Value\Representation\RepresentationInterface;
+use Kint\Zval\Representation\ColorRepresentation;
+use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 
-class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePluginInterface
+class ColorPlugin extends Plugin implements TabPluginInterface, ValuePluginInterface
 {
-    public function renderValue(AbstractValue $v): ?string
+    public function renderValue(Value $o)
     {
-        $r = $v->getRepresentation('color');
+        $r = $o->getRepresentation('color');
 
         if (!$r instanceof ColorRepresentation) {
-            return null;
+            return;
         }
 
-        $children = $this->renderer->renderChildren($v);
+        $children = $this->renderer->renderChildren($o);
 
-        $header = $this->renderer->renderHeader($v);
+        $header = $this->renderer->renderHeader($o);
         $header .= '<div class="kint-color-preview"><div style="background:';
         $header .= $r->getColor(ColorRepresentation::COLOR_RGBA);
         $header .= '"></div></div>';
 
-        $header = $this->renderer->renderHeaderWrapper($v->getContext(), (bool) \strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }
 
-    public function renderTab(RepresentationInterface $r, AbstractValue $v): ?string
+    public function renderTab(Representation $r)
     {
         if (!$r instanceof ColorRepresentation) {
-            return null;
+            return;
         }
 
         $out = '';
@@ -94,7 +92,7 @@ class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePlu
         }
 
         if (!\strlen($out)) {
-            return null;
+            return;
         }
 
         return '<pre>'.$out.'</pre>';
