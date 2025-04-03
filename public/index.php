@@ -1,4 +1,5 @@
 <?php
+ini_set('memory_limit', '256M');//TODO
 
 // Path to the front controller (this file)
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
