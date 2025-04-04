@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GROUPID: ${GROUPID}
+        GROUP: ${GROUP}
+        USERID: ${USERID}
+        USER: ${USER}
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./writable:/var/www/html/writable
+    depends_on:
+      - mysql
+    env_file:
+      - .env
+    environment:
+      - GROUPID=${GROUPID}
+      - GROUP=${GROUP}
+      - USERID=${USERID}
+      - USER=${USER}
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: codeigniter
+      MYSQL_USER: ci_user
+      MYSQL_PASSWORD: ci_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql_data:
