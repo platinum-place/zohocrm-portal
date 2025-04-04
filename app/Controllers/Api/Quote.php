@@ -6,6 +6,7 @@ use App\Libraries\Cotizar\CotizarAuto;
 use App\Libraries\Zoho;
 use App\Models\Cotizacion;
 use CodeIgniter\RESTful\ResourceController;
+use zcrmsdk\crm\exception\ZCRMException;
 
 class Quote extends ResourceController
 {
@@ -17,7 +18,7 @@ class Quote extends ResourceController
         session()->set('usuario_id', '3222373000203318001');
     }
 
-    public function estimateColectiva()
+    public function estimateVehicle()
     {
         if (!$this->request->getPost()) {
             throw new \Exception("No se recibieron datos");
@@ -76,12 +77,12 @@ class Quote extends ResourceController
         foreach ($cotizacion->planes as $plan) {
             $quotes[] = [
                 'Passcode' => '',
-                'OfertaID' => '',
+                'OfertaID' => $plan['planid'],
                 'Prima' => round($plan['prima'], 2),
                 'Impuesto' => round($plan['neta'], 2),
                 'PrimaTotal' => round($plan['total'], 2),
                 'PrimaCuota' => round($plan['total'] / 12, 2),
-                'Planid' => $plan['planid'],
+                'Planid' => '',
                 'Plan' => 'Plan Anual Full',
                 'Aseguradora' => $plan['aseguradora'],
                 'Idcotizacion' => $id,
@@ -93,5 +94,21 @@ class Quote extends ResourceController
         }
 
         return $this->respond($quotes);
+    }
+
+    public function issuePolicy()
+    {
+        if (!$this->request->getPost()) {
+            throw new \Exception("No se recibieron datos");
+        }
+
+        $libreria = new \App\Libraries\Cotizaciones();
+
+        $data = $this->request->getPost();
+
+        $cotizacion = $libreria->getRecord("Quotes", $data['cotzid']);
+        $libreria->actualizar_cotizacion($cotizacion, $data['ofertaID']);
+
+        return $this->respond(['code' => 200, 'status' => 'success']);
     }
 }

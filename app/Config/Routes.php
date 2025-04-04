@@ -47,7 +47,15 @@ $routes->post('oauth/token', 'OAuth::token');
 /**
  * Quote
  */
-$routes->post('api/cotizador/colectiva', 'Api\Quote::estimateColectiva');
+$routes->post('api/cotizador/colectiva', 'Api\Quote::estimateVehicle');
+$routes->post('api/cotizador/EmitirAuto', 'Api\Quote::issuePolicy');
+
+/**
+ * Vehicle
+ */
+$routes->post('api/vehiculos/Marca', 'Api\Vehicle::brands');
+$routes->post('api/vehiculos/Modelos/(:num)', 'Api\Vehicle::models/$1');
+$routes->post('api/vehiculos/TipoVehiculo', 'Api\Vehicle::types');
 
 
 /*
