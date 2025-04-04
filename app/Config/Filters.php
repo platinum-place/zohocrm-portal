@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Filters\EnsureOAuth2;
 use App\Filters\Sesion;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
@@ -25,6 +26,7 @@ class Filters extends BaseConfig
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
         'sesion'        => Sesion::class, //TODO
+        'oauth2'        => EnsureOAuth2::class,
     ];
 
     /**
@@ -38,7 +40,7 @@ class Filters extends BaseConfig
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
-            'sesion' => ['except' => ['plantillas/*', 'login']],
+            'sesion' => ['except' => ['plantillas/*', 'login', 'oauth/*','api/*']],
         ],
         'after' => [
             'toolbar',
@@ -67,5 +69,7 @@ class Filters extends BaseConfig
      *
      * @var array
      */
-    public $filters = [];
+    public $filters = [
+        'oauth2' => ['before' => ['api/*']],
+    ];
 }
