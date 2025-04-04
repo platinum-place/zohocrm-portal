@@ -19,14 +19,8 @@ RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 # Instalando dependencias para el stack LAMP
 RUN apt-get clean && \
     apt-get update && \
-    apt-get install -y libicu-dev g++ unzip libpng-dev libzip-dev && \
-    docker-php-ext-install mysqli && \
-    docker-php-ext-enable mysqli && \
-    docker-php-ext-configure intl && \
-    docker-php-ext-install intl && \
-    docker-php-ext-configure gd && \
-    docker-php-ext-install gd && \
-    docker-php-ext-install zip
+    apt-get install -y libicu-dev g++ unzip libpng-dev libzip-dev default-libmysqlclient-dev libxml2-dev && \
+    docker-php-ext-install mysqli pdo pdo_mysql intl gd zip
 RUN a2enmod rewrite
 
 # Instalamos composer
