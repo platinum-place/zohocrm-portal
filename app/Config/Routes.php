@@ -33,6 +33,23 @@ $routes->setAutoRoute(true);
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index');
 
+/**
+ * OAuth
+ */
+$routes->post('oauth/token', 'OAuth::token');
+
+/**
+ * --------------------------------------------------------------------
+ * API
+ * --------------------------------------------------------------------
+ */
+
+/**
+ * Quote
+ */
+$routes->post('api/cotizador/colectiva', 'Api\Quote::estimateColectiva');
+
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing
