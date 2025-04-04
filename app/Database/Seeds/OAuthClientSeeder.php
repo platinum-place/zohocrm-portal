@@ -5,7 +5,7 @@ namespace App\Database\Seeds;
 use CodeIgniter\CLI\CLI;
 use CodeIgniter\Database\Seeder;
 
-class OauthClientsSeeder extends Seeder
+class OAuthClientSeeder extends Seeder
 {
     public function run()
     {
