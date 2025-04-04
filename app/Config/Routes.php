@@ -53,6 +53,8 @@ $routes->post('api/cotizador/CotizaVida', 'Api\Quote::estimateLife');
 $routes->post('api/cotizador/EmitirVida', 'Api\Quote::issueLife');
 $routes->post('api/cotizador/CotizaDesempleo', 'Api\Quote::estimateUnemployment');
 $routes->post('api/cotizador/EmitirDesempleo', 'Api\Quote::issueLife');
+$routes->post('api/cotizador/CotizaIncendio', 'Api\Quote::estimateFire');
+$routes->post('api/cotizador/EmitirIncendio', 'Api\Quote::issueLife');
 
 /**
  * Vehicle

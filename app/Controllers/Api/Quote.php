@@ -169,7 +169,7 @@ class Quote extends ResourceController
                 "Quote_Stage" => "Cotizando",
                 "Nombre" => $data['NombreCliente'],
                 "Fecha_de_nacimiento" => $data['FechaNacimiento'],
-                "RNC_C_dula" => $data['IdenCliente'],
+                "RNC_C_dula" => $data['IdentCliente'],
                 "Direcci_n" => $data['Direccion'],
                 "Tel_Celular" => $data['Telefono1'],
                 "Plan" => 'Vida',
@@ -288,6 +288,81 @@ class Quote extends ResourceController
                 'Cuota' => $data['Cuota'],
                 'PlazoMese' => $data['Plazo'] * 12,
                 'Total' => round($plan['total'], 2),
+            ];
+        }
+
+        return $this->respond($quotes);
+    }
+
+    public function estimateFire()
+    {
+        $libreria = new \App\Libraries\Cotizaciones();
+
+        $cotizacion = new Cotizacion();
+
+        $data = $this->request->getPost();
+
+        $cotizacion->suma = $data['ValorFinanciado'];
+        $cotizacion->plan = 'Seguro Incendio Hipotecario';
+        $cotizacion->plazo = $data['Plazo'] * 12;
+        $anioActual = (int)date('Y');
+        $anioNacimiento = $anioActual - $data['TiempoLaborando'];
+        $mes = 1;
+        $dia = 1;
+        $data['TiempoLaborando'] = sprintf('%04d-%02d-%02d', $anioNacimiento, $mes, $dia);
+        $cotizacion->fecha_deudor = $data['TiempoLaborando'];
+        $cotizacion->direccion = $data['Ubicación'];
+        $cotizacion->prestamo = $data['MontoOriginal'];
+        $cotizacion->construccion = 'Superior';
+        $cotizacion->riesgo = 'Vivienda';
+
+        $cotizar = new CotizarIncendio($cotizacion, $libreria);
+
+        $cotizar->cotizar_planes();
+
+        if (empty($cotizacion->planes)) {
+            throw new \Exception("No se encontraron planes");
+        }
+
+        $quotes = array();
+        $libreria = new Zoho();
+
+        foreach ($cotizacion->planes as $plan) {
+            $registro = [
+                "Subject" => $data['Cliente'],
+                "Valid_Till" => date("Y-m-d", strtotime(date("Y-m-d") . "+ 30 days")),
+                "Vigencia_desde" => date("Y-m-d"),
+                "Account_Name" => session('cuenta_id'),
+                "Contact_Name" => session('usuario_id'),
+                "Quote_Stage" => "Cotizando",
+                "Nombre" => $data['Cliente'],
+                "RNC_C_dula" => $data['IdentCliente'],
+                "Tel_Celular" => $data['Telefono'],
+                "Plan" => 'Seguro Incendio Hipotecario',
+                "Suma_asegurada" => $data['ValorFinanciado'],
+                "Plazo" => $data['Plazo'] * 12,
+                "Cuota" => $data['Cuota'],
+            ];
+
+            $id = $libreria->createRecords("Quotes", $registro, [$plan]);
+
+            $quotes[] = [
+                'Impuesto' => round($plan['neta'], 2),
+                'PrimaPeriodo' => '',
+                'PrimaTotal' => round($plan['total'], 2),
+                'PrimaVida' => '',
+                'PrimaTotalVida' => '',
+                'Direccion' => '',
+                'identificador' => $id,
+                'Aseguradora' => '',
+                'Anios' => '',
+                'Valor' => '',
+                'EdadTerminar' => '',
+                'Codeudor' => '',
+                'Edad Codeudor' => '',
+                'IdentiCodeudor' => '',
+                'CoberturasListInc' => '',
+                'CoberturasListVid' => '',
             ];
         }
 
