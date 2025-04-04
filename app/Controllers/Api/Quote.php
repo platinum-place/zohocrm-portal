@@ -133,8 +133,8 @@ class Quote extends ResourceController
         } else {
             $anioActual = (int)date('Y');
             $anioNacimiento = $anioActual - $data['EdadCodeudor'];
-            $mes = rand(1, 12);
-            $dia = rand(1, 28);
+            $mes = 1;
+            $dia = 1;
             $data['EdadCodeudor'] = sprintf('%04d-%02d-%02d', $anioNacimiento, $mes, $dia);
         }
 
@@ -221,5 +221,76 @@ class Quote extends ResourceController
         $libreria->actualizar_cotizacion($cotizacion, $id_plan);
 
         return $this->respond(['code' => 200, 'status' => 'success']);
+    }
+
+    public function estimateUnemployment()
+    {
+        $libreria = new \App\Libraries\Cotizaciones();
+
+        $cotizacion = new Cotizacion();
+
+        $data = $this->request->getPost();
+
+        $cotizacion->suma = $data['MontoOriginal'];
+        $cotizacion->plan = 'Vida/Desempleo';
+        $cotizacion->plazo = $data['Plazo'] * 12;
+        $anioActual = (int)date('Y');
+        $anioNacimiento = $anioActual - $data['TiempoLaborando'];
+        $mes = 1;
+        $dia = 1;
+        $data['TiempoLaborando'] = sprintf('%04d-%02d-%02d', $anioNacimiento, $mes, $dia);
+        $cotizacion->fecha_deudor = $data['TiempoLaborando'];
+        $cotizacion->cuota = $data['Cuota'];
+
+        $cotizar = new CotizarDesempleo($cotizacion, $libreria);
+
+        $cotizar->cotizar_planes();
+
+        if (empty($cotizacion->planes)) {
+            throw new \Exception("No se encontraron planes");
+        }
+
+        $quotes = array();
+        $libreria = new Zoho();
+
+        foreach ($cotizacion->planes as $plan) {
+            $registro = [
+                "Subject" => $data['Cliente'],
+                "Valid_Till" => date("Y-m-d", strtotime(date("Y-m-d") . "+ 30 days")),
+                "Vigencia_desde" => date("Y-m-d"),
+                "Account_Name" => session('cuenta_id'),
+                "Contact_Name" => session('usuario_id'),
+                "Quote_Stage" => "Cotizando",
+                "Nombre" => $data['Cliente'],
+                "RNC_C_dula" => $data['IdenCliente'],
+                "Direcci_n" => $data['Direccion'],
+                "Tel_Celular" => $data['Telefono'],
+                "Plan" => 'Vida/Desempleo',
+                "Suma_asegurada" => $data['MontoOriginal'],
+                "Plazo" => $data['Plazo'] * 12,
+                "Cuota" => $data['Cuota'],
+            ];
+
+            $id = $libreria->createRecords("Quotes", $registro, [$plan]);
+
+            $quotes[] = [
+                'Impuesto' => round($plan['neta'], 2),
+                'PrimaPeriodo' => '',
+                'PrimaTotal' => '',
+                'identificador' => $id,
+                'Cliente' => $data['Cliente'],
+                'Direccion' => $data['Direccion'],
+                'Fecha' => date('Y-m-d'),
+                'TipoEmpleado' => '',
+                'IdenCliente' => $data['IdenCliente'],
+                'Aseguradora' => $plan['aseguradora'],
+                'MontoOriginal' => $data['MontoOriginal'],
+                'Cuota' => $data['Cuota'],
+                'PlazoMese' => $data['Plazo'] * 12,
+                'Total' => round($plan['total'], 2),
+            ];
+        }
+
+        return $this->respond($quotes);
     }
 }
