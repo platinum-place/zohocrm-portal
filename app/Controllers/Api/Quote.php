@@ -368,4 +368,15 @@ class Quote extends ResourceController
 
         return $this->respond($quotes);
     }
+
+    public function products()
+    {
+        $products = [
+            1 => 'Auto',
+            2 => 'Vida',
+            3 => 'Vida/Desempleo',
+            4 => 'Seguro Incendio Hipotecario'
+        ];
+        return $this->respond($products);
+    }
 }
