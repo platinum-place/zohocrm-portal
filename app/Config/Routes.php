@@ -49,6 +49,8 @@ $routes->post('oauth/token', 'OAuth::token');
  */
 $routes->post('api/cotizador/colectiva', 'Api\Quote::estimateVehicle');
 $routes->post('api/cotizador/EmitirAuto', 'Api\Quote::issuePolicy');
+$routes->post('api/cotizador/CotizaVida', 'Api\Quote::estimateLife');
+$routes->post('api/cotizador/EmitirVida', 'Api\Quote::issueLife');
 
 /**
  * Vehicle
