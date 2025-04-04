@@ -13,22 +13,20 @@ use OAuth2\Storage\Pdo;
 class OAuth2
 {
     public $server;
-
     protected $storage;
-
     protected $dsn;
-
     protected $db_username;
-
     protected $db_password;
 
     public function __construct()
     {
-        $this->dsn = 'mysql:dbname=' . getenv('database.default.database') . ';host=' . getenv('database.default.hostname');
+        $db_config = config('Database');
 
-        $this->db_username = getenv('database.default.username');
+        $default_group = $db_config->defaultGroup;
 
-        $this->db_password = getenv('database.default.password');
+        $this->dsn = 'mysql:dbname=' . $db_config->$default_group['database'] . ';host=' . $db_config->$default_group['hostname'];
+        $this->db_username = $db_config->$default_group['username'];
+        $this->db_password = $db_config->$default_group['password'];
 
         $this->initialize();
     }
