@@ -1,0 +1,1055 @@
+{
+	"info": {
+		"_postman_id": "54daf516-f4e3-431c-8208-fd86784c3507",
+		"name": "GNB CRM Portal",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23400545"
+	},
+	"item": [
+		{
+			"name": "Tokens",
+			"item": [
+				{
+					"name": "Get Refresh Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}oauth/token",
+							"host": [
+								"{{host}}oauth"
+							],
+							"path": [
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Access Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "refresh_token",
+									"type": "text"
+								},
+								{
+									"key": "refresh_token",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}oauth/token",
+							"host": [
+								"{{host}}oauth"
+							],
+							"path": [
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Access Token with User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "9e8d1afd-834b-4270-be60-0f2f4578f2dc",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "zLHh2r87o4Mskw5Ilo0ICCNGOIq4Ieax0j6raQsK",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}oauth/token",
+							"host": [
+								"{{host}}oauth"
+							],
+							"path": [
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Access Token with Client",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "69a329ca-cc32-4901-8c40-c7a220bbb634",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "e80de3b0b61bed6661f39e85db16a0bf",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}oauth/token",
+							"host": [
+								"{{host}}oauth"
+							],
+							"path": [
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cotizador",
+			"item": [
+				{
+					"name": "Cotizador",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "NombreCliente",
+									"value": "Juan Pérez",
+									"type": "text"
+								},
+								{
+									"key": "FechaNacimiento",
+									"value": "1985-07-15",
+									"type": "text"
+								},
+								{
+									"key": "IdCliente",
+									"value": "40226119390",
+									"type": "text"
+								},
+								{
+									"key": "TelefResidencia",
+									"value": "809-555-1234",
+									"type": "text"
+								},
+								{
+									"key": "TelefMovil",
+									"value": "829-555-5678",
+									"type": "text"
+								},
+								{
+									"key": "TelefTrabajo",
+									"value": "809-555-9876",
+									"type": "text"
+								},
+								{
+									"key": "Marca",
+									"value": "3222373000005779960",
+									"type": "text"
+								},
+								{
+									"key": "Modelo",
+									"value": "3222373000016954842",
+									"type": "text"
+								},
+								{
+									"key": "Anio",
+									"value": "2020",
+									"type": "text"
+								},
+								{
+									"key": "Chasis",
+									"value": "ABC123XYZ456",
+									"type": "text"
+								},
+								{
+									"key": "TipoVehiculo",
+									"value": "Automóvil",
+									"type": "text"
+								},
+								{
+									"key": "MontoAsegurado",
+									"value": "1000000",
+									"type": "text"
+								},
+								{
+									"key": "UsosGarantiasId",
+									"value": "[1, 3, 5]",
+									"type": "text"
+								},
+								{
+									"key": "Email",
+									"value": "juan.perez@email.com",
+									"type": "text"
+								},
+								{
+									"key": "Accesorios",
+									"value": "[\"Radio\", \"GPS\", \"Airbags adicionales\"]",
+									"type": "text"
+								},
+								{
+									"key": "Actividad",
+									"value": "Comerciante",
+									"type": "text"
+								},
+								{
+									"key": "Placa",
+									"value": "A123456",
+									"type": "text"
+								},
+								{
+									"key": "CirculacionID",
+									"value": "789654123",
+									"type": "text"
+								},
+								{
+									"key": "ColorId",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}api/cotizador/colectiva",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"cotizador",
+								"colectiva"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "EmitirAuto",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "cotzid",
+									"value": "3222373000206266001",
+									"type": "text"
+								},
+								{
+									"key": "ofertaID",
+									"value": "3222373000203318064",
+									"type": "text"
+								},
+								{
+									"key": "FechaVencimie",
+									"value": "1985-07-15",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}api/cotizador/EmitirAuto",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"cotizador",
+								"EmitirAuto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CotizaVida",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "FechaEmision",
+									"value": "1985-07-15",
+									"type": "text"
+								},
+								{
+									"key": "FechaVencimiento",
+									"value": "1985-07-15",
+									"type": "text"
+								},
+								{
+									"key": "Edad",
+									"value": "25",
+									"type": "text"
+								},
+								{
+									"key": "PlazoAnios",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "PlazoDias",
+									"value": "356",
+									"type": "text"
+								},
+								{
+									"key": "MontoOriginal",
+									"value": "1000000",
+									"type": "text"
+								},
+								{
+									"key": "NombreCliente",
+									"value": "Warlyn",
+									"type": "text"
+								},
+								{
+									"key": "IdenCliente",
+									"value": "40226119390",
+									"type": "text"
+								},
+								{
+									"key": "FechaNacimiento",
+									"value": "1998-06-13",
+									"type": "text"
+								},
+								{
+									"key": "Telefono1",
+									"value": "809-258-9632",
+									"type": "text"
+								},
+								{
+									"key": "Direccion",
+									"value": "Calle 1",
+									"type": "text"
+								},
+								{
+									"key": "codeudor",
+									"value": "Darlyn",
+									"type": "text"
+								},
+								{
+									"key": "EdadCodeudor",
+									"value": "55",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}api/cotizador/CotizaVida",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"cotizador",
+								"CotizaVida"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "EmitirVida",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "Identificador",
+									"value": "3222373000206267029",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}api/cotizador/EmitirVida",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"cotizador",
+								"EmitirVida"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CotizaDesempleo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "Cuota",
+									"value": "50000",
+									"type": "text"
+								},
+								{
+									"key": "Plazo",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "TiempoLaborando",
+									"value": "25",
+									"type": "text"
+								},
+								{
+									"key": "MontoOriginal",
+									"value": "1000000",
+									"type": "text"
+								},
+								{
+									"key": "IdenCliente",
+									"value": "40226119390",
+									"type": "text"
+								},
+								{
+									"key": "Cliente",
+									"value": "Warlyn",
+									"type": "text"
+								},
+								{
+									"key": "Direccion",
+									"value": "Calle 1",
+									"type": "text"
+								},
+								{
+									"key": "Telefono",
+									"value": "809-963-2883",
+									"type": "text"
+								},
+								{
+									"key": "idTipoEmpleado",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "FormaDePago",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "FinanciarSeguro",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}api/cotizador/CotizaDesempleo",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"cotizador",
+								"CotizaDesempleo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "EmitirDesempleo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "Identificador",
+									"value": "3222373000206234039",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}api/cotizador/EmitirDesempleo",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"cotizador",
+								"EmitirDesempleo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CotizaIncendio",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "Cuota",
+									"value": "50000",
+									"type": "text"
+								},
+								{
+									"key": "Plazo",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "TiempoLaborando",
+									"value": "25",
+									"type": "text"
+								},
+								{
+									"key": "idGiroDelNegocio",
+									"value": "1000000",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "MontoOriginal",
+									"value": "10000",
+									"type": "text"
+								},
+								{
+									"key": "idTipoEmpleado",
+									"value": "Warlyn",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "FormaDePago",
+									"value": "Calle 1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "FechaEmision",
+									"value": "809-963-2883",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "FechaVencimiento",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "IdentCliente",
+									"value": "40226119390",
+									"type": "text"
+								},
+								{
+									"key": "Cliente",
+									"value": "Warlyn",
+									"type": "text"
+								},
+								{
+									"key": "Telefono",
+									"value": "852-963-2589",
+									"type": "text"
+								},
+								{
+									"key": "ValorFinanciado",
+									"value": "1000000",
+									"type": "text"
+								},
+								{
+									"key": "Construccion",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "TipoContruccion",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "Ubicación",
+									"value": "Calle 1",
+									"type": "text"
+								},
+								{
+									"key": "Codeudor",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "Vida",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "EdadCodeudor",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "FinanciarSeguro",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}api/cotizador/CotizaIncendio",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"cotizador",
+								"CotizaIncendio"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "EmitirIncendio",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "Identificador",
+									"value": "3222373000206234039",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}api/cotizador/EmitirIncendio",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"cotizador",
+								"EmitirIncendio"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vehiculos",
+			"item": [
+				{
+					"name": "Vehiculos",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host}}api/vehiculos/Marca",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"vehiculos",
+								"Marca"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modelos",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host}}api/vehiculos/Modelos/3222373000005779920",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"vehiculos",
+								"Modelos",
+								"3222373000005779920"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TipoVehiculo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host}}api/vehiculos/TipoVehiculo",
+							"host": [
+								"{{host}}api"
+							],
+							"path": [
+								"vehiculos",
+								"TipoVehiculo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
