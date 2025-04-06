@@ -6,9 +6,13 @@ use App\Models\RoleModel;
 use App\Models\UserModel;
 use CodeIgniter\CLI\CLI;
 use CodeIgniter\Database\Seeder;
+use ReflectionException;
 
 class CreateAdminUserSeeder extends Seeder
 {
+    /**
+     * @throws ReflectionException
+     */
     public function run()
     {
         helper('string_util');
