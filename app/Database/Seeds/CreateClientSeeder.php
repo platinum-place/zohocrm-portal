@@ -5,14 +5,14 @@ namespace App\Database\Seeds;
 use CodeIgniter\CLI\CLI;
 use CodeIgniter\Database\Seeder;
 
-class OAuthClientSeeder extends Seeder
+class CreateClientSeeder extends Seeder
 {
     public function run()
     {
         helper('string_util');
 
         $client_id = generate_uuid_string();
-        $client_secret = bin2hex(random_bytes(16));
+        $client_secret = generate_secure_password(16);
 
         $data = [
             'client_id' => $client_id,
