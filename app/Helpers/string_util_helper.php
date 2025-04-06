@@ -8,3 +8,10 @@ if (!function_exists('generate_uuid_string')) {
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 }
+
+if (!function_exists('generate_secure_password')) {
+    function generate_secure_password(int $length): string
+    {
+        return bin2hex(random_bytes($length));
+    }
+}
