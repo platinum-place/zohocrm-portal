@@ -49,21 +49,26 @@ class UserModel extends Model
         return $data;
     }
 
-    public function getRoles(): array
+    protected function userRole(): UserRoleModel
     {
-        return (new UserRoleModel())
+        return new UserRoleModel();
+    }
+
+    public function getRoles(int $user_id): array
+    {
+        return $this->userRole()
             ->select('roles.*')
             ->join('roles', 'roles.id = user_roles.role_id')
-            ->where('user_roles.user_id', $this->id)
+            ->where('user_roles.user_id', $user_id)
             ->findAll();
     }
 
     /**
      * @throws ReflectionException
      */
-    public function assignRole(int $role_id): bool
+    public function assignRole(int $user_id, int $role_id): bool
     {
-        return (new UserRoleModel())
-            ->insert(['user_id' => $this->id, 'role_id' => $role_id]);
+        return $this->userRole()
+            ->insert(['user_id' => $user_id, 'role_id' => $role_id]);
     }
 }
