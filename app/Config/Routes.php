@@ -43,26 +43,27 @@ $routes->post('oauth/token', 'OAuth::token');
  * API
  * --------------------------------------------------------------------
  */
+$routes->group('api', ['filter' => 'oauth2'], function($routes) {
+    /**
+     * Quote
+     */
+    $routes->post('cotizador/colectiva', 'Api\Quote::estimateVehicle');
+    $routes->post('cotizador/EmitirAuto', 'Api\Quote::issuePolicy');
+    $routes->post('cotizador/CotizaVida', 'Api\Quote::estimateLife');
+    $routes->post('cotizador/EmitirVida', 'Api\Quote::issueLife');
+    $routes->post('cotizador/CotizaDesempleo', 'Api\Quote::estimateUnemployment');
+    $routes->post('cotizador/EmitirDesempleo', 'Api\Quote::issueLife');
+    $routes->post('cotizador/CotizaIncendio', 'Api\Quote::estimateFire');
+    $routes->post('cotizador/EmitirIncendio', 'Api\Quote::issueLife');
+    $routes->get('Productos', 'Api\Quote::products');
 
-/**
- * Quote
- */
-$routes->post('api/cotizador/colectiva', 'Api\Quote::estimateVehicle');
-$routes->post('api/cotizador/EmitirAuto', 'Api\Quote::issuePolicy');
-$routes->post('api/cotizador/CotizaVida', 'Api\Quote::estimateLife');
-$routes->post('api/cotizador/EmitirVida', 'Api\Quote::issueLife');
-$routes->post('api/cotizador/CotizaDesempleo', 'Api\Quote::estimateUnemployment');
-$routes->post('api/cotizador/EmitirDesempleo', 'Api\Quote::issueLife');
-$routes->post('api/cotizador/CotizaIncendio', 'Api\Quote::estimateFire');
-$routes->post('api/cotizador/EmitirIncendio', 'Api\Quote::issueLife');
-$routes->get('api/Productos', 'Api\Quote::products');
-
-/**
- * Vehicle
- */
-$routes->post('api/vehiculos/Marca', 'Api\Vehicle::brands');
-$routes->post('api/vehiculos/Modelos/(:num)', 'Api\Vehicle::models/$1');
-$routes->post('api/vehiculos/TipoVehiculo', 'Api\Vehicle::types');
+    /**
+     * Vehicle
+     */
+    $routes->post('vehiculos/Marca', 'Api\Vehicle::brands');
+    $routes->post('vehiculos/Modelos/(:num)', 'Api\Vehicle::models/$1');
+    $routes->post('vehiculos/TipoVehiculo', 'Api\Vehicle::types');
+});
 
 
 /*

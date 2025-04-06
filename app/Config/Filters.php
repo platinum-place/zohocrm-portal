@@ -40,7 +40,7 @@ class Filters extends BaseConfig
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
-            'sesion' => ['except' => ['plantillas/*', 'login', 'oauth/*','api/*']],
+            'sesion' => ['except' => ['plantillas/*', 'login', 'oauth/*','api/*']], //TODO
         ],
         'after' => [
             'toolbar',
@@ -69,7 +69,5 @@ class Filters extends BaseConfig
      *
      * @var array
      */
-    public $filters = [
-        'oauth2' => ['before' => ['api/*']],
-    ];
+    public $filters = [];
 }
