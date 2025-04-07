@@ -14,15 +14,15 @@ class CreateClientSeeder extends Seeder
         $client_id = generate_uuid_string();
         $client_secret = generate_secure_password(16);
 
-        $data = [
+        $this->db->table('oauth_clients')->insert([
             'client_id' => $client_id,
             'client_secret' => $client_secret,
             'redirect_uri' => 'http://fake/',
-        ];
+        ]);
 
-        $this->db->table('oauth_clients')->insert($data);
-
+        CLI::write('--------------------------------------------------------------------------------', 'green');
         CLI::write('Client ID: ' . $client_id, 'green');
         CLI::write('Client Secret: ' . $client_secret, 'yellow');
+        CLI::write('--------------------------------------------------------------------------------', 'green');
     }
 }
