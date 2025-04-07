@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace doc;
 
 use CodeIgniter\Model;
 use ReflectionException;
@@ -8,14 +8,14 @@ use ReflectionException;
 class UserModel extends Model
 {
     protected $DBGroup = 'default';
-    protected $table = 'users';
+    protected $table = 'oauth_users';
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
     protected $insertID = 0;
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $protectFields = true;
-    protected $allowedFields = ['name', 'username', 'email', 'password'];
+    protected $allowedFields = ['password', 'username', 'first_name', 'last_name','email', 'email_verified','scope'];
 
     // Dates
     protected $useTimestamps = false;
@@ -57,7 +57,6 @@ class UserModel extends Model
     public function getRoles(int $user_id): array
     {
         return $this->userRole()
-            ->select('roles.*')
             ->join('roles', 'roles.id = user_roles.role_id')
             ->where('user_roles.user_id', $user_id)
             ->findAll();
@@ -70,5 +69,16 @@ class UserModel extends Model
     {
         return $this->userRole()
             ->insert(['user_id' => $user_id, 'role_id' => $role_id]);
+    }
+
+    public function hasRole(int $user_id, int $role_name): bool
+    {
+        $query = $this->userRole()
+            ->join('roles', 'roles.id = user_roles.role_id')
+            ->where('user_roles.user_id', $user_id)
+            ->where('roles.name', $role_name)
+            ->get();
+
+        return $query->getRow() !== null;
     }
 }

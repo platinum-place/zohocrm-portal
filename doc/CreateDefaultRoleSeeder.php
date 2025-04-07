@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Database\Seeds;
+namespace doc;
 
-use App\Models\RoleModel;
-use CodeIgniter\CLI\CLI;
 use CodeIgniter\Database\Seeder;
 use ReflectionException;
 

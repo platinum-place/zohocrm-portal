@@ -3,6 +3,7 @@
 namespace Config;
 
 use App\Filters\EnsureOAuth2;
+use App\Filters\OnlySuperUser;
 use App\Filters\Sesion;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
@@ -27,6 +28,7 @@ class Filters extends BaseConfig
         'secureheaders' => SecureHeaders::class,
         'sesion'        => Sesion::class, //TODO
         'oauth2'        => EnsureOAuth2::class,
+        'superuser'     => OnlySuperUser::class,
     ];
 
     /**

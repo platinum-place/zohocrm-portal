@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Database\Seeds;
+namespace doc;
 
 use CodeIgniter\Database\Seeder;
 

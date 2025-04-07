@@ -43,7 +43,7 @@ $routes->post('oauth/token', 'OAuth::token');
  * API
  * --------------------------------------------------------------------
  */
-$routes->group('api', ['filter' => 'oauth2'], function($routes) {
+$routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     /**
      * Quote
      */
@@ -63,8 +63,12 @@ $routes->group('api', ['filter' => 'oauth2'], function($routes) {
     $routes->post('vehiculos/Marca', 'Api\Vehicle::brands');
     $routes->post('vehiculos/Modelos/(:num)', 'Api\Vehicle::models/$1');
     $routes->post('vehiculos/TipoVehiculo', 'Api\Vehicle::types');
-});
 
+    /**
+     * User
+     */
+    $routes->get('users', 'Api\User::index');
+});
 
 /*
  * --------------------------------------------------------------------

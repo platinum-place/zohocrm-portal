@@ -17,7 +17,7 @@ class CreateClientSeeder extends Seeder
         $this->db->table('oauth_clients')->insert([
             'client_id' => $client_id,
             'client_secret' => $client_secret,
-            'redirect_uri' => 'http://fake/',
+            'redirect_uri' => '',
         ]);
 
         CLI::write('--------------------------------------------------------------------------------', 'green');

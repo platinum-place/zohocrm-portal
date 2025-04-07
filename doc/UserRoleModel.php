@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace doc;
 
 use CodeIgniter\Model;
 use ReflectionException;

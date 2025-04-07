@@ -46,6 +46,6 @@ class OAuth2
         // Add the "Authorization Code" grant type (this is where the oauth magic happens)
         //$this->server->addGrantType(new AuthorizationCode($this->storage));
 
-        //$this->server->addGrantType(new UserCredentials($this->storage));
+        $this->server->addGrantType(new UserCredentials($this->storage));
     }
 }
