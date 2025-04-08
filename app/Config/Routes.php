@@ -55,7 +55,6 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     $routes->post('cotizador/EmitirDesempleo', 'Api\Quote::issueLife');
     $routes->post('cotizador/CotizaIncendio', 'Api\Quote::estimateFire');
     $routes->post('cotizador/EmitirIncendio', 'Api\Quote::issueLife');
-    $routes->get('Productos', 'Api\Quote::products');
 
     /**
      * Vehicle
@@ -68,6 +67,13 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
      * User
      */
     $routes->get('users', 'Api\User::index');
+
+
+    /**
+     * Vehicle
+     */
+    $routes->get('Productos', 'Api\Service::index');
+    $routes->get('Productos/Aseguradoras/(:num)', 'Api\Service::show/$1');
 });
 
 /*
