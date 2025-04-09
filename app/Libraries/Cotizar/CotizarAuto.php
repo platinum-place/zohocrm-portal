@@ -210,6 +210,7 @@ class CotizarAuto extends Cotizar
                 "neta" => $prima * 0.16,
                 "total" => $prima,
                 "suma" => $this->cotizacion->suma,
+                "plan" =>$cobertura->getFieldValue('Plan'),
                 "comentario" => $comentario
             ];
         }

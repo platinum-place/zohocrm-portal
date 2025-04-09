@@ -67,7 +67,7 @@ class Quote extends ResourceController
                 "Tel_Celular" => $data['TelefMovil'],
                 "Tel_Residencia" => $data['TelefResidencia'],
                 "Tel_Trabajo" => $data['TelefTrabajo'],
-                "Plan" => 'Anual full',
+                "Plan" => $plan['plan'],
                 "Suma_asegurada" => $data['MontoAsegurado'],
                 "A_o" => $data['Anio'],
                 "Marca" => $data['Marca'],
@@ -75,6 +75,7 @@ class Quote extends ResourceController
                 "Tipo_veh_culo" => $data['TipoVehiculo'],
                 "Chasis" => $data['Chasis'],
                 "Placa" => $data['Placa'],
+                "Fuente" => 'API',
             ];
             $id = $libreria->createRecords("Quotes", $registro, $cotizacion->planes);
 
@@ -86,7 +87,7 @@ class Quote extends ResourceController
                 'PrimaTotal' => round($plan['total'], 2),
                 'PrimaCuota' => round($plan['total'] / 12, 2),
                 'Planid' => '',
-                'Plan' => 'Plan Anual Full',
+                'Plan' => $plan['plan'],
                 'Aseguradora' => $plan['aseguradora'],
                 'Idcotizacion' => $id,
                 'Fecha' => date('Y-m-d'),
@@ -177,6 +178,7 @@ class Quote extends ResourceController
                 "Plazo" => $data['PlazoAnios'] * 12,
                 "Nombre_codeudor" => $data['codeudor'],
                 "Fecha_de_nacimiento_codeudor" => $data['EdadCodeudor'],
+                "Fuente" => 'API',
             ];
 
             $id = $libreria->createRecords("Quotes", $registro, [$plan]);
@@ -269,6 +271,7 @@ class Quote extends ResourceController
                 "Suma_asegurada" => $data['MontoOriginal'],
                 "Plazo" => $data['Plazo'] * 12,
                 "Cuota" => $data['Cuota'],
+                "Fuente" => 'API',
             ];
 
             $id = $libreria->createRecords("Quotes", $registro, [$plan]);
@@ -342,6 +345,7 @@ class Quote extends ResourceController
                 "Suma_asegurada" => $data['ValorFinanciado'],
                 "Plazo" => $data['Plazo'] * 12,
                 "Cuota" => $data['Cuota'],
+                "Fuente" => 'API',
             ];
 
             $id = $libreria->createRecords("Quotes", $registro, [$plan]);
