@@ -1,72 +1,8 @@
-<div class="card-group border">
-    <div class="card border-0">
-        <div class="card-body">
-            <table class="table table-sm table-borderless">
-                <tbody>
-                    <tr>
-                        <th scope="col">Marca</th>
-                        <td><?= $cotizacion->getFieldValue('Marca')->getLookupLabel() ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Modelo</th>
-                        <td><?= $cotizacion->getFieldValue('Modelo')->getLookupLabel() ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Año</th>
-                        <td><?= $cotizacion->getFieldValue("A_o") ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Color</th>
-                        <td><?= $cotizacion->getFieldValue("Color") ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Tipo</th>
-                        <td><?= $cotizacion->getFieldValue("Tipo_veh_culo") ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Salvamento</th>
-                        <td><?= ($cotizacion->getFieldValue("Salvamento")) ? "Si" : "No" ?></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card border-0">
-        <div class="card-body">
-            <table class="table table-sm table-borderless">
-                <tbody>
-                    <tr>
-                        <th scope="col">Chasis</th>
-                        <td><?= $cotizacion->getFieldValue("Chasis") ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Placa</th>
-                        <td><?= $cotizacion->getFieldValue("Placa") ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Uso</th>
-                        <td><?= $cotizacion->getFieldValue("Uso") ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Condiciones</th>
-                        <td><?= $cotizacion->getFieldValue("Condiciones") ?></td>
-                    </tr>
-
-                    <tr>
-                        <th scope="col">Suma asegurada</th>
-                        <td>RD$<?= number_format($cotizacion->getFieldValue("Suma_asegurada"), 2) ?></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+<table class="small-print-table" style="border:none; font-size:smaller; width:100%; border-collapse:collapse;">
+    <tr><td style="width:15%"><b>Marca:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue('Marca')->getLookupLabel()?></td><td style="width:15%"><b>Chasis:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Chasis")?></td></tr>
+    <tr><td style="width:15%"><b>Modelo:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue('Modelo')->getLookupLabel()?></td><td style="width:15%"><b>Placa:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Placa")?></td></tr>
+    <tr><td style="width:15%"><b>Año:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("A_o")?></td><td style="width:15%"><b>Uso:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Uso")?></td></tr>
+    <tr><td style="width:15%"><b>Color:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Color")?></td><td style="width:15%"><b>Condiciones:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Condiciones")?></td></tr>
+    <tr><td style="width:15%"><b>Tipo:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Tipo_veh_culo")?></td><td style="width:15%"><b>Suma:</b></td><td style="width:35%">RD$<?=number_format($cotizacion->getFieldValue("Suma_asegurada"),2)?></td></tr>
+    <tr><td style="width:15%"><b>Salvamento:</b></td><td style="width:35%"><?=($cotizacion->getFieldValue("Salvamento"))?"Si":"No"?></td><td style="width:15%"><b>&nbsp;</b></td><td style="width:35%">&nbsp;</td></tr>
+</table>

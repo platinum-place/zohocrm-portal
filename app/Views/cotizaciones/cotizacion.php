@@ -38,10 +38,6 @@
 
 
 <?php if ($cotizacion->getFieldValue("Plan") == "Anual Full" or $cotizacion->getFieldValue("Plan") == "Mensual Full") : ?>
-    <div class="col-12">
-        &nbsp;
-    </div>
-
     <h5 class="d-flex justify-content-center bg-primary text-white">DATOS DEL VEHÍCULO</h5>
     <?= $this->include('auto/datos_vehiculo') ?>
 <?php endif ?>
