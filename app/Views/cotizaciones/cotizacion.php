@@ -106,14 +106,6 @@
     &nbsp;
 </div>
 
-<div class="col-12">
-    &nbsp;
-</div>
-
-<div class="col-12">
-    &nbsp;
-</div>
-
 <div class="row">
     <div class="col-4">
         <p class="text-center">

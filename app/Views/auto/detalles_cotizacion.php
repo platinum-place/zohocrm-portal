@@ -170,6 +170,35 @@
     </div>
 </div>
 
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="terms-container" style="font-size: 12px; max-width: 98%; margin: 0 auto;">
+                <p class="mb-1"><strong>a)</strong> Las aseguradoras al efectuar su proceso de evaluación de riesgo, se reservan el derecho de aceptación del mismo. En caso de que la aseguradora seleccionada decline el riesgo, el cliente será notificado y en lo inmediato deberá escoger otra aseguradora que haya presentado cotización.</p>
+
+                <p class="mb-1"><strong>b)</strong> La aseguradora se reserva el derecho para realizar variación de prima y coberturas en esta cotización de seguros suscrita con el cliente.</p>
+
+                <p class="mb-1"><strong>1)</strong> Deducible de MAPFRE en su plan cero deducible y para vehículos 0km: en el caso de automóviles y jeepetas tendrán 0% de deducible y a partir del 5to año cambia al deducible del 0.5% mínimo RD$ 5,000. En el caso de camionetas 0km tendrán 0.5% de deducible mínimo RD$ 5,000.00 por el tiempo del préstamo.</p>
+
+                <p class="mb-1"><strong>2)</strong> Deducible de Humano en su plan cero deducible y para vehículos 0km: en el caso de automóviles, jeepetas, camionetas y vehículos pesados tendrán 0% de deducible y a partir del 5to año cambia al deducible del 1% mínimo RD$ 5,000.00</p>
+
+                <p class="mb-1"><strong>c)</strong> Exclusión por mora<br>
+                    El cliente que presente un atraso de más de 120 días, será excluido de la póliza de vehículos.<br>
+                    Efectuado el pago el cliente deberá pasar por una sucursal de Banco Caribe, donde se le realizará la re-inspección del vehículo, de no proceder con la misma continuará sin cobertura de póliza.</p>
+
+                <p class="mb-2"><strong>Vigencia:</strong> Por el período del préstamo</p>
+            </div>
+        </div>
+    </div>
+
+<!--    <div class="row mt-3">-->
+<!--        <div class="col-12 text-center">-->
+<!--            <p style="font-size: 11px;">He leido y estoy de acuerdo en seleccionar la aseguradora: ________________________________</p>-->
+<!--            <p style="font-size: 11px;">Al firmar acepta todas las condiciones detalladas en esta cotización de la aseguradora seleccionada</p>-->
+<!--        </div>-->
+<!--    </div>-->
+</div>
+
 <style>
     .card-container {
         border: 1px solid #dee2e6;
@@ -210,5 +239,9 @@
 
     .section-pricing {
         min-height: 65px;
+    }
+
+    .terms-container {
+        line-height: 1.3;
     }
 </style>
