@@ -3,14 +3,13 @@
 namespace Config;
 
 use App\Filters\EnsureOAuth2;
-use App\Filters\OnlySuperUser;
-use App\Filters\Sesion;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\DebugToolbar;
 use CodeIgniter\Filters\Honeypot;
 use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\SecureHeaders;
+use doc\Sesion;
 
 class Filters extends BaseConfig
 {
@@ -26,9 +25,7 @@ class Filters extends BaseConfig
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
-        'sesion'        => Sesion::class, //TODO
         'oauth2'        => EnsureOAuth2::class,
-        'superuser'     => OnlySuperUser::class,
     ];
 
     /**
@@ -42,7 +39,6 @@ class Filters extends BaseConfig
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
-            'sesion' => ['except' => ['plantillas/*', 'login', 'oauth/*','api/*']], //TODO
         ],
         'after' => [
             'toolbar',
