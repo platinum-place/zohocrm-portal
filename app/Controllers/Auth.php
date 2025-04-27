@@ -30,7 +30,7 @@ class Auth extends BaseController
                     'required' => 'El campo Uusario es obligatorio',
                 ]
             ],
-            'pass' => [
+            'password' => [
                 'rules' => 'required',
                 'errors' => [
                     'required' => 'La contraseña es obligatoria',
@@ -53,7 +53,6 @@ class Auth extends BaseController
             $session = session();
 
             $userData = [
-                'user_id' => $user['id'],
                 'username' => $user['username'],
                 'logged_in' => true
             ];

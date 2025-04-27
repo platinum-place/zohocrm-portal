@@ -16,3 +16,4 @@ $routes->post('oauth/token', 'OAuth::token');
  */
 $routes->get('login', 'Auth::index');
 $routes->post('login', 'Auth::login');
+$routes->put('logout', 'Auth::login');
