@@ -53,7 +53,7 @@ class Auth extends BaseController
             $session = session();
 
             $userData = [
-                'username' => $user['username'],
+                'user' => $user,
                 'logged_in' => true
             ];
 
