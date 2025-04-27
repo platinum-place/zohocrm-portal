@@ -2,11 +2,16 @@
 
 namespace App\Database\Seeds;
 
+use App\Models\RoleModel;
+use App\Models\UserModel;
 use CodeIgniter\CLI\CLI;
 use CodeIgniter\Database\Seeder;
 
-class CreateUserSeeder extends Seeder
+class CreateAdminUserSeeder extends Seeder
 {
+    /**
+     * @throws \ReflectionException
+     */
     public function run()
     {
         helper('string_util');
@@ -19,6 +24,12 @@ class CreateUserSeeder extends Seeder
             'username' => $username,
             'password' => password_hash($password, PASSWORD_DEFAULT),
         ]);
+
+        $roleModel = new RoleModel();
+        $role_id = $roleModel->where('name', SUPERUSER)->first()['id'];
+
+        $userModel = new UserModel();
+        $userModel->assignRole($username, $role_id);
 
         CLI::write('--------------------------------------------------------------------------------', 'green');
         CLI::write('Username: ' . $username, 'green');
