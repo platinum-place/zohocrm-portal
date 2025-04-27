@@ -2,16 +2,74 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\API\ResponseTrait;
+use App\Controllers\BaseController;
+use App\Models\UserModel;
 
 class Auth extends BaseController
 {
-    use ResponseTrait;
+    protected $helpers = ['form'];
 
-    protected $helpers = ['url', 'form'];
+    protected $userModel;
+
+    public function __construct()
+    {
+        $this->userModel = new UserModel();
+    }
+
+    public function index()
+    {
+        return view('auth/login');
+    }
 
     public function login()
     {
-        return view('auth/login');
+        $rules = [
+            'username' => [
+                'rules' => 'required',
+                'errors' => [
+                    'required' => 'El campo Uusario es obligatorio',
+                ]
+            ],
+            'pass' => [
+                'rules' => 'required',
+                'errors' => [
+                    'required' => 'La contraseña es obligatoria',
+                ]
+            ]
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        $username = $this->request->getPost('username');
+        $password = $this->request->getPost('password');
+
+        $user = $this->userModel->where('username', $username)->first();
+
+        if ($user && password_verify($password, $user['password'])) {
+            $session = session();
+
+            $userData = [
+                'user_id' => $user['id'],
+                'username' => $user['username'],
+                'logged_in' => true
+            ];
+
+            $session->set($userData);
+            return redirect()->to(site_url('/'));
+        }
+
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Usuario o contraseña incorrectos');
+    }
+
+    public function logout()
+    {
+        session()->destroy();
+        return redirect()->to(site_url('login'));
     }
 }

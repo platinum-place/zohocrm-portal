@@ -14,4 +14,5 @@ $routes->post('oauth/token', 'OAuth::token');
 /**
  * Auth
  */
-$routes->get('login', 'Auth::login');
+$routes->get('login', 'Auth::index');
+$routes->post('login', 'Auth::login');
