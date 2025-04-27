@@ -2,8 +2,8 @@
 
 namespace App\Controllers\Api;
 
+use App\Models\UserModel;
 use CodeIgniter\RESTful\ResourceController;
-use doc\UserModel;
 
 class UserController extends ResourceController
 {
