@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Filters\EnsureAuthentication;
 use App\Filters\EnsureOAuth2;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
@@ -26,6 +27,7 @@ class Filters extends BaseConfig
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
         'oauth2'        => EnsureOAuth2::class,
+        'auth'          => EnsureAuthentication::class,
     ];
 
     /**
