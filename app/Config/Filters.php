@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Filters\EnsureAdmin;
 use App\Filters\EnsureAuthentication;
 use App\Filters\EnsureOAuth2;
 use CodeIgniter\Config\BaseConfig;
@@ -28,6 +29,7 @@ class Filters extends BaseConfig
         'secureheaders' => SecureHeaders::class,
         'oauth2'        => EnsureOAuth2::class,
         'auth'          => EnsureAuthentication::class,
+        'auth.admin'         => [EnsureAuthentication::class, EnsureAdmin::class],
     ];
 
     /**

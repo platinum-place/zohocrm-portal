@@ -34,6 +34,7 @@ $routes->setAutoRoute(false);
 
 require APPPATH . 'Routes/Auth.php';
 require APPPATH . 'Routes/App.php';
+require APPPATH . 'Routes/Admin.php';
 
 
 /**
