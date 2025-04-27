@@ -1,8 +1,9 @@
 <?php
 
-namespace doc;
+namespace App\Models;
 
 use CodeIgniter\Model;
+use doc\UserRoleModel;
 use ReflectionException;
 
 class UserModel extends Model
