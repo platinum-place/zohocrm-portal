@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
-use doc\UserRoleModel;
 use ReflectionException;
 
 class UserModel extends Model
@@ -66,7 +65,7 @@ class UserModel extends Model
     /**
      * @throws ReflectionException
      */
-    public function assignRole(int $user_id, int $role_id): bool
+    public function assignRole(string $user_id, int $role_id): bool
     {
         return $this->userRole()
             ->insert(['user_id' => $user_id, 'role_id' => $role_id]);
