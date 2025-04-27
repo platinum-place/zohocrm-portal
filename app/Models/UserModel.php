@@ -71,7 +71,7 @@ class UserModel extends Model
             ->insert(['user_id' => $user_id, 'role_id' => $role_id]);
     }
 
-    public function hasRole(int $user_id, int $role_name): bool
+    public function hasRole(string $user_id, string $role_name): bool
     {
         $query = $this->userRole()
             ->join('roles', 'roles.id = user_roles.role_id')
