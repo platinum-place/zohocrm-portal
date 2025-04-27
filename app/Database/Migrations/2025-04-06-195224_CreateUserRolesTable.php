@@ -1,6 +1,6 @@
 <?php
 
-namespace doc;
+namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
@@ -10,9 +10,8 @@ class CreateUserRolesTable extends Migration
     {
         $this->forge->addField([
             'user_id' => [
-                'type'       => 'INT',
-                'unsigned'   => true,
-                'constraint' => 11,
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
             ],
             'role_id' => [
                 'type'       => 'INT',
@@ -31,7 +30,7 @@ class CreateUserRolesTable extends Migration
 
         $this->forge->addKey(['user_id', 'role_id'], true);
 
-        $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('user_id', 'oauth_users', 'username', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('role_id', 'roles', 'id', 'CASCADE', 'CASCADE');
 
         $this->forge->createTable('user_roles');
