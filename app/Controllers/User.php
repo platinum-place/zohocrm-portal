@@ -82,12 +82,6 @@ class User extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $user = $this->userModel->find($id);
-
-        if (!$user) {
-            return redirect()->to('admin/users')->with('error', 'Usuario no encontrado.');
-        }
-
         $updateData = [
             'username' => $this->request->getPost('username'),
             'email' => $this->request->getPost('email'),
@@ -104,32 +98,94 @@ class User extends BaseController
     {
         helper('string_util');
 
-        $user = $this->userModel->find($id);
-
-        if (!$user) {
-            return redirect()->to('admin/users')->with('error', 'Usuario no encontrado.');
-        }
-
         $password = generate_secure_password(16);
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         $this->userModel->update($id, ['password' => $hashedPassword]);
 
-        return redirect()->to('admin/users')->with('alert', 'Contraseña restablecida con éxito. Nueva contraseña: ' . esc($password));
+        return redirect()
+            ->to('admin/users')
+            ->with('alert', 'Contraseña restablecida con éxito. Nueva contraseña: ' . esc($password));
     }
 
     public function delete($id)
     {
-        $user = $this->userModel->find($id);
-
-        if (!$user) {
-            return redirect()->to('admin/users')->with('error', 'Usuario no encontrado.');
-        }
-
         if ($this->userModel->delete($id)) {
-            return redirect()->to('admin/users')->with('alert', 'Usuario eliminado con éxito.');
+            return redirect()
+                ->to('admin/users')
+                ->with('alert', 'Usuario eliminado con éxito.');
         } else {
-            return redirect()->to('admin/users')->with('alert', 'Ocurrió un problema al intentar eliminar al usuario.');
+            return redirect()
+                ->to('admin/users')
+                ->with('alert', 'Ocurrió un problema al intentar eliminar al usuario.');
         }
+    }
+
+    public function create()
+    {
+        return view('user/create');
+    }
+
+    public function store()
+    {
+        helper('string_util');
+
+        $rules = [
+            'username' => [
+                'rules' => 'required|min_length[3]|max_length[100]|is_unique[users.username]',
+                'errors' => [
+                    'required' => 'El campo Usuario es obligatorio.',
+                    'min_length' => 'El campo Usuario debe tener al menos 3 caracteres.',
+                    'max_length' => 'El campo Usuario no puede exceder los 100 caracteres.',
+                    'is_unique' => 'El nombre de usuario ya está en uso.',
+                ],
+            ],
+            'email' => [
+                'rules' => 'required|valid_email|is_unique[users.email]',
+                'errors' => [
+                    'required' => 'El campo Correo Electrónico es obligatorio.',
+                    'valid_email' => 'Debe proporcionar un correo electrónico válido.',
+                    'is_unique' => 'El correo electrónico ya está registrado.',
+                ],
+            ],
+            'first_name' => [
+                'rules' => 'required|min_length[2]|max_length[100]',
+                'errors' => [
+                    'required' => 'El campo Nombre es obligatorio.',
+                    'min_length' => 'El campo Nombre debe tener al menos 2 caracteres.',
+                    'max_length' => 'El campo Nombre no puede exceder los 100 caracteres.',
+                ],
+            ],
+            'last_name' => [
+                'rules' => 'required|min_length[2]|max_length[100]',
+                'errors' => [
+                    'required' => 'El campo Apellido es obligatorio.',
+                    'min_length' => 'El campo Apellido debe tener al menos 2 caracteres.',
+                    'max_length' => 'El campo Apellido no puede exceder los 100 caracteres.',
+                ],
+            ],
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        $password = generate_secure_password(16);
+
+        $data = [
+            'username' => $this->request->getPost('username'),
+            'email' => $this->request->getPost('email'),
+            'first_name' => $this->request->getPost('first_name'),
+            'last_name' => $this->request->getPost('last_name'),
+            'password' => $password,
+        ];
+
+        $this->userModel->insert($data);
+
+        return redirect()
+            ->to('admin/users')
+            ->with('alert', 'Usuario creado con éxito. Contraseña: ' . esc($password));
     }
 }
