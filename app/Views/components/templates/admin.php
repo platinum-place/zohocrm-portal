@@ -10,7 +10,7 @@
 
     <link rel="shortcut icon" href="<?= base_url('img/favicon.png') ?>" type="image/png">
     <link rel="icon" href="<?= base_url('img/favicon.png') ?>" type="image/png">
-    <link href="<?= base_url('css/styles.css') ?>" rel="stylesheet" />
+    <link href="<?= base_url('css/styles.css') ?>" rel="stylesheet"/>
 
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"
@@ -28,9 +28,10 @@
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
-                <?php if (session('error')) : ?>
-                    <div class="alert alert-danger">
-                        <?= session('error') ?>
+                <br>
+                <?php if (session('alert')) : ?>
+                    <div class="alert alert-primary">
+                        <?= session('alert') ?>
                     </div>
                 <?php endif ?>
 

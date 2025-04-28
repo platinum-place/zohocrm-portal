@@ -56,12 +56,12 @@
 <?= $this->section('js') ?>
 <script>
     function editUser(id) {
-        window.location.href = '<?= site_url('user/edit/') ?>' + id;
+        window.location.href = '<?= site_url('admin/users/edit/') ?>' + id;
     }
 
     function deleteUser(id) {
         if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
-            window.location.href = '<?= site_url('user/delete/') ?>' + id;
+            window.location.href = '<?= site_url('admin/users/delete/') ?>' + id;
         }
     }
 

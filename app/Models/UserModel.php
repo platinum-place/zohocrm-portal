@@ -9,7 +9,7 @@ class UserModel extends Model
 {
     protected $DBGroup = 'default';
     protected $table = 'oauth_users';
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'username';
     protected $useAutoIncrement = true;
     protected $insertID = 0;
     protected $returnType = 'array';
