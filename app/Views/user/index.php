@@ -1,0 +1,76 @@
+<?= $this->extend('components/templates/admin') ?>
+
+<?= $this->section('content') ?>
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Usuarios</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Lista de Usuarios
+        </div>
+        <div class="card-body">
+            <table id="datatablesSimple" class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Correo Electrónico</th>
+                    <th>Nombre de usuario</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php if (isset($users) && is_array($users)) : ?>
+                    <?php foreach ($users as $key => $user) : ?>
+                        <tr>
+                            <td><?= $key + 1 ?></td>
+                            <td><?= esc($user['first_name']) . ' ' . esc($user['last_name']) ?></td>
+                            <td><?= esc($user['email']) ?></td>
+                            <td><?= esc($user['username']) ?></td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary btn-sm "
+                                            onclick="editUser('<?= esc($user['username']) ?>')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                            onclick="deleteUser('<?= $user['username'] ?>')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr>
+                        <td colspan="6" class="text-center">No se encontraron usuarios</td>
+                    </tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<?= $this->endSection() ?>
+
+<?= $this->section('js') ?>
+<script>
+    function editUser(id) {
+        window.location.href = '<?= site_url('user/edit/') ?>' + id;
+    }
+
+    function deleteUser(id) {
+        if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
+            window.location.href = '<?= site_url('user/delete/') ?>' + id;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const datatablesSimple = document.getElementById('datatablesSimple');
+        if (datatablesSimple) {
+            new simpleDatatables.DataTable(datatablesSimple);
+        }
+    });
+</script>
+<?= $this->endSection() ?>
+
