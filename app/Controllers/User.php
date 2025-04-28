@@ -132,7 +132,7 @@ class User extends BaseController
 
         $rules = [
             'username' => [
-                'rules' => 'required|min_length[3]|max_length[100]|is_unique[users.username]',
+                'rules' => 'required|min_length[3]|max_length[100]|is_unique[oauth_users.username]',
                 'errors' => [
                     'required' => 'El campo Usuario es obligatorio.',
                     'min_length' => 'El campo Usuario debe tener al menos 3 caracteres.',
@@ -141,7 +141,7 @@ class User extends BaseController
                 ],
             ],
             'email' => [
-                'rules' => 'required|valid_email|is_unique[users.email]',
+                'rules' => 'required|valid_email|is_unique[oauth_users.email]',
                 'errors' => [
                     'required' => 'El campo Correo Electrónico es obligatorio.',
                     'valid_email' => 'Debe proporcionar un correo electrónico válido.',
