@@ -21,7 +21,8 @@
                                 </div>
 
                                 <div class="card-body">
-                                    <?= form_open('login', ['csrf_field' => true]) ?>
+                                    <?= form_open('login',['method' => 'post']) ?>
+                                    <?= csrf_field() ?>
                                     <div class="form-floating mb-3">
                                         <input class="form-control <?= session('errors.username') ? 'is-invalid' : '' ?>"
                                                id="inputEmail"
