@@ -34,10 +34,13 @@
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     |
-                                    <button type="button" class="btn btn-danger btn-sm"
-                                            onclick="deleteUser('<?= esc($user['username']) ?>')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <form action="<?= site_url('admin/users/delete/' . esc($user['username'])) ?>" method="post" style="display: inline;">
+                                        <?= csrf_field() ?>
+                                        <?= form_hidden('_method', 'delete') ?>
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de que desea eliminar este usuario?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                     |
                                     <button type="button" class="btn btn-warning btn-sm"
                                             onclick="resetPassword('<?= esc($user['username']) ?>')">
@@ -63,12 +66,6 @@
 <script>
     function editUser(id) {
         window.location.href = '<?= site_url('admin/users/edit/') ?>' + id;
-    }
-
-    function deleteUser(id) {
-        if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
-            window.location.href = '<?= site_url('admin/users/delete/') ?>' + id;
-        }
     }
 
     function resetPassword(username) {

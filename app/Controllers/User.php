@@ -117,4 +117,19 @@ class User extends BaseController
 
         return redirect()->to('admin/users')->with('alert', 'Contraseña restablecida con éxito. Nueva contraseña: ' . esc($password));
     }
+
+    public function delete($id)
+    {
+        $user = $this->userModel->find($id);
+
+        if (!$user) {
+            return redirect()->to('admin/users')->with('error', 'Usuario no encontrado.');
+        }
+
+        if ($this->userModel->delete($id)) {
+            return redirect()->to('admin/users')->with('alert', 'Usuario eliminado con éxito.');
+        } else {
+            return redirect()->to('admin/users')->with('alert', 'Ocurrió un problema al intentar eliminar al usuario.');
+        }
+    }
 }

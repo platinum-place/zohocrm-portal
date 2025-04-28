@@ -14,4 +14,5 @@ $routes->group('admin', ['filter' => 'auth.admin'], function ($routes) {
     $routes->get('users/edit/(:segment)', 'User::edit/$1');
     $routes->put('users/update/(:segment)', 'User::update/$1');
     $routes->get('users/reset-password/(:segment)', 'User::resetPassword/$1');
+    $routes->delete('users/delete/(:segment)', 'User::delete/$1');
 });
