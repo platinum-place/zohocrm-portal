@@ -7,7 +7,11 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 $routes->group('admin', ['filter' => 'auth.admin'], function ($routes) {
+    /**
+     * User
+     */
     $routes->get('users', 'User::index');
     $routes->get('users/edit/(:segment)', 'User::edit/$1');
     $routes->put('users/update/(:segment)', 'User::update/$1');
+    $routes->get('users/reset-password/(:segment)', 'User::resetPassword/$1');
 });

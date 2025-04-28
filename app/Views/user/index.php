@@ -29,13 +29,19 @@
                             <td><?= esc($user['username']) ?></td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-primary btn-sm "
+                                    <button type="button" class="btn btn-primary btn-sm"
                                             onclick="editUser('<?= esc($user['username']) ?>')">
                                         <i class="fas fa-edit"></i>
                                     </button>
+                                    |
                                     <button type="button" class="btn btn-danger btn-sm"
-                                            onclick="deleteUser('<?= $user['username'] ?>')">
+                                            onclick="deleteUser('<?= esc($user['username']) ?>')">
                                         <i class="fas fa-trash"></i>
+                                    </button>
+                                    |
+                                    <button type="button" class="btn btn-warning btn-sm"
+                                            onclick="resetPassword('<?= esc($user['username']) ?>')">
+                                        <i class="fas fa-key"></i>
                                     </button>
                                 </div>
                             </td>
@@ -62,6 +68,12 @@
     function deleteUser(id) {
         if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
             window.location.href = '<?= site_url('admin/users/delete/') ?>' + id;
+        }
+    }
+
+    function resetPassword(username) {
+        if (confirm('¿Está seguro de que desea resetear la contraseña de este usuario?')) {
+            window.location.href = '<?= site_url('admin/users/reset-password/') ?>' + username;
         }
     }
 

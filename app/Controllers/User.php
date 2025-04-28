@@ -99,4 +99,22 @@ class User extends BaseController
 
         return redirect()->to('admin/users')->with('alert', 'Usuario actualizado con éxito.');
     }
+
+    public function resetPassword($id)
+    {
+        helper('string_util');
+
+        $user = $this->userModel->find($id);
+
+        if (!$user) {
+            return redirect()->to('admin/users')->with('error', 'Usuario no encontrado.');
+        }
+
+        $password = generate_secure_password(16);
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $this->userModel->update($id, ['password' => $hashedPassword]);
+
+        return redirect()->to('admin/users')->with('alert', 'Contraseña restablecida con éxito. Nueva contraseña: ' . esc($password));
+    }
 }
