@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\RoleModel;
 use App\Models\UserModel;
 
 class User extends BaseController
@@ -35,9 +36,14 @@ class User extends BaseController
             return redirect()->to('admin/users')->with('message', 'Usuario no encontrado.');
         }
 
+        $roleModel = new RoleModel();
+        $roles = $roleModel->findAll();
+
         return view('user/edit', [
             'user' => $user,
+            'roles' => $roles
         ]);
+
     }
 
     public function update($id)

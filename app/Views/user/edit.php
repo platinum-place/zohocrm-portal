@@ -1,4 +1,7 @@
-<?php /** @var array $user */ ?>
+<?php
+/** @var array $user */
+/** @var array $roles */
+?>
 <?= $this->extend('components/templates/admin') ?>
 
 <?= $this->section('content') ?>
@@ -27,6 +30,18 @@
                                 <label for="first_name" class="form-label">Primer Nombre</label>
                                 <input type="text" class="form-control" id="first_name" name="first_name"
                                        value="<?= set_value('first_name', $user['first_name']) ?>" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Rol</label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="">Seleccione un rol</option>
+                                    <?php foreach ($roles as $role): ?>
+                                        <option value="<?= $role['id'] ?>" <?= isset($user['role_id']) && $user['role_id'] == $role['id'] ? 'selected' : '' ?>>
+                                            <?= esc($role['name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
 
