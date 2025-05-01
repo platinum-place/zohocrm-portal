@@ -3,61 +3,56 @@
 <?= $this->section('content') ?>
     <div class="container-fluid px-4">
         <div class="d-flex justify-content-between align-items-center mt-4">
-            <h1>Usuarios</h1>
-            <a href="<?= site_url('admin/users/create') ?>" class="btn btn-success">
-                <i class="fas fa-user-plus"></i> Crear Usuario
+            <h1>Clientes</h1>
+            <a href="<?= site_url('admin/clients/create') ?>" class="btn btn-success">
+                <i class="fas fa-user-plus"></i> Crear Cliente
             </a>
         </div>
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-table me-1"></i>
-                Lista de Usuarios
+                Lista de Clientes
             </div>
             <div class="card-body">
                 <table id="datatablesSimple" class="table table-striped table-bordered">
                     <thead>
                     <tr>
                         <th>#</th>
-                        <th>Nombre</th>
-                        <th>Correo Electrónico</th>
-                        <th>Nombre de usuario</th>
+                        <th>Client ID</th>
+                        <th>Usuario</th>
                         <th>Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <?php if (isset($users) && is_array($users)) : ?>
-                        <?php foreach ($users as $key => $user) : ?>
+                    <?php if (isset($clients) && is_array($clients)) : ?>
+                        <?php foreach ($clients as $key => $client) : ?>
                             <tr>
                                 <td><?= $key + 1 ?></td>
-                                <td><?= esc($user['first_name']) . ' ' . esc($user['last_name']) ?></td>
-                                <td><?= esc($user['email']) ?></td>
-                                <td><?= esc($user['username']) ?></td>
+                                <td><?= esc($client['client_id']) ?></td>
+                                <td><?= esc($client['user_id']) ?></td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-primary btn-sm"
-                                                onclick="editUser('<?= esc($user['username']) ?>')">
+                                                onclick="editClient('<?= esc($client['client_id']) ?>')">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         |
-                                        <form action="<?= site_url('admin/users/delete/' . esc($user['username'])) ?>" method="post" style="display: inline;">
+                                        <form action="<?= site_url('admin/clients/delete/' . esc($client['client_id'])) ?>"
+                                              method="post" style="display: inline;">
                                             <?= csrf_field() ?>
                                             <input type="hidden" name="_method" value="DELETE">
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de que desea eliminar este usuario?')">
+                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('¿Está seguro de que desea eliminar este cliente?')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
-                                        |
-                                        <button type="button" class="btn btn-warning btn-sm"
-                                                onclick="resetPassword('<?= esc($user['username']) ?>')">
-                                            <i class="fas fa-key"></i>
-                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="6" class="text-center">No se encontraron usuarios</td>
+                            <td colspan="5" class="text-center">No se encontraron clientes</td>
                         </tr>
                     <?php endif; ?>
                     </tbody>
@@ -69,14 +64,8 @@
 
 <?= $this->section('js') ?>
     <script>
-        function editUser(id) {
-            window.location.href = '<?= site_url('admin/users/edit/') ?>' + id;
-        }
-
-        function resetPassword(username) {
-            if (confirm('¿Está seguro de que desea resetear la contraseña de este usuario?')) {
-                window.location.href = '<?= site_url('admin/users/reset-password/') ?>' + username;
-            }
+        function editClient(clientId) {
+            window.location.href = '<?= site_url('admin/clients/edit/') ?>' + clientId;
         }
 
         document.addEventListener('DOMContentLoaded', function () {

@@ -16,7 +16,7 @@
             <div class="card-body">
                 <form action="<?= site_url('admin/users/update/' . $user['username']) ?>" method="post">
                     <?= csrf_field() ?>
-                    <?= form_hidden('_method', 'put') ?>
+                    <input type="hidden" name="_method" value="PUT">
 
                     <div class="row">
                         <div class="col-md-6">
@@ -33,8 +33,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="role" class="form-label">Rol</label>
-                                <select class="form-select" id="role" name="role" required>
+                                <label for="role_id" class="form-label">Rol</label>
+                                <select class="form-select" id="role_id" name="role_id" required>
                                     <option value="">Seleccione un rol</option>
                                     <?php foreach ($roles as $role): ?>
                                         <option value="<?= $role['id'] ?>" <?= isset($user['role_id']) && $user['role_id'] === $role['id'] ? 'selected' : '' ?>>

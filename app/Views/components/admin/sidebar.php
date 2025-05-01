@@ -14,6 +14,11 @@
                     Usuarios
                 </a>
 
+                <a class="nav-link <?= strpos(current_url(), 'clients') !== false ? 'active' : '' ?>" href="<?= site_url('admin/clients') ?>">
+                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                    Clientes
+                </a>
+
 <!--                <a class="nav-link" href="--><?php //= site_url() ?><!--">-->
 <!--                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>-->
 <!--                    Panel de Control-->

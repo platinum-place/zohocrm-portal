@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+
+use App\Models\ClientModel;
 use App\Models\RoleModel;
 use App\Models\UserModel;
 
@@ -9,7 +11,7 @@ class User extends BaseController
 {
     protected $helpers = ['form'];
 
-    protected $userModel;
+    protected UserModel $userModel;
 
     public function __construct()
     {
@@ -78,7 +80,13 @@ class User extends BaseController
                     'min_length' => 'El campo Apellido debe tener al menos 2 caracteres.',
                     'max_length' => 'El campo Apellido no puede exceder los 100 caracteres.'
                 ]
-            ]
+            ],
+            'role_id' => [
+                'rules' => 'required',
+                'errors' => [
+                    'required' => 'Debes selecionar un rol para el usuario.',
+                ]
+            ],
         ];
 
         if (!$this->validate($rules)) {
@@ -92,6 +100,7 @@ class User extends BaseController
             'email' => $this->request->getPost('email'),
             'first_name' => $this->request->getPost('first_name'),
             'last_name' => $this->request->getPost('last_name'),
+            'role_id' => $this->request->getPost('role_id'),
         ];
 
         $this->userModel->update($id, $updateData);

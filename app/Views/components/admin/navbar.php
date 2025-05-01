@@ -11,7 +11,7 @@
                 <li>
                     <form id="logoutForm" action="<?= site_url('logout') ?>" method="post">
                         <?= csrf_field() ?>
-                        <?= form_hidden('_method', 'put') ?>
+                        <input type="hidden" name="_method" value="PUT">
                         <button type="button" class="dropdown-item" onclick="handleLogout()">
                             Cerrar sesión
                         </button>

@@ -17,4 +17,11 @@ $routes->group('admin', ['filter' => 'auth.admin'], function ($routes) {
     $routes->put('users/update/(:segment)', 'User::update/$1');
     $routes->get('users/reset-password/(:segment)', 'User::resetPassword/$1');
     $routes->delete('users/delete/(:segment)', 'User::delete/$1');
+
+    /**
+     * Client
+     */
+    $routes->get('clients', 'Client::index');
+    $routes->get('clients/edit/(:segment)', 'Client::edit/$1');
+    $routes->put('clients/update/(:segment)', 'Client::update/$1');
 });
