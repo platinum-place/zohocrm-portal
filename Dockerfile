@@ -26,7 +26,7 @@ RUN a2enmod rewrite
 # Instalamos composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 COPY ["composer.json","composer.lock", "/var/www/html/"]
-RUN composer install
+#RUN composer install
 
 # Crear el grupo y el usuario
 RUN groupadd --gid ${GROUPID} ${GROUP} \
