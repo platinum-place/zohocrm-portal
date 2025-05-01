@@ -35,45 +35,7 @@ $routes->setAutoRoute(false);
 require APPPATH . 'Routes/Auth.php';
 require APPPATH . 'Routes/App.php';
 require APPPATH . 'Routes/Admin.php';
-
-
-/**
- * --------------------------------------------------------------------
- * API
- * --------------------------------------------------------------------
- */
-$routes->group('api', ['filter' => 'oauth2'], function ($routes) {
-    /**
-     * Quote
-     */
-    $routes->post('cotizador/colectiva', 'Api\Quote::estimateVehicle');
-    $routes->post('cotizador/EmitirAuto', 'Api\Quote::issuePolicy');
-    $routes->post('cotizador/CotizaVida', 'Api\Quote::estimateLife');
-    $routes->post('cotizador/EmitirVida', 'Api\Quote::issueLife');
-    $routes->post('cotizador/CotizaDesempleo', 'Api\Quote::estimateUnemployment');
-    $routes->post('cotizador/EmitirDesempleo', 'Api\Quote::issueLife');
-    $routes->post('cotizador/CotizaIncendio', 'Api\Quote::estimateFire');
-    $routes->post('cotizador/EmitirIncendio', 'Api\Quote::issueLife');
-
-    /**
-     * Vehicle
-     */
-    $routes->post('vehiculos/Marca', 'Api\Vehicle::brands');
-    $routes->post('vehiculos/Modelos/(:num)', 'Api\Vehicle::models/$1');
-    $routes->post('vehiculos/TipoVehiculo', 'Api\Vehicle::types');
-
-    /**
-     * User
-     */
-    $routes->get('users', 'Api\User::index');
-
-
-    /**
-     * Vehicle
-     */
-    $routes->get('Productos', 'Api\Service::index');
-    $routes->get('Productos/Aseguradoras/(:num)', 'Api\Service::show/$1');
-});
+require APPPATH . 'Routes/Api.php';
 
 /*
  * --------------------------------------------------------------------

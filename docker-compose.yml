@@ -9,7 +9,7 @@ services:
         USERID: ${USERID}
         USER: ${USER}
     ports:
-      - "8000:80"
+      - "80:80"
     volumes:
       - ./:/var/www/html
       - ./writable:/var/www/html/writable
