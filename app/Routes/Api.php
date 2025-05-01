@@ -6,6 +6,9 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
+
+$routes->post('oauth/token', 'OAuth::token');
+
 $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     /**
      * Quote
