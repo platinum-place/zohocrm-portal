@@ -2,11 +2,10 @@
 
 namespace App\Filters;
 
-use App\Models\UserRoleModel;
+use App\Models\RoleModel;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Models\RoleModel;
 
 class EnsureAdmin implements FilterInterface
 {

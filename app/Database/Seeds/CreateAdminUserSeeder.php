@@ -1,10 +1,10 @@
 <?php
 
-namespace Seeds;
+namespace App\Database\Seeds;
 
+use App\Models\RoleModel;
 use CodeIgniter\CLI\CLI;
 use CodeIgniter\Database\Seeder;
-use Models\RoleModel;
 
 class CreateAdminUserSeeder extends Seeder
 {

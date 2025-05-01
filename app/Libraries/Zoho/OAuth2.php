@@ -1,6 +1,6 @@
 <?php
 
-namespace Libraries\Zoho;
+namespace App\Libraries\Zoho;
 
 class OAuth2
 {

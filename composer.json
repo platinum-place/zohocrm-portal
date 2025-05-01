@@ -10,7 +10,7 @@
         "slack": "https://codeigniterchat.slack.com"
     },
     "require": {
-        "php": "^8.4",
+        "php": "^8.1",
         "ext-intl": "*",
         "ext-mbstring": "*",
         "bshaffer/oauth2-server-php": "^1.14",

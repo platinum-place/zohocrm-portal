@@ -2,10 +2,10 @@
 
 namespace App\Filters;
 
+use App\Libraries\Bshaffer\OAuth2;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Libraries\Bshaffer\OAuth2;
 use OAuth2\Request;
 
 class EnsureOAuth2 implements FilterInterface

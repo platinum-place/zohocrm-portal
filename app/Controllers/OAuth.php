@@ -2,8 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Libraries\Bshaffer\OAuth2;
 use CodeIgniter\RESTful\ResourceController;
-use Libraries\Bshaffer\OAuth2;
 use OAuth2\Request;
 
 class OAuth extends ResourceController

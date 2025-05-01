@@ -1,6 +1,6 @@
 <?php
 
-namespace Libraries\Bshaffer;
+namespace App\Libraries\Bshaffer;
 
 use OAuth2\GrantType\ClientCredentials;
 use OAuth2\GrantType\UserCredentials;
