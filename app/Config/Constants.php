@@ -85,4 +85,4 @@ defined('EXIT__AUTO_MAX') || define('EXIT__AUTO_MAX', 125); // highest automatic
  | --------------------------------------------------------------------------
  |
  */
-define('SUPERUSER', 'Super user');
+define('SUPERUSER', 'Super usuario');

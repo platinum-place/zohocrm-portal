@@ -20,16 +20,14 @@ class CreateAdminUserSeeder extends Seeder
         $username = $faker->userName;
         $password = generate_secure_password(6);
 
-        $this->db->table('oauth_users')->insert([
-            'username' => $username,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-        ]);
-
         $roleModel = new RoleModel();
         $role_id = $roleModel->where('name', SUPERUSER)->first()['id'];
 
-        $userModel = new UserModel();
-        $userModel->assignRole($username, $role_id);
+        $this->db->table('oauth_users')->insert([
+            'username' => $username,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'role_id' => $role_id,
+        ]);
 
         CLI::write('--------------------------------------------------------------------------------', 'green');
         CLI::write('Username: ' . $username, 'green');

@@ -15,7 +15,7 @@ class UserModel extends Model
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $protectFields = true;
-    protected $allowedFields = ['password', 'username', 'first_name', 'last_name','email', 'email_verified','scope'];
+    protected $allowedFields = ['role_id','password', 'username', 'first_name', 'last_name','email', 'email_verified','scope'];
 
     // Dates
     protected $useTimestamps = false;
@@ -47,38 +47,5 @@ class UserModel extends Model
             $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
         }
         return $data;
-    }
-
-    protected function userRole(): UserRoleModel
-    {
-        return new UserRoleModel();
-    }
-
-    public function getRoles(int $user_id): array
-    {
-        return $this->userRole()
-            ->join('roles', 'roles.id = user_roles.role_id')
-            ->where('user_roles.user_id', $user_id)
-            ->findAll();
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    public function assignRole(string $user_id, int $role_id): bool
-    {
-        return $this->userRole()
-            ->insert(['user_id' => $user_id, 'role_id' => $role_id]);
-    }
-
-    public function hasRole(string $user_id, string $role_name): bool
-    {
-        $query = $this->userRole()
-            ->join('roles', 'roles.id = user_roles.role_id')
-            ->where('user_roles.user_id', $user_id)
-            ->where('roles.name', $role_name)
-            ->get();
-
-        return $query->getRow() !== null;
     }
 }
