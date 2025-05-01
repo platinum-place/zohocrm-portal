@@ -2,6 +2,9 @@
 
 namespace Config;
 
+use App\Filters\EnsureAdmin;
+use App\Filters\EnsureAuthentication;
+use App\Filters\EnsureOAuth2;
 use CodeIgniter\Config\Filters as BaseFilters;
 use CodeIgniter\Filters\Cors;
 use CodeIgniter\Filters\CSRF;
@@ -34,6 +37,9 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'oauth2'        => EnsureOAuth2::class,
+        'auth'          => EnsureAuthentication::class,
+        'auth.admin'    => [EnsureAuthentication::class, EnsureAdmin::class],
     ];
 
     /**
