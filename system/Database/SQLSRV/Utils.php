@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -34,7 +36,7 @@ class Utils extends BaseUtils
      */
     protected $optimizeTable = 'ALTER INDEX all ON %s REORGANIZE';
 
-    public function __construct(ConnectionInterface &$db)
+    public function __construct(ConnectionInterface $db)
     {
         parent::__construct($db);
 
@@ -44,7 +46,7 @@ class Utils extends BaseUtils
     /**
      * Platform dependent version of the backup function.
      *
-     * @return mixed
+     * @return never
      */
     public function _backup(?array $prefs = null)
     {

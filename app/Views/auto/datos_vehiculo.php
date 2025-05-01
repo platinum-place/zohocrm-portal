@@ -1,8 +1,0 @@
-<table class="small-print-table" style="border:none; font-size:smaller; width:100%; border-collapse:collapse;">
-    <tr><td style="width:15%"><b>Marca:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue('Marca')->getLookupLabel()?></td><td style="width:15%"><b>Chasis:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Chasis")?></td></tr>
-    <tr><td style="width:15%"><b>Modelo:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue('Modelo')->getLookupLabel()?></td><td style="width:15%"><b>Placa:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Placa")?></td></tr>
-    <tr><td style="width:15%"><b>Año:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("A_o")?></td><td style="width:15%"><b>Uso:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Uso")?></td></tr>
-    <tr><td style="width:15%"><b>Color:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Color")?></td><td style="width:15%"><b>Condiciones:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Condiciones")?></td></tr>
-    <tr><td style="width:15%"><b>Tipo:</b></td><td style="width:35%"><?=$cotizacion->getFieldValue("Tipo_veh_culo")?></td><td style="width:15%"><b>Suma:</b></td><td style="width:35%">RD$<?=number_format($cotizacion->getFieldValue("Suma_asegurada"),2)?></td></tr>
-    <tr><td style="width:15%"><b>Salvamento:</b></td><td style="width:35%"><?=($cotizacion->getFieldValue("Salvamento"))?"Si":"No"?></td><td style="width:15%"><b>&nbsp;</b></td><td style="width:35%">&nbsp;</td></tr>
-</table>

@@ -1,7 +1,0 @@
-/.idea
-/vendor
-.env
-zcrm_oauthtokens.txt
-ZCRMClientLibrary.log
-writable/*
-!writable/.gitkeep

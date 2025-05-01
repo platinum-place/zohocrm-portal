@@ -1,50 +1,75 @@
-FROM php:7.3.12-apache
+FROM php:8.4.6-apache
 
-ARG GROUPID
-ARG GROUP
-ARG USERID
-ARG USER
+# Actualizar paquetes e instalar dependencias necesarias
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libzip-dev \
+    default-mysql-client \
+    libicu-dev
 
-ENV GROUPID=${GROUPID} \
-    GROUP=${GROUP} \
-    USERID=${USERID} \
-    USER=${USER}
+# Instalar extensiones de PHP
+RUN docker-php-ext-install pdo_mysql mysqli zip intl mbstring exif pcntl bcmath gd
 
-# Configuraciones iniciales
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-
-# Instalando dependencias para el stack LAMP
-RUN apt-get clean && \
-    apt-get update && \
-    apt-get install -y libicu-dev g++ unzip libpng-dev libzip-dev default-libmysqlclient-dev libxml2-dev && \
-    docker-php-ext-install mysqli pdo pdo_mysql intl gd zip
+# Habilitar mod_rewrite para Apache
 RUN a2enmod rewrite
 
-# Instalamos composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-COPY ["composer.json","composer.lock", "/var/www/html/"]
-#RUN composer install
+# Definir argumentos para el usuario y grupo
+ARG USERID
+ARG GROUPID
+ARG USER
+ARG GROUP
 
-# Crear el grupo y el usuario
-RUN groupadd --gid ${GROUPID} ${GROUP} || true \
-    && useradd --uid ${USERID} --gid ${GROUPID} --home-dir /home/${USER} --create-home ${USER} || true \
-    && mkdir -p /home/${USER}/.composer \
-    && chown -R ${USER}:${GROUP} /home/${USER}
+# Crear grupo y usuario no-root (con verificación)
+RUN set -e; \
+    if ! getent group "${GROUP}" > /dev/null; then \
+        addgroup --gid "${GROUPID}" "${GROUP}"; \
+    fi; \
+    if ! id -u "${USER}" > /dev/null 2>&1; then \
+        adduser --disabled-password --gecos "" --uid "${USERID}" --gid "${GROUPID}" "${USER}"; \
+    fi
 
-# Copiar archivos dentro del contenedor
-WORKDIR /var/www/html/
-COPY [".", "/var/www/html/"]
+# Agregar el usuario creado al grupo de Apache (www-data)
+RUN usermod -aG www-data "${USER}"
 
-# Cambiar los permisos de las carpetas necesarias
-RUN chown -R ${USER}:${GROUP} /var/www/html/writable \
+# Configurar Apache para usar el usuario y grupo no-root
+RUN sed -i "s/^User www-data/User ${USER}/" /etc/apache2/apache2.conf \
+    && sed -i "s/^Group www-data/Group ${GROUP}/" /etc/apache2/apache2.conf
+
+# Establecer permisos correctos para las carpetas del proyecto
+WORKDIR /var/www/html
+COPY . /var/www/html/
+RUN chown -R "${USER}:${GROUP}" /var/www/html \
+    && chmod -R 775 /var/www/html \
     && chmod -R 777 /var/www/html/writable
 
-# Configuración de php.ini para tamaños de archivos
-RUN sed -E -i 's/(;?)(post_max_size\s*=\s*)[0-9]+M/\220M/g' /usr/local/etc/php/php.ini \
-    && sed -E -i 's/(;?)(upload_max_filesize\s*=\s*)[0-9]+M/\220M/g' /usr/local/etc/php/php.ini
+# Instalar Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Cambiar al usuario PHP
-USER ${USER}
+# Cambiar al usuario para instalar las dependencias de Composer
+USER "${USER}"
+RUN composer install --no-dev --optimize-autoloader
+USER root
+
+# Configurar Apache para servir correctamente los archivos del proyecto
+RUN echo '<Directory /var/www/html/public>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>' > /etc/apache2/conf-available/codeigniter.conf \
+    && a2enconf codeigniter
+
+# Configurar el DocumentRoot de Apache
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
+# Exponer el puerto 80
+EXPOSE 80
+
+# Ejecutar Apache en primer plano como usuario no root
+USER "${USER}"
+CMD ["apache2-foreground"]
