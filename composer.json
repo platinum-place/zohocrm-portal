@@ -13,8 +13,10 @@
         "php": "^8.4",
         "ext-intl": "*",
         "ext-mbstring": "*",
+        "bshaffer/oauth2-server-php": "^1.14",
         "laminas/laminas-escaper": "^2.14",
-        "psr/log": "^3.0"
+        "psr/log": "^3.0",
+        "zohocrm/php-sdk-archive": "^2.2"
     },
     "require-dev": {
         "codeigniter/coding-standard": "^1.7",
