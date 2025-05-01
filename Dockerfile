@@ -29,8 +29,8 @@ COPY ["composer.json","composer.lock", "/var/www/html/"]
 #RUN composer install
 
 # Crear el grupo y el usuario
-RUN groupadd --gid ${GROUPID} ${GROUP} \
-    && useradd --uid ${USERID} --gid ${GROUPID} --home-dir /home/${USER} --create-home ${USER} \
+RUN groupadd --gid ${GROUPID} ${GROUP} || true \
+    && useradd --uid ${USERID} --gid ${GROUPID} --home-dir /home/${USER} --create-home ${USER} || true \
     && mkdir -p /home/${USER}/.composer \
     && chown -R ${USER}:${GROUP} /home/${USER}
 
