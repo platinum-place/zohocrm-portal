@@ -2,6 +2,7 @@
 
 namespace App\Filters;
 
+use App\Models\RoleModel;
 use App\Models\UserModel;
 use App\Models\UserRoleModel;
 use CodeIgniter\Filters\FilterInterface;
@@ -29,11 +30,12 @@ class EnsureAdmin implements FilterInterface
     {
         $session = session();
 
-        $user_id = $session->get('user')['username'];
+        $role_id = $session->get('user')['role_id'];
 
-        $userModel = new UserModel();
+        $roleModel = new RoleModel();
+        $admin_role_id = $roleModel->where('name', SUPERUSER)->first()['id'];
 
-        if (!$userModel->hasRole($user_id, SUPERUSER)) {
+        if ($role_id !== $admin_role_id) {
             return redirect()->to(site_url('/'))->with('error', 'Acceso denegado.');
         }
     }

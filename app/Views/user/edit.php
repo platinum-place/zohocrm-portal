@@ -37,7 +37,7 @@
                                 <select class="form-select" id="role" name="role" required>
                                     <option value="">Seleccione un rol</option>
                                     <?php foreach ($roles as $role): ?>
-                                        <option value="<?= $role['id'] ?>" <?= isset($user['role_id']) && $user['role_id'] == $role['id'] ? 'selected' : '' ?>>
+                                        <option value="<?= $role['id'] ?>" <?= isset($user['role_id']) && $user['role_id'] === $role['id'] ? 'selected' : '' ?>>
                                             <?= esc($role['name']) ?>
                                         </option>
                                     <?php endforeach; ?>

@@ -14,10 +14,26 @@ class CreateRolesSeeder extends Seeder
         ];
 
         foreach ($roles as $role) {
-            $this->db->table('roles')->insert([
-                'name' => $role,
-            ]);
+            $existingRole = $this->db->table('roles')
+                ->where('name', $role)
+                ->get()
+                ->getRow();
+
+            if (!$existingRole) {
+                $this->db->table('roles')->insert([
+                    'name' => $role,
+                ]);
+                CLI::write("Rol '{$role}' creado", 'green');
+            } else {
+                $this->db->table('roles')
+                    ->where('name', $role)
+                    ->update([
+                        'name' => $role,
+                    ]);
+                CLI::write("Rol '{$role}' actualizado", 'yellow');
+            }
         }
+
 
         CLI::write('--------------------------------------------------------------------------------', 'green');
         CLI::write('Roles created', 'green');
