@@ -13,8 +13,6 @@ services:
     volumes:
       - ./:/var/www/html
       - ./writable:/var/www/html/writable
-    depends_on:
-      - mysql
     env_file:
       - .env
     environment:
