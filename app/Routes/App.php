@@ -6,11 +6,11 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-$routes->get('login', 'Auth::index');
-$routes->post('login', 'Auth::login');
-$routes->put('logout', 'Auth::logout');
+$routes->get('admin/login', 'Auth::index');
+$routes->post('admin/login', 'Auth::login');
+$routes->put('admin/logout', 'Auth::logout');
 
-$routes->group('', ['filter' => 'auth'], function ($routes) {
+$routes->group('' /** , ['filter' => 'auth'] */, function ($routes) {
     $routes->get('/', 'Home::index');
 });
 

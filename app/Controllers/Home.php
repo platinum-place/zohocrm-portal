@@ -2,10 +2,16 @@
 
 namespace App\Controllers;
 
-class Home extends BaseController
+use CodeIgniter\RESTful\ResourceController;
+
+class Home extends ResourceController
 {
-    public function index(): string
+    public function index(): \CodeIgniter\HTTP\ResponseInterface
     {
-        return view('welcome_message');
+        //return view('welcome_message');
+        return $this->respond([
+            'app_name' => 'IT - Insurance Tech',
+            'version' => '1.0.0',
+        ]);
     }
 }

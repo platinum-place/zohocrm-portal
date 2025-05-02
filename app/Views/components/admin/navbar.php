@@ -9,7 +9,7 @@
             <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li>
-                    <form id="logoutForm" action="<?= site_url('logout') ?>" method="post">
+                    <form id="logoutForm" action="<?= site_url('admin/logout') ?>" method="post">
                         <?= csrf_field() ?>
                         <input type="hidden" name="_method" value="PUT">
                         <button type="button" class="dropdown-item" onclick="handleLogout()">

@@ -34,7 +34,7 @@ class EnsureAdmin implements FilterInterface
         $admin_role_id = $roleModel->where('name', SUPERUSER)->first()['id'];
 
         if ($role_id !== $admin_role_id) {
-            return redirect()->to(site_url('/'))->with('error', 'Acceso denegado.');
+            return redirect()->to(site_url('admin/login'))->with('error', 'Acceso denegado.');
         }
     }
 

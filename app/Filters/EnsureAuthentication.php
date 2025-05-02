@@ -28,7 +28,7 @@ class EnsureAuthentication implements FilterInterface
         $session = session();
 
         if (!$session->get('logged_in')) {
-            return redirect()->to(site_url('login'))->with('error', 'Por favor inicie sesión para acceder.');
+            return redirect()->to(site_url('admin/login'))->with('error', 'Por favor inicie sesión para acceder.');
         }
     }
 

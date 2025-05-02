@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\RoleModel;
 use App\Models\UserModel;
 
 class Auth extends BaseController
@@ -48,6 +49,15 @@ class Auth extends BaseController
 
         $user = $this->userModel->where('username', $username)->first();
 
+        $role_id = $user['role_id'];
+
+        $roleModel = new RoleModel();
+        $admin_role_id = $roleModel->where('name', SUPERUSER)->first()['id'];
+
+        if ($role_id !== $admin_role_id) {
+            return redirect()->to(site_url('admin/login'))->with('error', 'Acceso denegado.');
+        }
+
         if ($user && password_verify($password, $user['password'])) {
             $session = session();
 
@@ -57,7 +67,8 @@ class Auth extends BaseController
             ];
 
             $session->set($userData);
-            return redirect()->to(site_url('/'));
+
+            return redirect()->to(site_url('/admin/users'));
         }
 
         return redirect()->back()
@@ -68,6 +79,6 @@ class Auth extends BaseController
     public function logout()
     {
         session()->destroy();
-        return redirect()->to('/login');
+        return redirect()->to('admin/login');
     }
 }
