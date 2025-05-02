@@ -22,7 +22,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="role" class="form-label">Rol</label>
-                                <select class="form-select" id="user_id" name="user_id" required>
+                                <select class="form-select" id="user_id" name="user_id">
                                     <option value="">Seleccione un usuario</option>
                                     <?php foreach ($users as $user): ?>
                                         <option value="<?= $user['username'] ?>" <?= isset($client['user_id']) && $client['user_id'] === $user['username'] ? 'selected' : '' ?>>

@@ -48,20 +48,20 @@ class Client extends BaseController
 
     public function update($id)
     {
-        $rules = [
-            'user_id' => [
-                'rules' => 'required',
-                'errors' => [
-                    'required' => 'Debes selecionar un usuario para el usuario.',
-                ]
-            ],
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
+//        $rules = [
+//            'user_id' => [
+//                'rules' => 'required',
+//                'errors' => [
+//                    'required' => 'Debes selecionar un usuario para el usuario.',
+//                ]
+//            ],
+//        ];
+//
+//        if (!$this->validate($rules)) {
+//            return redirect()->back()
+//                ->withInput()
+//                ->with('errors', $this->validator->getErrors());
+//        }
 
         $updateData = [
             'user_id' => $this->request->getPost('user_id'),
