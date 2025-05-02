@@ -101,6 +101,7 @@ class User extends BaseController
             'first_name' => $this->request->getPost('first_name'),
             'last_name' => $this->request->getPost('last_name'),
             'role_id' => $this->request->getPost('role_id'),
+            'scope' => $this->request->getPost('scope'),
         ];
 
         $this->userModel->update($id, $updateData);
@@ -113,7 +114,7 @@ class User extends BaseController
         helper('string_util');
 
         $password = generate_secure_password(16);
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $hashedPassword = sha1($password);
 
         $this->userModel->update($id, ['password' => $hashedPassword]);
 
@@ -199,6 +200,7 @@ class User extends BaseController
             'first_name' => $this->request->getPost('first_name'),
             'last_name' => $this->request->getPost('last_name'),
             'password' => $this->request->getPost('password'),
+            'scope' => $this->request->getPost('scope'),
         ];
 
         $this->userModel->insert($data);

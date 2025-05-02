@@ -24,7 +24,7 @@ class CreateAdminUserSeeder extends Seeder
 
         $this->db->table('oauth_users')->insert([
             'username' => $username,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'password' => sha1($password),
             'role_id' => $role_id,
         ]);
 

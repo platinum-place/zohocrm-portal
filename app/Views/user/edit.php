@@ -14,6 +14,17 @@
             </div>
 
             <div class="card-body">
+
+                <?php if (session('errors')) : ?>
+                    <div class="alert alert-danger">
+                        <ul>
+                            <?php foreach (session('errors') as $error) : ?>
+                                <li><?= esc($error) ?></li>
+                            <?php endforeach ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+
                 <form action="<?= site_url('admin/users/update/' . $user['username']) ?>" method="post">
                     <?= csrf_field() ?>
                     <input type="hidden" name="_method" value="PUT">
@@ -21,42 +32,95 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="username" class="form-label">Nombre de usuariop</label>
-                                <input type="text" class="form-control" id="username" name="username"
-                                       value="<?= set_value('username', $user['username']) ?>" required>
+                                <label for="username" class="form-label">Nombre de usuario</label>
+                                <input type="text"
+                                       class="form-control <?= session('errors.username') ? 'is-invalid' : '' ?>"
+                                       id="username"
+                                       name="username"
+                                       value="<?= old('username', $user['username']) ?>" required>
+                                <?php if (session('errors.username')) : ?>
+                                    <div class="invalid-feedback">
+                                        <?= esc(session('errors.username')) ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
                             <div class="mb-3">
                                 <label for="first_name" class="form-label">Primer Nombre</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name"
-                                       value="<?= set_value('first_name', $user['first_name']) ?>" required>
+                                <input type="text"
+                                       class="form-control <?= session('errors.first_name') ? 'is-invalid' : '' ?>"
+                                       id="first_name"
+                                       name="first_name"
+                                       value="<?= old('first_name', $user['first_name']) ?>" required>
+                                <?php if (session('errors.first_name')) : ?>
+                                    <div class="invalid-feedback">
+                                        <?= esc(session('errors.first_name')) ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
                             <div class="mb-3">
                                 <label for="role_id" class="form-label">Rol</label>
-                                <select class="form-select" id="role_id" name="role_id" required>
+                                <select class="form-select <?= session('errors.role_id') ? 'is-invalid' : '' ?>"
+                                        id="role_id"
+                                        name="role_id" required>
                                     <option value="">Seleccione un rol</option>
                                     <?php foreach ($roles as $role): ?>
-                                        <option value="<?= $role['id'] ?>" <?= isset($user['role_id']) && $user['role_id'] === $role['id'] ? 'selected' : '' ?>>
+                                        <option value="<?= $role['id'] ?>"
+                                            <?= old('role_id', $user['role_id'] ?? '') == $role['id'] ? 'selected' : '' ?>>
                                             <?= esc($role['name']) ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
+                                <?php if (session('errors.role_id')) : ?>
+                                    <div class="invalid-feedback">
+                                        <?= esc(session('errors.role_id')) ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                       value="<?= set_value('email', $user['email']) ?>" required>
+                                <input type="email"
+                                       class="form-control <?= session('errors.email') ? 'is-invalid' : '' ?>"
+                                       id="email"
+                                       name="email"
+                                       value="<?= old('email', $user['email']) ?>" required>
+                                <?php if (session('errors.email')) : ?>
+                                    <div class="invalid-feedback">
+                                        <?= esc(session('errors.email')) ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
                             <div class="mb-3">
                                 <label for="last_name" class="form-label">Apellido</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name"
-                                       value="<?= set_value('last_name', $user['last_name']) ?>" required>
+                                <input type="text"
+                                       class="form-control <?= session('errors.last_name') ? 'is-invalid' : '' ?>"
+                                       id="last_name"
+                                       name="last_name"
+                                       value="<?= old('last_name', $user['last_name']) ?>" required>
+                                <?php if (session('errors.last_name')) : ?>
+                                    <div class="invalid-feedback">
+                                        <?= esc(session('errors.last_name')) ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="scope" class="form-label">Scope</label>
+                            <textarea class="form-control <?= session('errors.scope') ? 'is-invalid' : '' ?>"
+                                      id="scope"
+                                      name="scope" rows="3"
+                                      placeholder="Define el alcance, separado por espacios"><?= old('scope', esc($user['scope'])) ?></textarea>
+                            <?php if (session('errors.scope')) : ?>
+                                <div class="invalid-feedback"><?= esc(session('errors.scope')) ?></div>
+                            <?php endif; ?>
                         </div>
                     </div>
 

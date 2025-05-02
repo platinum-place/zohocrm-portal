@@ -17,7 +17,7 @@ class CreateUserSeeder extends Seeder
 
         $this->db->table('oauth_users')->insert([
             'username' => $username,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'password' => sha1($password),
         ]);
 
         CLI::write('--------------------------------------------------------------------------------', 'green');

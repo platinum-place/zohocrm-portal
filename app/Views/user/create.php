@@ -10,9 +10,14 @@
             </div>
 
             <div class="card-body">
-                <?php if (session('error')) : ?>
+
+                <?php if (session('errors')) : ?>
                     <div class="alert alert-danger">
-                        <?= session('error') ?>
+                        <ul>
+                            <?php foreach (session('errors') as $error) : ?>
+                                <li><?= esc($error) ?></li>
+                            <?php endforeach ?>
+                        </ul>
                     </div>
                 <?php endif ?>
 
@@ -31,7 +36,7 @@
                             >
                             <?php if (session('errors.username')) : ?>
                                 <div class="invalid-feedback">
-                                    <?= session('errors.username') ?>
+                                    <?= esc(session('errors.username')) ?>
                                 </div>
                             <?php endif ?>
                         </div>
@@ -46,7 +51,7 @@
                             >
                             <?php if (session('errors.first_name')) : ?>
                                 <div class="invalid-feedback">
-                                    <?= session('errors.first_name') ?>
+                                    <?= esc(session('errors.first_name')) ?>
                                 </div>
                             <?php endif ?>
                         </div>
@@ -63,7 +68,7 @@
                             >
                             <?php if (session('errors.email')) : ?>
                                 <div class="invalid-feedback">
-                                    <?= session('errors.email') ?>
+                                    <?= esc(session('errors.email')) ?>
                                 </div>
                             <?php endif ?>
                         </div>
@@ -78,13 +83,26 @@
                             >
                             <?php if (session('errors.last_name')) : ?>
                                 <div class="invalid-feedback">
-                                    <?= session('errors.last_name') ?>
+                                    <?= esc(session('errors.last_name')) ?>
                                 </div>
                             <?php endif ?>
                         </div>
                     </div>
 
-                    <!-- Nuevo campo de contraseña -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="mb-3">
+                                <label for="scope" class="form-label">Scope</label>
+                                <textarea class="form-control <?= session('errors.scope') ? 'is-invalid' : '' ?>"
+                                          id="scope" name="scope" rows="3"
+                                          placeholder="Define el alcance, separado por espacios"></textarea>
+                                <?php if (session('errors.scope')) : ?>
+                                    <div class="invalid-feedback"><?= esc(session('errors.scope')) ?></div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="password" class="form-label">Contraseña *</label>
@@ -95,7 +113,7 @@
                             >
                             <?php if (session('errors.password')) : ?>
                                 <div class="invalid-feedback">
-                                    <?= session('errors.password') ?>
+                                    <?= esc(session('errors.password')) ?>
                                 </div>
                             <?php endif ?>
                         </div>

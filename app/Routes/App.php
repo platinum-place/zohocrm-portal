@@ -30,6 +30,8 @@ $routes->group('admin', ['filter' => 'auth.admin'], function ($routes) {
      * Client
      */
     $routes->get('clients', 'Client::index');
+    $routes->get('clients/create', 'Client::create');
+    $routes->post('clients/store', 'Client::store');
     $routes->get('clients/edit/(:segment)', 'Client::edit/$1');
     $routes->put('clients/update/(:segment)', 'Client::update/$1');
 });

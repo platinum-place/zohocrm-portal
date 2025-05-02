@@ -20,6 +20,10 @@
                         <th>#</th>
                         <th>Client ID</th>
                         <th>Usuario</th>
+                        <th>Client Secret</th>
+                        <th>Redirect URI</th>
+                        <th>Grant Types</th>
+                        <th>Scope</th>
                         <th>Acciones</th>
                     </tr>
                     </thead>
@@ -30,6 +34,10 @@
                                 <td><?= $key + 1 ?></td>
                                 <td><?= esc($client['client_id']) ?></td>
                                 <td><?= esc($client['user_id']) ?></td>
+                                <td><?= esc($client['client_secret']) ?></td>
+                                <td><?= esc($client['redirect_uri']) ?></td>
+                                <td><?= esc($client['grant_types']) ?></td>
+                                <td><?= esc($client['scope']) ?></td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-primary btn-sm"
@@ -52,7 +60,7 @@
                         <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="5" class="text-center">No se encontraron clientes</td>
+                            <td colspan="8" class="text-center">No se encontraron clientes</td>
                         </tr>
                     <?php endif; ?>
                     </tbody>
