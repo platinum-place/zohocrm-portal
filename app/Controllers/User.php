@@ -154,6 +154,13 @@ class User extends BaseController
                     'is_unique' => 'El nombre de usuario ya está en uso.',
                 ],
             ],
+            'password' => [
+                'rules' => 'required|min_length[8]',
+                'errors' => [
+                    'required' => 'El campo Contraseña es obligatorio.',
+                    'min_length' => 'El campo Contraseña debe tener al menos 8 caracteres.',
+                ],
+            ],
             'email' => [
                 'rules' => 'required|valid_email|is_unique[oauth_users.email]',
                 'errors' => [
@@ -186,20 +193,18 @@ class User extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $password = generate_secure_password(16);
-
         $data = [
             'username' => $this->request->getPost('username'),
             'email' => $this->request->getPost('email'),
             'first_name' => $this->request->getPost('first_name'),
             'last_name' => $this->request->getPost('last_name'),
-            'password' => $password,
+            'password' => $this->request->getPost('password'),
         ];
 
         $this->userModel->insert($data);
 
         return redirect()
             ->to('admin/users')
-            ->with('alert', 'Usuario creado con éxito. Contraseña: ' . esc($password));
+            ->with('alert', 'Usuario creado con éxito.');
     }
 }

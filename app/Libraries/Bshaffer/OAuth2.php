@@ -13,6 +13,7 @@ use OAuth2\Storage\Pdo;
 class OAuth2
 {
     public $server;
+
     protected $storage;
     protected $dsn;
     protected $db_username;
