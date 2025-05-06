@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GROUPID: ${GROUPID}
+        GROUP: ${GROUP}
+        USERID: ${USERID}
+        USER: ${USER}
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www/html
+      - ./writable:/var/www/html/writable
+    env_file:
+      - .env
+    environment:
+      - GROUPID=${GROUPID}
+      - GROUP=${GROUP}
+      - USERID=${USERID}
+      - USER=${USER}
