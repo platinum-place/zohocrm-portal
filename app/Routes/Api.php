@@ -17,8 +17,8 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     $routes->post('cotizador/EmitirAuto', 'Api\Quote::issuePolicy');
     $routes->post('cotizador/CotizaVida', 'Api\Quote::estimateLife');
     $routes->post('cotizador/EmitirVida', 'Api\Quote::issueLife');
-    $routes->post('cotizador/CotizaDesempleo', 'Api\Quote::estimateUnemployment');
-    $routes->post('cotizador/EmitirDesempleo', 'Api\Quote::issueLife');
+    $routes->post('cotizador/CotizaDesempleoDeuda', 'Api\Quote::estimateUnemployment');
+    $routes->post('cotizador/EmitirDesempleoDeuda', 'Api\Quote::issueLife');
     $routes->post('cotizador/CotizaIncendio', 'Api\Quote::estimateFire');
     $routes->post('cotizador/EmitirIncendio', 'Api\Quote::issueLife');
 
