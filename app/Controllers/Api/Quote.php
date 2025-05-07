@@ -108,7 +108,7 @@ class Quote extends ResourceController
 
         $data = $this->request->getPost();
 
-        $cotizacion = $libreria->getRecord("Quotes", $data['cotzid']);
+        $cotizacion = $libreria->getRecord("Quotes", $data['Identificador']);
 
         foreach ($cotizacion->getLineItems() as $lineItem) {
             $id_plan = $lineItem->getProduct()->getEntityId();
