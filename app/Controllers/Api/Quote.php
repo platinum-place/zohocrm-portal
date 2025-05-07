@@ -168,7 +168,7 @@ class Quote extends ResourceController
                 "Quote_Stage" => "Cotizando",
                 "Nombre" => $data['NombreCliente'],
                 "Fecha_de_nacimiento" => $data['FechaNacimiento'],
-                "RNC_C_dula" => $data['IdentCliente'],
+                "RNC_C_dula" => $data['IdenCliente'],
                 "Direcci_n" => $data['Direccion'],
                 "Tel_Celular" => $data['Telefono1'],
                 "Plan" => 'Vida',
