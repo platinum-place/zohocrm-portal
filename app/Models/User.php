@@ -9,8 +9,10 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable implements OAuthenticatable
+class User extends Authenticatable implements OAuthenticatable,FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable,HasRoles;
@@ -53,5 +55,10 @@ class User extends Authenticatable implements OAuthenticatable
     public function findForPassport(string $username): User
     {
         return $this->where('username', $username)->first();
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return /** str_ends_with($this->email, '@yourdomain.com') && $this->hasVerifiedEmail() */ true;
     }
 }
