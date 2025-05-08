@@ -41,7 +41,7 @@ class AccountPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Account/Widgets'), for: 'App\\Filament\\Account\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                //Widgets\FilamentInfoWidget::class,
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -63,8 +63,8 @@ class AccountPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label(__('Admin panel'))
-                    ->url(fn(): string => route('filament.admin.pages.dashboard'))
-                    ->visible(fn(): bool => auth()->user()->isAdmin())
+                    ->url(fn (): string => route('filament.admin.pages.dashboard'))
+                    ->visible(fn (): bool => auth()->user()->isAdmin())
                     ->icon('heroicon-o-cog-6-tooth'),
             ])
             ->tenantRegistration(RegisterAccount::class)

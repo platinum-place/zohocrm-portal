@@ -11,7 +11,7 @@ class Account extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name', 'identifier'
+        'name', 'identifier',
     ];
 
     public function users(): BelongsToMany

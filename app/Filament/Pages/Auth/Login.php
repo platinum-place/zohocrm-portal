@@ -97,7 +97,7 @@ class Login extends SimplePage
     protected function throwFailureValidationException(): never
     {
         throw ValidationException::withMessages([
-            //'data.email' => __('filament-panels::pages/auth/login.messages.failed'),
+            // 'data.email' => __('filament-panels::pages/auth/login.messages.failed'),
             'data.username' => __('filament-panels::pages/auth/login.messages.failed'),
         ]);
     }
@@ -116,7 +116,7 @@ class Login extends SimplePage
             'form' => $this->form(
                 $this->makeForm()
                     ->schema([
-                        //$this->getEmailFormComponent(),
+                        // $this->getEmailFormComponent(),
                         $this->getUsernameFormComponent(),
                         $this->getPasswordFormComponent(),
                         $this->getRememberFormComponent(),
@@ -172,12 +172,12 @@ class Login extends SimplePage
             ->url(filament()->getRegistrationUrl());
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('filament-panels::pages/auth/login.title');
     }
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         return __('filament-panels::pages/auth/login.heading');
     }
@@ -211,7 +211,7 @@ class Login extends SimplePage
     protected function getCredentialsFromFormData(array $data): array
     {
         return [
-            //'email' => $data['email'],
+            // 'email' => $data['email'],
             'username' => $data['username'],
             'password' => $data['password'],
         ];
