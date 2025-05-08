@@ -4,9 +4,9 @@
     <div class="container-fluid px-4">
         <div class="d-flex justify-content-between align-items-center mt-4">
             <h1>Clientes</h1>
-            <a href="<?= site_url('admin/clients/create') ?>" class="btn btn-success">
-                <i class="fas fa-user-plus"></i> Crear Cliente
-            </a>
+<!--            <a href="--><?php //= site_url('admin/clients/create') ?><!--" class="btn btn-success">-->
+<!--                <i class="fas fa-user-plus"></i> Crear Cliente-->
+<!--            </a>-->
         </div>
         <div class="card mb-4">
             <div class="card-header">

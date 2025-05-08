@@ -58,7 +58,7 @@ class Auth extends BaseController
             return redirect()->to(site_url('admin/login'))->with('error', 'Acceso denegado.');
         }
 
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && sha1($password) == $user['password']) {
             $session = session();
 
             $userData = [
