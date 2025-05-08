@@ -3,7 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
-use App\Http\Middleware\EnsureAdmin;
+use App\Filament\Pages\Tenancy\EditAccountProfile;
+use App\Filament\Pages\Tenancy\RegisterAccount;
+use App\Models\Account;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -21,23 +23,22 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class AccountPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('admin')
-            ->path('admin')
-            ->login(Login::class)
+            ->id('account')
+            ->path('account')
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverResources(in: app_path('Filament/Account/Resources'), for: 'App\\Filament\\Account\\Resources')
+            ->discoverPages(in: app_path('Filament/Account/Pages'), for: 'App\\Filament\\Account\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Account/Widgets'), for: 'App\\Filament\\Account\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
                 //Widgets\FilamentInfoWidget::class,
@@ -52,16 +53,21 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                EnsureAdmin::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->default()
+            ->login(Login::class)
+            ->tenant(Account::class)
             ->userMenuItems([
                 MenuItem::make()
-                    ->label(__('Accounts'))
-                    ->url(fn (): string => route('filament.account.tenant'))
+                    ->label(__('Admin panel'))
+                    ->url(fn(): string => route('filament.admin.pages.dashboard'))
+                    ->visible(fn(): bool => auth()->user()->isAdmin())
                     ->icon('heroicon-o-cog-6-tooth'),
-            ]);
+            ])
+            ->tenantRegistration(RegisterAccount::class)
+            ->tenantProfile(EditAccountProfile::class);
     }
 }
