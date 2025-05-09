@@ -19,4 +19,9 @@ class Account extends Model
     {
         return $this->belongsToMany(User::class, 'account_user');
     }
+
+    public function clients(): BelongsToMany
+    {
+        return $this->belongsToMany(Client::class, 'account_client');
+    }
 }
