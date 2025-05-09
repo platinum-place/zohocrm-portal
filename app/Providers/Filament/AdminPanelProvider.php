@@ -52,10 +52,10 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                EnsureAdmin::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsureAdmin::class,
             ])
             ->userMenuItems([
                 MenuItem::make()
