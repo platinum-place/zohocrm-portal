@@ -7,11 +7,13 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class UserResource extends Resource
 {
@@ -24,12 +26,19 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->live(true)
+                    ->afterStateUpdated(function ($state, Set $set) {
+                        return $set('username', str_replace(' ', '.', strtolower($state)));
+                    }),
                 Forms\Components\TextInput::make('email')
                     ->email(),
                 Forms\Components\TextInput::make('username'),
                 Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('password')
+                    ->default(Str::random())
+                    ->revealable()
+                    ->visibleOn('create')
                     ->password()
                     ->required(),
             ]);
