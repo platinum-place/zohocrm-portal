@@ -471,4 +471,42 @@ class Quote extends ResourceController
         ];
         return $this->respond($types);
     }
+
+    public function CancelarVida()
+    {
+        if (!$this->request->getRawInput()) {
+            throw new \Exception("No se recibieron datos");
+        }
+
+        $libreria = new \App\Libraries\Cotizaciones();
+
+        $data = $this->request->getRawInput();
+
+        $cambios = [
+            "Quote_Stage" => "Cancelada",
+        ];
+
+        $libreria->update("Quotes", $data['Identificador'], $cambios);
+
+        return $this->respond(['code' => 200, 'status' => 'success']);
+    }
+
+    public function CancelarAuto()
+    {
+        if (!$this->request->getRawInput()) {
+            throw new \Exception("No se recibieron datos");
+        }
+
+        $libreria = new \App\Libraries\Cotizaciones();
+
+        $data = $this->request->getRawInput();
+
+        $cambios = [
+            "Quote_Stage" => "Cancelada",
+        ];
+
+        $libreria->update("Quotes", $data['IdCotizacion'], $cambios);
+
+        return $this->respond(['code' => 200, 'status' => 'success']);
+    }
 }

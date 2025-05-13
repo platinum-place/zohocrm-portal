@@ -26,6 +26,11 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     $routes->get('cotizador/ValorPromedio', 'Api\Quote::ValorPromedio');
     $routes->get('cotizador/GetTipoEmpleado', 'Api\Quote::GetTipoEmpleado');
     $routes->get('cotizador/GetGiroDelNegocio', 'Api\Quote::GetGiroDelNegocio');
+    $routes->get('cotizador/CancelarVida', 'Api\Quote::CancelarVida');
+    $routes->get('cotizador/CancelarIncendio', 'Api\Quote::CancelarVida');
+    $routes->get('cotizador/CancelarDesempleo', 'Api\Quote::CancelarVida');
+    $routes->get('cotizador/CancelarDesempleoDeuda', 'Api\Quote::CancelarVida');
+    $routes->get('cotizador/CancelarAuto', 'Api\Quote::CancelarAuto');
 
     /**
      * Vehicle
