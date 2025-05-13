@@ -49,4 +49,10 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
      */
     $routes->get('Productos', 'Api\Service::index');
     $routes->get('Productos/Aseguradoras/(:num)', 'Api\Service::show/$1');
+
+    /**
+     * Service
+     */
+    $routes->get('Productos', 'Api\Service::index');
+    $routes->get('Productos/Aseguradoras/(:num)', 'Api\Service::show/$1');
 });
