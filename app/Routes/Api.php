@@ -28,9 +28,13 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     /**
      * Vehicle
      */
-    $routes->post('vehiculos/Marca', 'Api\Vehicle::brands');
-    $routes->post('vehiculos/Modelos/(:num)', 'Api\Vehicle::models/$1');
-    $routes->post('vehiculos/TipoVehiculo', 'Api\Vehicle::types');
+    $routes->post('vehiculos/Marca', 'Api\Vehicle::Marca');
+    $routes->post('vehiculos/Modelos/(:num)', 'Api\Vehicle::Modelos/$1');
+    $routes->post('vehiculos/TipoVehiculo', 'Api\Vehicle::TipoVehiculo');
+    $routes->post('vehiculos/Accesorios', 'Api\Vehicle::Accesorios');
+    $routes->post('vehiculos/Actividades', 'Api\Vehicle::Actividades');
+    $routes->post('vehiculos/Circulacion', 'Api\Vehicle::Circulacion');
+    $routes->get('vehiculos/Color', 'Api\Vehicle::Color');
 
     /**
      * Service

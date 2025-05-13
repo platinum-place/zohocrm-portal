@@ -28,7 +28,7 @@ class Vehicle extends ResourceController
         return $this->respond($marcas_sort);
     }
 
-    public function models($brand_id = null)
+    public function Modelos($brand_id = null)
     {
         if (!$brand_id) {
             throw new \Exception("No se recibieron datos");
@@ -68,18 +68,54 @@ class Vehicle extends ResourceController
         return $this->respond($models);
     }
 
-    public function types()
+    public function TipoVehiculo()
     {
         $types = [
-            1 => 'Automóvil',
-            2 => 'Jeepeta',
-            3 => 'Camioneta',
-            4 => 'Furgoneta',
-            5 => 'Minivan',
-            6 => 'Camión',
-            7 => 'Veh. Pesado',
-            8 => 'Autobús',
-            9 => 'Minibus'
+            "01" => 'Automóvil',
+            "02" => 'Jeepeta',
+            "03" => 'Camioneta',
+            "04"=> 'Furgoneta',
+            "05"=> 'Minivan',
+            "06" => 'Camión',
+            "07" => 'Veh. Pesado',
+            "08" => 'Autobús',
+            "09" => 'Minibus'
+        ];
+        return $this->respond($types);
+    }
+
+    public function Accesorios()
+    {
+        $types = [
+            "01" => 'Gas',
+            "02" => 'Aros',
+        ];
+        return $this->respond($types);
+    }
+
+    public function Actividades()
+    {
+        $types = [
+            "01" => 'Uber',
+            "02" => 'Taxi',
+        ];
+        return $this->respond($types);
+    }
+
+    public function Circulacion()
+    {
+        $types = [
+            "01" => 'Distrito Nacional',
+            "02" => 'Santo Domingo',
+        ];
+        return $this->respond($types);
+    }
+
+    public function Color()
+    {
+        $types = [
+            "01" => 'Azul',
+            "02" => 'Rojo',
         ];
         return $this->respond($types);
     }
