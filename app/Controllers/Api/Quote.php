@@ -454,6 +454,25 @@ class Quote extends ResourceController
         return $this->respond($types);
     }
 
+    public function ValidarInspeccion()
+    {
+        if (!$this->request->getRawInput()) {
+            throw new \Exception("No se recibieron datos");
+        }
+
+        $libreria = new \App\Libraries\Cotizaciones();
+
+        $data = $this->request->getRawInput();
+
+        $cambios = [
+            "Depurado" => true,
+        ];
+
+        $libreria->update("Quotes", $data['cotz_id'], $cambios);
+
+        return $this->respond(['code' => 200, 'status' => 'success']);
+    }
+
     public function GetTipoEmpleado()
     {
         $types = [

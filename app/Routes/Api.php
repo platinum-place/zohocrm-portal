@@ -31,6 +31,7 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     $routes->get('cotizador/CancelarDesempleo', 'Api\Quote::CancelarVida');
     $routes->get('cotizador/CancelarDesempleoDeuda', 'Api\Quote::CancelarVida');
     $routes->get('cotizador/CancelarAuto', 'Api\Quote::CancelarAuto');
+    $routes->post('cotizador/ValidarInspeccion', 'Api\Quote::ValidarInspeccion');
 
     /**
      * Vehicle
