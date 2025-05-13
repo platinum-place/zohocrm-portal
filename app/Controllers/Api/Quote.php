@@ -453,4 +453,13 @@ class Quote extends ResourceController
         ];
         return $this->respond($types);
     }
+
+    public function GetTipoEmpleado()
+    {
+        $types = [
+            '1' => 'Publico',
+            '2' => 'Privado',
+        ];
+        return $this->respond($types);
+    }
 }

@@ -23,7 +23,8 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     $routes->post('cotizador/EmitirDesempleo', 'Api\Quote::EmitirVida');
     $routes->post('cotizador/CotizaIncendio', 'Api\Quote::CotizaIncendio');
     $routes->post('cotizador/EmitirIncendio', 'Api\Quote::EmitirVida');
-    $routes->get('cotizador/ValorPromedio', 'Api\Quote::value');
+    $routes->get('cotizador/ValorPromedio', 'Api\Quote::ValorPromedio');
+    $routes->get('cotizador/GetTipoEmpleado', 'Api\Quote::GetTipoEmpleado');
 
     /**
      * Vehicle
