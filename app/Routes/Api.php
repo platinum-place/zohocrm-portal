@@ -25,6 +25,7 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     $routes->post('cotizador/EmitirIncendio', 'Api\Quote::EmitirVida');
     $routes->get('cotizador/ValorPromedio', 'Api\Quote::ValorPromedio');
     $routes->get('cotizador/GetTipoEmpleado', 'Api\Quote::GetTipoEmpleado');
+    $routes->get('cotizador/GetGiroDelNegocio', 'Api\Quote::GetGiroDelNegocio');
 
     /**
      * Vehicle

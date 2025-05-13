@@ -462,4 +462,13 @@ class Quote extends ResourceController
         ];
         return $this->respond($types);
     }
+
+    public function GetGiroDelNegocio()
+    {
+        $types = [
+            '1' => 'COMERCIAL',
+            '2' => 'CASA DE CAMPO',
+        ];
+        return $this->respond($types);
+    }
 }
