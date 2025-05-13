@@ -13,14 +13,17 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     /**
      * Quote
      */
-    $routes->post('cotizador/colectiva', 'Api\Quote::estimateVehicle');
-    $routes->post('cotizador/EmitirAuto', 'Api\Quote::issuePolicy');
-    $routes->post('cotizador/CotizaVida', 'Api\Quote::estimateLife');
-    $routes->post('cotizador/EmitirVida', 'Api\Quote::issueLife');
-    $routes->post('cotizador/CotizaDesempleoDeuda', 'Api\Quote::estimateUnemployment');
-    $routes->post('cotizador/EmitirDesempleoDeuda', 'Api\Quote::issueLife');
-    $routes->post('cotizador/CotizaIncendio', 'Api\Quote::estimateFire');
-    $routes->post('cotizador/EmitirIncendio', 'Api\Quote::issueLife');
+    $routes->post('cotizador/colectiva', 'Api\Quote::colectiva');
+    $routes->post('cotizador/EmitirAuto', 'Api\Quote::EmitirAuto');
+    $routes->post('cotizador/CotizaVida', 'Api\Quote::CotizaVida');
+    $routes->post('cotizador/EmitirVida', 'Api\Quote::EmitirVida');
+    $routes->post('cotizador/CotizaDesempleoDeuda', 'Api\Quote::CotizaDesempleoDeuda');
+    $routes->post('cotizador/CotizaDesempleo', 'Api\Quote::CotizaDesempleo');
+    $routes->post('cotizador/EmitirDesempleoDeuda', 'Api\Quote::EmitirVida');
+    $routes->post('cotizador/EmitirDesempleo', 'Api\Quote::EmitirVida');
+    $routes->post('cotizador/CotizaIncendio', 'Api\Quote::CotizaIncendio');
+    $routes->post('cotizador/EmitirIncendio', 'Api\Quote::EmitirVida');
+    $routes->get('cotizador/ValorPromedio', 'Api\Quote::value');
 
     /**
      * Vehicle
@@ -30,7 +33,7 @@ $routes->group('api', ['filter' => 'oauth2'], function ($routes) {
     $routes->post('vehiculos/TipoVehiculo', 'Api\Vehicle::types');
 
     /**
-     * Vehicle
+     * Service
      */
     $routes->get('Productos', 'Api\Service::index');
     $routes->get('Productos/Aseguradoras/(:num)', 'Api\Service::show/$1');

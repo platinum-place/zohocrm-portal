@@ -20,7 +20,7 @@ class Quote extends ResourceController
         session()->set('usuario_id', '3222373000203318001');
     }
 
-    public function estimateVehicle()
+    public function colectiva()
     {
         if (!$this->request->getPost()) {
             throw new \Exception("No se recibieron datos");
@@ -98,7 +98,7 @@ class Quote extends ResourceController
         return $this->respond($quotes);
     }
 
-    public function issuePolicy()
+    public function EmitirAuto()
     {
         if (!$this->request->getPost()) {
             throw new \Exception("No se recibieron datos");
@@ -119,7 +119,7 @@ class Quote extends ResourceController
         return $this->respond(['code' => 200, 'status' => 'success']);
     }
 
-    public function estimateLife()
+    public function CotizaVida()
     {
         $libreria = new \App\Libraries\Cotizaciones();
 
@@ -202,7 +202,7 @@ class Quote extends ResourceController
         return $this->respond($quotes);
     }
 
-    public function issueLife()
+    public function EmitirVida()
     {
         if (!$this->request->getPost()) {
             throw new \Exception("No se recibieron datos");
@@ -223,7 +223,80 @@ class Quote extends ResourceController
         return $this->respond(['code' => 200, 'status' => 'success']);
     }
 
-    public function estimateUnemployment()
+    public function CotizaDesempleoDeuda()
+    {
+        $libreria = new \App\Libraries\Cotizaciones();
+
+        $cotizacion = new Cotizacion();
+
+        $data = $this->request->getPost();
+
+        $cotizacion->suma = $data['MontoOriginal'];
+        $cotizacion->plan = 'Vida/Desempleo';
+        $cotizacion->plazo = $data['Plazo'] * 12;
+        $anioActual = (int)date('Y');
+        $anioNacimiento = $anioActual - $data['TiempoLaborando'];
+        $mes = 1;
+        $dia = 1;
+        $data['TiempoLaborando'] = sprintf('%04d-%02d-%02d', $anioNacimiento, $mes, $dia);
+        $cotizacion->fecha_deudor = $data['TiempoLaborando'];
+
+        $cotizar = new CotizarDesempleo($cotizacion, $libreria);
+
+        $cotizar->cotizar_planes();
+
+        if (empty($cotizacion->planes)) {
+            throw new \Exception("No se encontraron planes");
+        }
+
+        $quotes = array();
+        $libreria = new Zoho();
+
+        foreach ($cotizacion->planes as $plan) {
+            $registro = [
+                "Subject" => $data['Cliente'],
+                "Valid_Till" => date("Y-m-d", strtotime(date("Y-m-d") . "+ 30 days")),
+                "Vigencia_desde" => date("Y-m-d"),
+                "Account_Name" => session('cuenta_id'),
+                "Contact_Name" => session('usuario_id'),
+                "Quote_Stage" => "Cotizando",
+                "Nombre" => $data['Cliente'],
+                "RNC_C_dula" => $data['IdenCliente'],
+                "Direcci_n" => $data['Direccion'],
+                "Tel_Celular" => $data['Telefono'],
+                "Plan" => 'Vida/Desempleo',
+                "Suma_asegurada" => $data['MontoOriginal'],
+                "Plazo" => $data['Plazo'] * 12,
+                "Fuente" => 'API',
+            ];
+
+            $id = $libreria->createRecords("Quotes", $registro, [$plan]);
+
+            $quotes[] = [
+                'Impuesto' => round($plan['neta'], 2),
+                'PrimaPeriodo' => '000.00',
+                'PrimaTotal' => '000.00',
+                'identificador' => $id,
+                'Cliente' => $data['Cliente'],
+                'Direccion' => $data['Direccion'],
+                'TipoEmpleado' => 'Publico',
+                'Fecha' => date('Y-m-d'),
+                'IdenCliente' => $data['IdenCliente'],
+                'Telefono' => $data['Telefono'],
+                'Aseguradora' => $plan['aseguradora'],
+                'MontoPrestamo' => '000.00',
+                'Cuota' => '000.00',
+                'PlazoMese' => $data['Plazo'] * 12,
+                'Desempleo' => '000.00',
+                'Deuda' => '000.00',
+                'Total' => round($plan['total'], 2),
+            ];
+        }
+
+        return $this->respond($quotes);
+    }
+
+    public function CotizaDesempleo()
     {
         $libreria = new \App\Libraries\Cotizaciones();
 
@@ -295,7 +368,7 @@ class Quote extends ResourceController
         return $this->respond($quotes);
     }
 
-    public function estimateFire()
+    public function CotizaIncendio()
     {
         $libreria = new \App\Libraries\Cotizaciones();
 
@@ -371,14 +444,13 @@ class Quote extends ResourceController
         return $this->respond($quotes);
     }
 
-    public function products()
+    public function ValorPromedio()
     {
-        $products = [
-            1 => 'Auto',
-            2 => 'Vida',
-            3 => 'Vida/Desempleo',
-            4 => 'Seguro Incendio Hipotecario'
+        $types = [
+            'valorMinimo' => '0000',
+            'valorEstandar' => '000.00',
+            'valorMaximo' => '000.00',
         ];
-        return $this->respond($products);
+        return $this->respond($types);
     }
 }
