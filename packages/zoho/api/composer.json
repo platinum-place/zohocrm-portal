@@ -1,0 +1,16 @@
+{
+    "name": "zoho/api",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Zoho\\Api\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Zoho\\Api\\ServiceProvider"
+            ]
+        }
+    }
+}
