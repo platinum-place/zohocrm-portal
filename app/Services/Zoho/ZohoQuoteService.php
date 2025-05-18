@@ -2,7 +2,4 @@
 
 namespace App\Services\Zoho;
 
-class ZohoQuoteService extends ZohoService
-{
-
-}
+class ZohoQuoteService extends ZohoService {}

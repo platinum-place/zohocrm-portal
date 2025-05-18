@@ -11,6 +11,8 @@ Route::middleware([EnsureClientIsResourceOwner::class])->group(function () {
     Route::post('cotizador/Inspeccionar', [\App\Http\Controllers\QuoteController::class, 'inspect']);
     Route::post('cotizador/ObtenerQRInspeccion', [\App\Http\Controllers\QuoteController::class, 'getQRInspect']);
     Route::post('cotizador/ObtenerImagenes', [\App\Http\Controllers\QuoteController::class, 'getQR']);
+    Route::post('cotizador/CotizaVida', [\App\Http\Controllers\QuoteController::class, 'estimateLife']);
+    Route::post('cotizador/EmitirVida', [\App\Http\Controllers\QuoteController::class, 'issueLife']);
 
     Route::post('vehiculos/Marca', [\App\Http\Controllers\VehicleController::class, 'list']);
     Route::post('vehiculos/Modelos/{MarcaID}', [\App\Http\Controllers\VehicleController::class, 'getModel']);
