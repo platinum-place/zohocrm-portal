@@ -200,4 +200,9 @@ class QuoteController extends Controller
             ]
         ]);
     }
+
+    public function issueFire(IssueLifeRequest $request)
+    {
+        return response()->noContent();
+    }
 }

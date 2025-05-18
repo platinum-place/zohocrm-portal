@@ -18,6 +18,7 @@ Route::middleware([EnsureClientIsResourceOwner::class])->group(function () {
     Route::post('cotizador/CotizaDesempleo', [\App\Http\Controllers\QuoteController::class, 'estimateUnemployment']);
     Route::post('cotizador/EmitirDesempleo', [\App\Http\Controllers\QuoteController::class, 'issueUnemployment']);
     Route::post('cotizador/CotizaIncendio', [\App\Http\Controllers\QuoteController::class, 'estimateFire']);
+    Route::post('cotizador/EmitirIncendio', [\App\Http\Controllers\QuoteController::class, 'issueFire']);
 
     Route::post('vehiculos/Marca', [\App\Http\Controllers\VehicleController::class, 'list']);
     Route::post('vehiculos/Modelos/{MarcaID}', [\App\Http\Controllers\VehicleController::class, 'getModel']);
