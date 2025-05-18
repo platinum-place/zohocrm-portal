@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Zoho;
 
 class ZohoQuoteService extends ZohoService
 {

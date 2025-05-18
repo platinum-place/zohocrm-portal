@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Zoho;
 
-use App\Models\ZohoOauthAccessToken;
-use App\Models\ZohoOauthRefreshToken;
+use App\Models\Zoho\ZohoOauthAccessToken;
+use App\Models\Zoho\ZohoOauthRefreshToken;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
