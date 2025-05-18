@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Quote\CancelVehicleRequest;
 use App\Http\Requests\Quote\EstimateFireRequest;
 use App\Http\Requests\Quote\EstimateLifeRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentDebtRequest;
@@ -220,5 +221,30 @@ class QuoteController extends Controller
             1 => 'COMERCIAL',
             2 => 'CASA DE CAMPO',
         ]);
+    }
+
+    public function cancelLife(IssueLifeRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function cancelFire(IssueLifeRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function cancelUnemployment(IssueLifeRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function cancelUnemploymentDebt(IssueLifeRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function cancelVehicle(CancelVehicleRequest $request)
+    {
+        return response()->noContent();
     }
 }
