@@ -46,7 +46,7 @@ class QuoteController extends Controller
                         'descripcion' => 'Cobertura completa del vehículo',
                     ],
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -106,7 +106,7 @@ class QuoteController extends Controller
                 'Error' => '',
                 'codeudor' => true,
                 'EdadCodeudor' => 28,
-            ]
+            ],
         ]);
     }
 
@@ -136,7 +136,7 @@ class QuoteController extends Controller
                 'Desempleo' => '6000',
                 'Deuda' => '8000',
                 'To tal' => '10000',
-            ]
+            ],
         ]);
     }
 
@@ -163,7 +163,7 @@ class QuoteController extends Controller
                 'Cuota' => '000.00',
                 'PlazoMese' => '24',
                 'Total' => '000.00',
-            ]
+            ],
         ]);
     }
 
@@ -197,7 +197,7 @@ class QuoteController extends Controller
                     'Cobertura' => 'Vida',
                     'Valor' => '100%',
                 ],
-            ]
+            ],
         ]);
     }
 

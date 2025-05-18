@@ -22,7 +22,7 @@ class IssueLifeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'Identificador' => ['required', 'string']
+            'Identificador' => ['required', 'string'],
         ];
     }
 }
