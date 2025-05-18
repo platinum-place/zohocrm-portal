@@ -1,0 +1,19 @@
+{
+    "name": "zoho/crm",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Zoho\\CRM\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Zoho\\CRM\\ServiceProvider"
+            ],
+            "aliases": {
+                "ZohoCRM": "Zoho\\CRM\\Facade"
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "name": "zoho/oauth",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Zoho\\Oauth\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Zoho\\Oauth\\ServiceProvider"
+            ],
+            "aliases": {
+                "ZohoOauth": "Zoho\\Oauth\\Facade"
+            }
+        }
+    }
+}
