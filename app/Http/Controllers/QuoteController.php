@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Quote\CancelVehicleRequest;
+use App\Http\Requests\Quote\DisableVehicleLawRequest;
 use App\Http\Requests\Quote\EstimateFireRequest;
 use App\Http\Requests\Quote\EstimateLifeRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentDebtRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentRequest;
+use App\Http\Requests\Quote\EstimateVehicleLawRequest;
 use App\Http\Requests\Quote\EstimateVehicleRequest;
 use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
@@ -244,6 +246,94 @@ class QuoteController extends Controller
     }
 
     public function cancelVehicle(CancelVehicleRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function estimateVehicleLaw(EstimateVehicleLawRequest $request)
+    {
+        return response()->json([
+            [
+                'Passcode' => '4821',
+                'OfertaID' => 105,
+                'Prima' => 12500.75,
+                'Impuesto' => 1875.11,
+                'PrimaTotal' => 14375.86,
+                'PrimaCuota' => 1197.99,
+                'Planid' => 3,
+                'Plan' => 'Plan Básico',
+                'Aseguradora' => 'Seguros XYZ',
+                'Idcotizacion' => 789654,
+                'Fecha' => now()->toDateTimeString(),
+                'CoberturasList' => [
+                    [
+                        'id' => 1,
+                        'nombre' => 'Cobertura Total',
+                        'descripcion' => 'Cobertura completa del vehículo',
+                    ],
+                    [
+                        'id' => 2,
+                        'nombre' => 'Cobertura Total',
+                        'descripcion' => 'Cobertura completa del vehículo',
+                    ],
+                    [
+                        'id' => 3,
+                        'nombre' => 'Cobertura Total',
+                        'descripcion' => 'Cobertura completa del vehículo',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function paymentType()
+    {
+        return response()->json([
+            [
+                'ID' => 1,
+                'TIPOVEHICULOID' => 1.0,
+                'TIPOVEHICULO' => 'Motocicletas hasta 250 CC',
+                'COBERTURADPAYRC' => '50/50/100',
+                'FINANZAJUDICIAL' => '50000',
+            ],
+        ]);
+    }
+
+    public function searchDocument()
+    {
+        return response()->json([
+            [
+                'IDCliente' => '00102793585',
+                'NombreCliente' => 'PEDRO ALMONTE',
+                'Direccion' => 'calle anacaona no 56',
+                'Telefono' => '(809)-3659595',
+                'IDTipoVehiculo' => 2,
+                'TipoVehiculo' => 'AUTOMOVIL, JEEP, STATION 6 CIL',
+                'Marca' => 'BMW',
+                'Modelo' => 'SERIE 6',
+                'Correo' => 'palmonte@gmail.com',
+                'Anio' => 2015,
+                'Color' => 'AZUL CLARO',
+                'Chassis' => '1804808484480480',
+                'Placa' => '18094848',
+                'Poliza' => '1-500-00000',
+                'Prima' => 1940,
+                'Vigencia' => '12 Meses',
+                'Cobertura' => '100/100/200',
+                'FianzaJudicial' => 250000,
+                'FechaEmision' => '2019-04-30T16:56:06',
+                'Estado' => 1,
+                'Usuario' => 'oficial1',
+                'PDV' => null,
+                'C3_Meses' => null,
+                'C6_Meses' => null,
+                'C12_Meses' => null,
+                'Error' => null,
+            ],
+        ]);
+    }
+
+    public function disableVehicleLaw(DisableVehicleLawRequest $request)
     {
         return response()->noContent();
     }

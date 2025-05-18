@@ -27,6 +27,11 @@ Route::middleware([EnsureClientIsResourceOwner::class])->group(function () {
     Route::get('cotizador/CancelarDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'cancelUnemploymentDebt']);
     Route::get('cotizador/CancelarAuto', [\App\Http\Controllers\QuoteController::class, 'cancelVehicle']);
 
+    Route::post('SegurosLeyApi/GuardarSeguro', [\App\Http\Controllers\QuoteController::class, 'estimateVehicleLaw']);
+    Route::get('SegurosLeyApi/Obtener/MetodosDePago', [\App\Http\Controllers\QuoteController::class, 'paymentType']);
+    Route::get('SegurosLeyApi/Buscar/PorNoDocumento', [\App\Http\Controllers\QuoteController::class, 'searchDocument']);
+    Route::get('SegurosLeyApi/Anular', [\App\Http\Controllers\QuoteController::class, 'disableVehicleLaw']);
+
     Route::post('vehiculos/Marca', [\App\Http\Controllers\VehicleController::class, 'list']);
     Route::post('vehiculos/Modelos/{MarcaID}', [\App\Http\Controllers\VehicleController::class, 'getModel']);
     Route::post('vehiculos/TipoVehiculo', [\App\Http\Controllers\VehicleController::class, 'typeList']);
