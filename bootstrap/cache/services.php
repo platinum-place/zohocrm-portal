@@ -44,7 +44,9 @@
     40 => 'Termwind\\Laravel\\TermwindServiceProvider',
     41 => 'Spatie\\Permission\\PermissionServiceProvider',
     42 => 'Zoho\\Api\\ServiceProvider',
-    43 => 'App\\Providers\\AppServiceProvider',
+    43 => 'Zoho\\CRM\\ServiceProvider',
+    44 => 'Zoho\\Oauth\\ServiceProvider',
+    45 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
   array (
@@ -76,7 +78,9 @@
     25 => 'Termwind\\Laravel\\TermwindServiceProvider',
     26 => 'Spatie\\Permission\\PermissionServiceProvider',
     27 => 'Zoho\\Api\\ServiceProvider',
-    28 => 'App\\Providers\\AppServiceProvider',
+    28 => 'Zoho\\CRM\\ServiceProvider',
+    29 => 'Zoho\\Oauth\\ServiceProvider',
+    30 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (

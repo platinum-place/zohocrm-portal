@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models\User;
+namespace App\Models;
 
-use App\Models\Account;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Passport\Client as PassportClient;
 
