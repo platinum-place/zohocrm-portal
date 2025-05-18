@@ -205,4 +205,20 @@ class QuoteController extends Controller
     {
         return response()->noContent();
     }
+
+    public function employmentTypes()
+    {
+        return response()->json([
+            1 => 'Publico',
+            2 => 'Privado',
+        ]);
+    }
+
+    public function businessTypes()
+    {
+        return response()->json([
+            1 => 'COMERCIAL',
+            2 => 'CASA DE CAMPO',
+        ]);
+    }
 }
