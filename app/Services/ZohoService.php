@@ -8,7 +8,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
 use ZohoCRM;
-use ZohoOauth;
+use ZohoOAuth;
 
 class ZohoService
 {
@@ -29,7 +29,7 @@ class ZohoService
      */
     public function generateAccessToken(string $grantToken): string
     {
-        $response = ZohoOauth::getPersistentToken($grantToken);
+        $response = ZohoOAuth::getPersistentToken($grantToken);
 
         $this->createAccessToken($response);
 

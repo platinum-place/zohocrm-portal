@@ -1,6 +1,6 @@
 <?php
 
-namespace Zoho\Oauth\Services;
+namespace Zoho\Api;
 
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
@@ -8,7 +8,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
-class OauthService
+class Oauth2
 {
     protected string $clientId;
 
