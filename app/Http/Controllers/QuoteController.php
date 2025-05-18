@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Quote\EstimateLifeRequest;
+use App\Http\Requests\Quote\EstimateUnemploymentDebtRequest;
+use App\Http\Requests\Quote\EstimateUnemploymentRequest;
 use App\Http\Requests\Quote\EstimateVehicleRequest;
 use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
@@ -108,6 +110,63 @@ class QuoteController extends Controller
     }
 
     public function issueLife(IssueLifeRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function estimateUnemploymentDebt(EstimateUnemploymentDebtRequest $request)
+    {
+        return response()->json([
+            [
+                'Impuesto' => '18.5',
+                'PrimaPeriodo' => '000.00',
+                'PrimaTotal' => '000.00',
+                'identificador' => 'A92F8BB6-0AC6-41B1-8D7F-FBE1A67C013F',
+                'Cliente' => 'Fulano del tal',
+                'Direccion' => 'Calle Primera',
+                'TipoEmpleado' => 'Publico',
+                'Fecha' => '01/01/2020',
+                'IdenCliente' => '000101001002030',
+                'Telefono' => '809390903',
+                'Aseguradora' => 'Mapfre',
+                'MontoPrestamo' => '50000',
+                'Cuota' => '5000',
+                'PlazoMese' => '24',
+                'Desempleo' => '6000',
+                'Deuda' => '8000',
+                'To tal' => '10000',
+            ]
+        ]);
+    }
+
+    public function issueUnemploymentDebt(IssueLifeRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function estimateUnemployment(EstimateUnemploymentRequest $request)
+    {
+        return response()->json([
+            [
+                'Impuesto' => '18.5',
+                'PrimaPeriodo' => '000.00',
+                'PrimaTotal' => '000.00',
+                'identificador' => 'A92F8BB6-0AC6-41B1-8D7F-FBE1A67C013F',
+                'Cliente' => 'Fulano de Tal',
+                'Direccion' => 'Calle Primera',
+                'Fecha' => '01/01/2020',
+                'TipoEmpleado' => 'Privado',
+                'IdentCliente' => '00030489834989',
+                'Aseguradora ' => 'Mapfre',
+                'MontoOriginal' => '000.00',
+                'Cuota' => '000.00',
+                'PlazoMese' => '24',
+                'Total' => '000.00',
+            ]
+        ]);
+    }
+
+    public function issueUnemployment(IssueLifeRequest $request)
     {
         return response()->noContent();
     }
