@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Quote\EstimateVehicleRequest;
+use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueVehicleRequest;
 use App\Http\Requests\Quote\ValidateInspectionRequest;
 
@@ -61,5 +62,24 @@ class QuoteController extends Controller
     public function validateInspection(ValidateInspectionRequest $request)
     {
         return response()->noContent();
+    }
+
+    public function inspect(InspectRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function getQRInspect(ValidateInspectionRequest $request)
+    {
+        return response()->json([
+            'QR' => '0iVBORw0KGgoAAAANSUhEUgAABCQAAAQkCAYAAAClls8JAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAL1ZSURBVHhe7NjBqmvJtiTR9',
+        ]);
+    }
+
+    public function getQR(ValidateInspectionRequest $request)
+    {
+        return response()->json([
+            'partefrontal' => '0iVBORw0KGgoAAAANSUhEUgAABCQAAAQkCAYAAAClls8JAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAL1ZSURBVHhe7NjBqmvJtiTR9',
+        ]);
     }
 }
