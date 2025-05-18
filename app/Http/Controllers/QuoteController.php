@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreVehicleRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\Quote\EstimateVehicleRequest;
+use App\Http\Requests\Quote\IssueVehicleRequest;
+use App\Http\Requests\Quote\ValidateInspectionRequest;
 
 class QuoteController extends Controller
 {
-    public function estimateVehicle(StoreVehicleRequest $request)
+    public function estimateVehicle(EstimateVehicleRequest $request)
     {
         $response = [
             'Passcode' => '4821',
@@ -41,5 +42,24 @@ class QuoteController extends Controller
         ];
 
         return response()->json($response);
+    }
+
+    public function issueVehicle(IssueVehicleRequest $request)
+    {
+        return response()->noContent();
+    }
+
+    public function valueVehicle()
+    {
+        return response()->json([
+            'valorMinimo' => '0000',
+            'valorEstandar' => '000.00',
+            'valorMaximo' => '000.00',
+        ]);
+    }
+
+    public function validateInspection(ValidateInspectionRequest $request)
+    {
+        return response()->noContent();
     }
 }
