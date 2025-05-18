@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Quote\EstimateFireRequest;
 use App\Http\Requests\Quote\EstimateLifeRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentDebtRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentRequest;
@@ -169,5 +170,34 @@ class QuoteController extends Controller
     public function issueUnemployment(IssueLifeRequest $request)
     {
         return response()->noContent();
+    }
+
+    public function estimateFire(EstimateFireRequest $request)
+    {
+        return response()->json([
+            [
+                'Impuesto' => '18.5',
+                'PrimaPeriodo' => '000.00',
+                'PrimaTotal' => '000.00',
+                'PrimaVida' => '000.00',
+                'PrimaTotalVida' => '000.00',
+                'identificador' => 'A92F8BB6-0AC6-41B1-8D7F-FBE1A67C013F',
+                'Aseguradora' => 'Mapfre',
+                'Anios' => '5',
+                'Valor' => '000.00',
+                'EdadTerminar' => '35',
+                'Codeudor' => 'Fulanito',
+                'EdadCodeudor' => '30',
+                'IdentiCodeudor' => '000000000',
+                'CoberturasListInc' => [
+                    'Cobertura' => 'Incendio',
+                    'Valor' => '100%',
+                ],
+                'CoberturasListVid' => [
+                    'Cobertura' => 'Vida',
+                    'Valor' => '100%',
+                ],
+            ]
+        ]);
     }
 }
