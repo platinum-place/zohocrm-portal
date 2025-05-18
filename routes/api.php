@@ -5,4 +5,11 @@ use Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner;
 
 Route::middleware([EnsureClientIsResourceOwner::class])->group(function () {
     Route::post('cotizador/colectiva', [\App\Http\Controllers\QuoteController::class, 'estimateVehicle']);
+    Route::post('vehiculos/Marca', [\App\Http\Controllers\VehicleController::class, 'list']);
+    Route::post('vehiculos/Modelos/{MarcaID}', [\App\Http\Controllers\VehicleController::class, 'getModel']);
+    Route::post('vehiculos/TipoVehiculo', [\App\Http\Controllers\VehicleController::class, 'typeList']);
+    Route::post('vehiculos/Accesorios', [\App\Http\Controllers\VehicleController::class, 'accessoriesList']);
+    Route::post('vehiculos/Actividades', [\App\Http\Controllers\VehicleController::class, 'activitiesList']);
+    Route::post('vehiculos/Circulacion', [\App\Http\Controllers\VehicleController::class, 'routeList']);
+    Route::get('vehiculos/Color', [\App\Http\Controllers\VehicleController::class, 'colorList']);
 });
