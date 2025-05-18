@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\Client;
+use App\Models\User\Client;
 use Carbon\CarbonInterval;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;

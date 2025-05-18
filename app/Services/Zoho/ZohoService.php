@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Zoho;
 
-use App\Models\ZohoOauthAccessToken;
-use App\Models\ZohoOauthRefreshToken;
+use App\Models\Zoho\ZohoOauthAccessToken;
+use App\Models\Zoho\ZohoOauthRefreshToken;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
 use ZohoCRM;
-use ZohoOauth;
+use ZohoOAuth;
 
 class ZohoService
 {
@@ -29,7 +29,7 @@ class ZohoService
      */
     public function generateAccessToken(string $grantToken): string
     {
-        $response = ZohoOauth::getPersistentToken($grantToken);
+        $response = ZohoOAuth::getPersistentToken($grantToken);
 
         $this->createAccessToken($response);
 

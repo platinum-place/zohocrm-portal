@@ -1,12 +1,12 @@
 <?php
 
-namespace Zoho\CRM\Services;
+namespace Zoho\Api;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 
-class CRMService
+class CRM
 {
     protected function getApiUrl(): string
     {
