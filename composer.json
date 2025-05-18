@@ -15,6 +15,20 @@
             "options": {
                 "symlink": true
             }
+        },
+        {
+            "type": "path",
+            "url": "packages/zoho/oauth",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/zoho/crm",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "require": {
@@ -24,7 +38,9 @@
         "laravel/passport": "^13.0",
         "laravel/tinker": "^2.10.1",
         "spatie/laravel-permission": "^6.17",
-        "zoho/api": "dev-main"
+        "zoho/api": "dev-main",
+        "zoho/oauth": "dev-main",
+        "zoho/crm": "dev-main"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

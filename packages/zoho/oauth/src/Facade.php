@@ -1,13 +1,14 @@
 <?php
 
-namespace Zoho\Api;
+namespace Zoho\Oauth;
 
 use Illuminate\Support\Facades\Facade as LaravelFacade;
+use Zoho\Oauth\Services\OauthService;
 
-class OAuthFacade extends LaravelFacade
+class Facade extends LaravelFacade
 {
     public static function getFacadeAccessor(): string
     {
-        return Oauth2::class;
+        return OauthService::class;
     }
 }

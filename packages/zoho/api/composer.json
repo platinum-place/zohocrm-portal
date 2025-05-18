@@ -10,11 +10,7 @@
         "laravel": {
             "providers": [
                 "Zoho\\Api\\ServiceProvider"
-            ],
-            "aliases": {
-                "ZohoOAuth": "Zoho\\Api\\OAuthFacade",
-                "ZohoCRM": "Zoho\\Api\\CRMFacade"
-            }
+            ]
         }
     }
 }

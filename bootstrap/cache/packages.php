@@ -138,10 +138,27 @@
     array (
       0 => 'Zoho\\Api\\ServiceProvider',
     ),
+  ),
+  'zoho/crm' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Zoho\\CRM\\ServiceProvider',
+    ),
     'aliases' => 
     array (
-      'ZohoOAuth' => 'Zoho\\Api\\OAuthFacade',
-      'ZohoCRM' => 'Zoho\\Api\\CRMFacade',
+      'ZohoCRM' => 'Zoho\\CRM\\Facade',
+    ),
+  ),
+  'zoho/oauth' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Zoho\\Oauth\\ServiceProvider',
+    ),
+    'aliases' => 
+    array (
+      'ZohoOauth' => 'Zoho\\Oauth\\Facade',
     ),
   ),
 );
