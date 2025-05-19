@@ -18,6 +18,7 @@ use App\Services\Zoho\ZohoQuoteService;
 use App\Services\Zoho\ZohoVehicle;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class QuoteController extends Controller
@@ -96,6 +97,28 @@ class QuoteController extends Controller
 
     public function inspect(InspectRequest $request)
     {
+        $id = $request->get('cotz_id');
+
+        $photo = $request->get('Foto1');
+
+        $imageData = base64_decode($photo);
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_buffer($finfo, $imageData);
+
+        switch ($mimeType) {
+            case 'image/jpeg':
+                $extension = '.jpg';
+                break;
+            case 'image/png':
+                $extension = '.png';
+                break;
+        }
+
+        $path = "$id/photos" . uniqid() . $extension;
+
+        Storage::put($path, $imageData);
+
         return response()->noContent();
     }
 
