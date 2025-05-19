@@ -6,6 +6,7 @@ use App\Services\Zoho\ZohoProduct;
 use App\Services\Zoho\ZohoVehicle;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
+use Throwable;
 
 class ProductController extends Controller
 {
@@ -15,7 +16,7 @@ class ProductController extends Controller
 
     /**
      * @throws RequestException
-     * @throws \Throwable
+     * @throws Throwable
      * @throws ConnectionException
      */
     public function list()
@@ -29,16 +30,19 @@ class ProductController extends Controller
         );
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function show(string $id)
     {
-        $plan = $this->zohoProduct->get($id);
-
-        $productData = $plan['data'][0];
+        $product = $this->zohoProduct->get($id);
 
         return response()->json([
-            $productData['id'] => [
+            $product['id'] => [
                 [
-                    $productData['Vendor_Name']['id'] => $productData['Product_Name']
+                    $product['Vendor_Name']['id'] => $product['Product_Name']
                 ]
             ]
         ]);

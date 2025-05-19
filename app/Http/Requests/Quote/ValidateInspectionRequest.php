@@ -22,7 +22,7 @@ class ValidateInspectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cotz_id' => ['required', 'integer'],
+            'cotz_id' => ['required', 'string'],
             'passcode' => ['required', 'string', 'size:4'],
         ];
     }
