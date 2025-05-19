@@ -10,7 +10,7 @@ class CRM
 {
     protected function getApiUrl(): string
     {
-        return config('zoho.domains.api').'/'.config('zoho.crm.uri');
+        return config('zoho.domains.api') . '/' . config('zoho.crm.uri');
     }
 
     /**
@@ -37,7 +37,7 @@ class CRM
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function searchRecords(string $module, string $token, string $criteria): ?array
+    public function searchRecords(string $module, string $token, string $criteria, int $page = 1, int $perPage = 200): ?array
     {
         $url = sprintf('%s/%s/search',
             $this->getApiUrl(),
@@ -45,7 +45,11 @@ class CRM
         );
 
         return Http::withToken($token, 'Zoho-oauthtoken')
-            ->get($url, http_build_query(['criteria' => $criteria]))
+            ->get($url, http_build_query([
+                'criteria' => $criteria,
+                'page' => $page,
+                'per_page' => $perPage,
+            ]))
             ->throw()
             ->json();
     }
