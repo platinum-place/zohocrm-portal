@@ -14,7 +14,7 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         foreach (RolesEnum::cases() as $role) {
-            app(Role::class)->findOrCreate($role->value, 'web');
+            app(Role::class)->findOrCreate($role->value, 'api');
         }
     }
 }
