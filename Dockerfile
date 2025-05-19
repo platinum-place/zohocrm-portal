@@ -88,13 +88,12 @@ RUN touch /var/www/html/database/database.sqlite \
 COPY . /var/www/html/
 
 # Set correct permissions
-RUN chown -R "${USER}:${GROUP}" /var/www/html \
-    && chmod -R 775 /var/www/html \
-    && chmod -R 777 /var/www/html/storage \
-    && chmod -R 777 /var/www/html/storage/framework \
-    && chmod -R 777 /var/www/html/storage/logs \
-    && chmod -R 777 /var/www/html/database \
-    && chmod 666 /var/www/html/database/database.sqlite
+RUN chown -R ${USER}:${GROUP} /var/www/html \
+    && find /var/www/html -type d -exec chmod 755 {} \; \
+    && find /var/www/html -type f -exec chmod 644 {} \; \
+    && chmod 755 /var/www/html/artisan \
+    && chmod -R 775 storage \
+    && chmod -R 775 bootstrap/cache
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

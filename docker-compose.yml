@@ -1,14 +1,15 @@
 services:
   app:
     container_name: ${APP_NAME:-Laravel}-backend
+    user: "${USERID}:${GROUPID}"
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        USERID: ${USERID:-1000}
-        GROUPID: ${GROUPID:-1000}
-        USER: ${USER:-laravel}
-        GROUP: ${GROUP:-laravel}
+        USERID: ${USERID}
+        GROUPID: ${GROUPID}
+        USER: ${USER}
+        GROUP: ${GROUP}
     image: 'php-8.4/app'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
