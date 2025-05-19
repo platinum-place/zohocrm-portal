@@ -49,7 +49,7 @@ class ZohoService
     {
         $refreshToken = ZohoOauthRefreshToken::latest('id')->value('refresh_token');
 
-        if (! $refreshToken) {
+        if (!$refreshToken) {
             throw new \Exception(__('Not Found'));
         }
 
@@ -71,7 +71,7 @@ class ZohoService
             ->where('expires_at', '>=', now())
             ->value('access_token');
 
-        if (! $token) {
+        if (!$token) {
             $token = $this->refreshAccessToken();
         }
 
@@ -88,5 +88,17 @@ class ZohoService
         $token = $this->getAccessToken();
 
         return ZohoCRM::searchRecords($module, $token, $criteria);
+    }
+
+    /**
+     * @throws Throwable
+     * @throws ConnectionException
+     * @throws RequestException
+     */
+    public function getRecords(string $module, array $fields, ?string $id = ''): ?array
+    {
+        $token = $this->getAccessToken();
+
+        return ZohoCRM::getRecords($module, $token, $fields, $id);
     }
 }
