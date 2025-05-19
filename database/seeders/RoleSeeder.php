@@ -13,8 +13,12 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
+        $guards = config('auth.guards');
+
         foreach (RolesEnum::cases() as $role) {
-            app(Role::class)->findOrCreate($role->value, 'api');
+            foreach ($guards as $key => $guard) {
+                app(Role::class)->findOrCreate($role->value, $key);
+            }
         }
     }
 }
