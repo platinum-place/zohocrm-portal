@@ -9,14 +9,6 @@ use Throwable;
 class Handler extends Exception
 {
     /**
-     * Report the exception.
-     */
-    public function report(): void
-    {
-        // ...
-    }
-
-    /**
      * Render the exception as an HTTP response.
      */
     public function render($request, Throwable $e)
