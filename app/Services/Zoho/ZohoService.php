@@ -4,6 +4,7 @@ namespace App\Services\Zoho;
 
 use App\Models\Zoho\ZohoOauthAccessToken;
 use App\Models\Zoho\ZohoOauthRefreshToken;
+use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
@@ -83,11 +84,17 @@ class ZohoService
      * @throws ConnectionException
      * @throws RequestException
      */
-    public function searchRecords(string $module, string $criteria): ?array
+    public function searchRecords(string $module, string $criteria, ?int $page = 1, ?int $perPage = 200): ?array
     {
         $token = $this->getAccessToken();
 
-        return ZohoCRM::searchRecords($module, $token, $criteria);
+        $response = ZohoCRM::searchRecords($module, $token, $criteria, $page, $perPage);
+
+        if (empty($response)) {
+            throw new Exception(__('Not Found'));
+        }
+
+        return $response;
     }
 
     /**
@@ -99,6 +106,12 @@ class ZohoService
     {
         $token = $this->getAccessToken();
 
-        return ZohoCRM::getRecords($module, $token, $fields, $id);
+        $response = ZohoCRM::getRecords($module, $token, $fields, $id);
+
+        if (empty($response)) {
+            throw new Exception(__('Not Found'));
+        }
+
+        return $response;
     }
 }
