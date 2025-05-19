@@ -112,6 +112,24 @@ class ZohoService
             throw new Exception(__('Not Found'));
         }
 
+        return $response['data'][0];
+    }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function updateRecords(string $module, string $id, array $data): ?array
+    {
+        $token = $this->getAccessToken();
+
+        $response = ZohoCRM::updateRecords($module, $token, $id, $data);
+
+        if (empty($response)) {
+            throw new Exception(__('Not Found'));
+        }
+
         return $response;
     }
 }
