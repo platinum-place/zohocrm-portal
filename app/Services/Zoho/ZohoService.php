@@ -50,7 +50,7 @@ class ZohoService
     {
         $refreshToken = ZohoOauthRefreshToken::latest('id')->value('refresh_token');
 
-        if (!$refreshToken) {
+        if (! $refreshToken) {
             throw new \Exception(__('Not Found'));
         }
 
@@ -72,7 +72,7 @@ class ZohoService
             ->where('expires_at', '>=', now())
             ->value('access_token');
 
-        if (!$token) {
+        if (! $token) {
             $token = $this->refreshAccessToken();
         }
 

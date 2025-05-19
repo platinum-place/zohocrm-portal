@@ -3,15 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Services\Zoho\ZohoVehicle;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\RequestException;
 use Throwable;
 
 class VehicleController extends Controller
 {
-    public function __construct(protected ZohoVehicle $zohoVehicle)
-    {
-    }
+    public function __construct(protected ZohoVehicle $zohoVehicle) {}
 
     /**
      * Get list of brands from Zoho
@@ -21,8 +17,8 @@ class VehicleController extends Controller
         $brands = $this->zohoVehicle->brandList();
 
         $sortedBrands = collect($brands['data'])
-            ->map(fn($brand) => [$brand['id'] => $brand['Name']])
-            ->sortBy(fn($brand) => reset($brand))
+            ->map(fn ($brand) => [$brand['id'] => $brand['Name']])
+            ->sortBy(fn ($brand) => reset($brand))
             ->values()
             ->toArray();
 
@@ -37,15 +33,15 @@ class VehicleController extends Controller
             do {
                 $modelsData = $this->zohoVehicle->modelsList($brandId, $page);
 
-                if (!empty($modelsData)) {
+                if (! empty($modelsData)) {
                     $sortedModels = collect($modelsData['data'])
-                        ->map(fn($model) => [
+                        ->map(fn ($model) => [
                             'id' => $model['id'],
                             'name' => $model['Name'],
-                            'type' => $model['Tipo']
+                            'type' => $model['Tipo'],
                         ])
                         ->sortBy('name')
-                        ->map(fn($model) => [$brandId => [$model['id'] => $model['name']]])
+                        ->map(fn ($model) => [$brandId => [$model['id'] => $model['name']]])
                         ->values()
                         ->toArray();
 
@@ -58,6 +54,7 @@ class VehicleController extends Controller
         } catch (Throwable $e) {
 
         }
+
         return response()->json($models);
     }
 

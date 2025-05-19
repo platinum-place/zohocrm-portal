@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\User\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CreateUserCommand extends Command
@@ -47,11 +46,11 @@ class CreateUserCommand extends Command
         $this->info('New user created successfully.');
         $this->info('');
 
-        $this->line('<fg=green>User ID</> .............................................................. ' . $user->id);
-        $this->line('<fg=green>User Name</> ........................................................... ' . $user->name);
-        $this->line('<fg=green>Username</> ........................................................... ' . $user->username);
-        $this->line('<fg=green>Email</> .............................................................. ' . $user->email);
-        $this->line('<fg=green>Password</> ........................................................... ' . $password);
+        $this->line('<fg=green>User ID</> .............................................................. '.$user->id);
+        $this->line('<fg=green>User Name</> ........................................................... '.$user->name);
+        $this->line('<fg=green>Username</> ........................................................... '.$user->username);
+        $this->line('<fg=green>Email</> .............................................................. '.$user->email);
+        $this->line('<fg=green>Password</> ........................................................... '.$password);
         $this->warn("<fg=yellow>Warning:</> The User password will not be shown again, so don't lose it! ");
         $this->info('');
 

@@ -28,6 +28,7 @@ class Oauth2
         $this->redirectUri = config('zoho.oauth.redirect_uri')
             ?? throw new Exception('Missing Zoho redirect_uri');
     }
+
     protected function getTokenUrl(): string
     {
         return config('zoho.domains.accounts_url').'/'.config('zoho.oauth.uri');

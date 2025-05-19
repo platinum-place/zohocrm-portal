@@ -10,7 +10,7 @@ class CRM
 {
     protected function getApiUrl(): string
     {
-        return config('zoho.domains.api') . '/' . config('zoho.crm.uri');
+        return config('zoho.domains.api').'/'.config('zoho.crm.uri');
     }
 
     /**

@@ -2,10 +2,9 @@
 
 namespace App\Exceptions;
 
-use Throwable;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Throwable;
 
 class Handler extends Exception
 {
@@ -33,12 +32,12 @@ class Handler extends Exception
 
             if ($e instanceof \Illuminate\Http\Client\RequestException) {
                 return response()->json([
-                    'Error' => __('Internal Server Error') . ': ' . $e->getMessage(),
+                    'Error' => __('Internal Server Error').': '.$e->getMessage(),
                     'code' => $code,
                 ], $code);
             } elseif ($e instanceof \Illuminate\Http\Client\ConnectionException) {
                 return response()->json([
-                    'Error' => __('Connection Closed Without Response') . ': ' . $e->getMessage(),
+                    'Error' => __('Connection Closed Without Response').': '.$e->getMessage(),
                     'code' => 503,
                 ], 503);
             }
