@@ -2,24 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Zoho\ZohoVehicle;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
+use Throwable;
+
 class VehicleController extends Controller
 {
-    public function list()
+    public function __construct(protected ZohoVehicle $zohoVehicle)
     {
-        return response()->json([
-            '01' => 'TOYOTA',
-            '02' => 'RENAULT',
-        ]);
     }
 
-    public function getModel(string $MarcaID)
+    /**
+     * Get list of brands from Zoho
+     */
+    public function list()
     {
-        return response()->json([
-            '02' => [
-                '01' => 'LOGAN',
-                '02' => 'SANDERO',
-            ],
-        ]);
+        $brands = $this->zohoVehicle->brandList();
+
+        $sortedBrands = collect($brands['data'])
+            ->map(fn($brand) => [$brand['id'] => $brand['Name']])
+            ->sortBy(fn($brand) => reset($brand))
+            ->values()
+            ->toArray();
+
+        return response()->json($sortedBrands);
+    }
+
+    public function getModel(string $brandId)
+    {
+        $page = 1;
+        $models = [];
+        try {
+            do {
+                $modelsData = $this->zohoVehicle->modelsList($brandId, $page);
+
+                if (!empty($modelsData)) {
+                    $sortedModels = collect($modelsData['data'])
+                        ->map(fn($model) => [
+                            'id' => $model['id'],
+                            'name' => $model['Name'],
+                            'type' => $model['Tipo']
+                        ])
+                        ->sortBy('name')
+                        ->map(fn($model) => [$brandId => [$model['id'] => $model['name']]])
+                        ->values()
+                        ->toArray();
+
+                    $models = array_merge($models, $sortedModels);
+                    $page++;
+                } else {
+                    $page = 0;
+                }
+            } while ($page > 0);
+        } catch (Throwable $e) {
+
+        }
+        return response()->json($models);
     }
 
     public function typeList()
