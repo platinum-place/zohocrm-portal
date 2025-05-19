@@ -17,7 +17,7 @@ class EnsureAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (! Auth::check() || ! Auth::user()->isAdmin()) {
-            abort(403);
+            abort(403, __('Unauthorized'));
         }
 
         return $next($request);

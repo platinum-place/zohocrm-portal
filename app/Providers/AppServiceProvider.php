@@ -27,5 +27,7 @@ class AppServiceProvider extends ServiceProvider
         Passport::personalAccessTokensExpireIn(CarbonInterval::months(6));
 
         Passport::useClientModel(Client::class);
+
+        Passport::enablePasswordGrant();
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models\User;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\User\RolesEnum;
 use App\Models\Account;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,8 +15,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements OAuthenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, HasRoles,Notifiable;
+    /** @use HasFactory<\Database\Factories\User\UserFactory> */
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -64,6 +65,6 @@ class User extends Authenticatable implements OAuthenticatable
 
     public function isAdmin(): bool
     {
-        return $this->hasRole(ADMIN_ROLE);
+        return $this->hasRole(RolesEnum::ADMIN);
     }
 }

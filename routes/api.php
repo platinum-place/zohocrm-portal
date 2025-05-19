@@ -1,9 +1,20 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner;
 
-Route::middleware([EnsureClientIsResourceOwner::class])->group(function () {
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('user', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::middleware([\App\Http\Middleware\EnsureAdmin::class])->group(function () {
+        Route::get('roles', [\App\Http\Controllers\RoleController::class, 'index']);
+        Route::put('users/{id}/sync-roles', [\App\Http\Controllers\UseController::class, 'syncRoles']);
+    });
+});
+
+Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner::class, 'auth:api'])->group(function () {
     Route::post('cotizador/colectiva', [\App\Http\Controllers\QuoteController::class, 'estimateVehicle']);
     Route::post('cotizador/EmitirAuto', [\App\Http\Controllers\QuoteController::class, 'issueVehicle']);
     Route::get('cotizador/ValorPromedio', [\App\Http\Controllers\QuoteController::class, 'valueVehicle']);

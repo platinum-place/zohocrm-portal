@@ -2,23 +2,21 @@
 
 namespace Database\Seeders;
 
+use App\Enums\User\RolesEnum;
 use App\Models\User\User;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 
-class UserSeeder extends Seeder
+class AdminUserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $role = Role::create(['name' => ADMIN_ROLE]);
-
         $user = User::factory()->create([
             'username' => 'admin',
         ]);
 
-        $user->assignRole($role);
+        $user->assignRole(RolesEnum::ADMIN);
     }
 }
