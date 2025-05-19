@@ -14,9 +14,18 @@ use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
 use App\Http\Requests\Quote\IssueVehicleRequest;
 use App\Http\Requests\Quote\ValidateInspectionRequest;
+use App\Services\Zoho\ZohoQuoteService;
+use App\Services\Zoho\ZohoVehicle;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
+use Throwable;
 
 class QuoteController extends Controller
 {
+    public function __construct(protected ZohoQuoteService $quoteService)
+    {
+    }
+
     public function estimateVehicle(EstimateVehicleRequest $request)
     {
         return response()->json([
@@ -67,8 +76,21 @@ class QuoteController extends Controller
         ]);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function validateInspection(ValidateInspectionRequest $request)
     {
+        $id = $request->get('cotz_id');
+
+        $data = [
+            'Depurado' => true,
+        ];
+
+        $this->quoteService->update($id, $data);
+
         return response()->noContent();
     }
 
