@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Exceptions;
+
+use Throwable;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+class Handler extends Exception
+{
+    /**
+     * Report the exception.
+     */
+    public function report(): void
+    {
+        // ...
+    }
+
+    /**
+     * Render the exception as an HTTP response.
+     */
+    public function render($request, Throwable $e)
+    {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            $code = 500;
+
+            if (method_exists($e, 'getStatusCode')) {
+                $code = $e->getStatusCode();
+            } elseif ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+                $code = $e->getStatusCode();
+            }
+
+            if ($e instanceof \Illuminate\Http\Client\RequestException) {
+                return response()->json([
+                    'Error' => 'Error interno de Zoho: ' . $e->getMessage(),
+                    'code' => $code,
+                ], $code);
+            } elseif ($e instanceof \Illuminate\Http\Client\ConnectionException) {
+                return response()->json([
+                    'Error' => 'Error de conexión con Zoho: ' . $e->getMessage(),
+                    'code' => 503,
+                ], 503);
+            }
+
+            return response()->json([
+                'Error' => $e->getMessage(),
+                'code' => $code,
+            ], $code);
+        }
+
+        return false;
+    }
+}
