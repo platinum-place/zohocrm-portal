@@ -9,11 +9,11 @@ use Illuminate\Support\Str;
 class CreateUserCommand extends Command
 {
     /**
-     * The name and signature of the console command.
+     * The username and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'user:create {--name= : The name of the user}';
+    protected $signature = 'user:create {--username= : The username of the user}';
 
     /**
      * The console command description.
@@ -33,10 +33,10 @@ class CreateUserCommand extends Command
             'password' => $password,
         ];
 
-        if ($name = $this->option('name')) {
-            $data['name'] = $name;
-        } elseif ($name = $this->ask('What name would you like to use for the user? (leave empty for fake name)')) {
-            $data['name'] = $name;
+        if ($username = $this->option('username')) {
+            $data['username'] = $username;
+        } elseif ($username = $this->ask('What name would you like to use for the user? (leave empty for fake username)')) {
+            $data['username'] = $username;
         }
 
         $user = User::factory()->create($data);
