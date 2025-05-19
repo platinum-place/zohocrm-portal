@@ -1,6 +1,6 @@
 services:
   app:
-    container_name: app
+    container_name: ${APP_NAME:-Laravel}-backend
     build:
       context: .
       dockerfile: Dockerfile
