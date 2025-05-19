@@ -10,26 +10,24 @@ use Throwable;
 
 class Oauth2
 {
-    protected string $clientId;
+    private string $clientId;
 
-    protected string $clientSecret;
+    private string $clientSecret;
 
-    protected string $redirectUri;
+    private string $redirectUri;
 
     /**
      * @throws Throwable
      */
     public function __construct()
     {
-        $this->clientId = config('zoho.oauth.client_id');
-        $this->clientSecret = config('zoho.oauth.client_secret');
-        $this->redirectUri = config('zoho.oauth.redirect_uri');
-
-        throw_if(! $this->clientId || ! $this->clientSecret || ! $this->redirectUri,
-            new Exception('Missing Zoho CRM credentials')
-        );
+        $this->clientId = config('zoho.oauth.client_id')
+            ?? throw new Exception('Missing Zoho client_id');
+        $this->clientSecret = config('zoho.oauth.client_secret')
+            ?? throw new Exception('Missing Zoho client_secret');
+        $this->redirectUri = config('zoho.oauth.redirect_uri')
+            ?? throw new Exception('Missing Zoho redirect_uri');
     }
-
     protected function getTokenUrl(): string
     {
         return config('zoho.domains.accounts_url').'/'.config('zoho.oauth.uri');
