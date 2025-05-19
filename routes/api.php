@@ -14,7 +14,7 @@ Route::middleware(['auth:api'])->group(function () {
     });
 });
 
-Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner::class, 'auth:api'])->group(function () {
+Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner::class])->group(function () {
     Route::post('cotizador/colectiva', [\App\Http\Controllers\QuoteController::class, 'estimateVehicle']);
     Route::post('cotizador/EmitirAuto', [\App\Http\Controllers\QuoteController::class, 'issueVehicle']);
     Route::get('cotizador/ValorPromedio', [\App\Http\Controllers\QuoteController::class, 'valueVehicle']);
