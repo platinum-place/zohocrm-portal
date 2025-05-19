@@ -8668,23 +8668,23 @@
             "dist": {
                 "type": "path",
                 "url": "packages/zoho/api",
-                "reference": "4862535d61232c199823090086c7f78b1b43bdbc"
+                "reference": "471901d21a632be76e99b19cb711db4958cdb2ca"
             },
             "type": "library",
             "extra": {
                 "laravel": {
                     "providers": [
-                        "Zoho\\Api\\ServiceProvider"
+                        "Zoho\\API\\ServiceProvider"
                     ],
                     "aliases": {
-                        "ZohoOAuth": "Zoho\\Api\\OAuthFacade",
-                        "ZohoCRM": "Zoho\\Api\\CRMFacade"
+                        "ZohoOAuth": "Zoho\\API\\Facades\\OAuthFacade",
+                        "ZohoCRM": "Zoho\\API\\Facades\\CRMFacade"
                     }
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Zoho\\Api\\": "src/"
+                    "Zoho\\API\\": "src/"
                 }
             },
             "transport-options": {

@@ -136,12 +136,12 @@
   array (
     'providers' => 
     array (
-      0 => 'Zoho\\Api\\ServiceProvider',
+      0 => 'Zoho\\API\\ServiceProvider',
     ),
     'aliases' => 
     array (
-      'ZohoOAuth' => 'Zoho\\Api\\OAuthFacade',
-      'ZohoCRM' => 'Zoho\\Api\\CRMFacade',
+      'ZohoOAuth' => 'Zoho\\API\\Facades\\OAuthFacade',
+      'ZohoCRM' => 'Zoho\\API\\Facades\\CRMFacade',
     ),
   ),
 );
