@@ -43,7 +43,7 @@
     39 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     40 => 'Termwind\\Laravel\\TermwindServiceProvider',
     41 => 'Spatie\\Permission\\PermissionServiceProvider',
-    42 => 'Zoho\\Api\\ServiceProvider',
+    42 => 'Zoho\\API\\ServiceProvider',
     43 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
@@ -75,7 +75,7 @@
     24 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     25 => 'Termwind\\Laravel\\TermwindServiceProvider',
     26 => 'Spatie\\Permission\\PermissionServiceProvider',
-    27 => 'Zoho\\Api\\ServiceProvider',
+    27 => 'Zoho\\API\\ServiceProvider',
     28 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
