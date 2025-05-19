@@ -1,6 +1,6 @@
 <?php
 
-namespace Zoho\Api;
+namespace Zoho\API;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -10,7 +10,7 @@ class CRM
 {
     protected function getApiUrl(): string
     {
-        return config('zoho.domains.api').'/'.config('zoho.crm.uri');
+        return config('zoho.domains.api') . '/' . config('zoho.crm.uri');
     }
 
     /**
@@ -19,11 +19,7 @@ class CRM
      */
     public function getRecords(string $module, string $token, array $fields, ?string $id = ''): ?array
     {
-        $url = sprintf('%s/%s%s',
-            $this->getApiUrl(),
-            $module,
-            $id ? "/$id" : ''
-        );
+        $url = sprintf('%s/%s%s', $this->getApiUrl(), $module, $id ? "/$id" : '');
 
         return Http::withToken($token, 'Zoho-oauthtoken')
             ->get($url, [
@@ -39,10 +35,7 @@ class CRM
      */
     public function searchRecords(string $module, string $token, string $criteria, int $page = 1, int $perPage = 200): ?array
     {
-        $url = sprintf('%s/%s/search',
-            $this->getApiUrl(),
-            $module,
-        );
+        $url = sprintf('%s/%s/search', $this->getApiUrl(), $module);
 
         return Http::withToken($token, 'Zoho-oauthtoken')
             ->get($url, http_build_query([
@@ -50,6 +43,22 @@ class CRM
                 'page' => $page,
                 'per_page' => $perPage,
             ]))
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function updateRecords(string $module, string $token, string $id, array $data): ?array
+    {
+        $url = sprintf('%s/%s/%s', $this->getApiUrl(), $module, $id);
+
+        return Http::withToken($token, 'Zoho-oauthtoken')
+            ->put($url, [
+                'data' => [$data],
+            ])
             ->throw()
             ->json();
     }

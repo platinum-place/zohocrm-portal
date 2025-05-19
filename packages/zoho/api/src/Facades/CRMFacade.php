@@ -1,13 +1,14 @@
 <?php
 
-namespace Zoho\Api;
+namespace Zoho\API\Facades;
 
 use Illuminate\Support\Facades\Facade as LaravelFacade;
+use Zoho\API\CRM;
 
-class OAuthFacade extends LaravelFacade
+class CRMFacade extends LaravelFacade
 {
     public static function getFacadeAccessor(): string
     {
-        return Oauth2::class;
+        return CRM::class;
     }
 }

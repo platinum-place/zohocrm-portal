@@ -3,17 +3,17 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Zoho\\Api\\": "src/"
+            "Zoho\\API\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Zoho\\Api\\ServiceProvider"
+                "Zoho\\API\\ServiceProvider"
             ],
             "aliases": {
-                "ZohoOAuth": "Zoho\\Api\\OAuthFacade",
-                "ZohoCRM": "Zoho\\Api\\CRMFacade"
+                "ZohoOAuth": "Zoho\\API\\Facades\\OAuthFacade",
+                "ZohoCRM": "Zoho\\API\\Facades\\CRMFacade"
             }
         }
     }
