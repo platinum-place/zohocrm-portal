@@ -19,6 +19,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QuoteController extends Controller
 {
@@ -154,7 +155,14 @@ class QuoteController extends Controller
 
     public function getPhotos(ValidateInspectionRequest $request)
     {
-        $attachments = $this->service->getAttachments($request->get('cotz_id'));
+        $id = $request->get('cotz_id');
+
+        $attachments = $this->service->getAttachments($id);
+
+        foreach ($attachments as $attachment) {
+          $this->service->downloadAttachment($id, $attachment['id']);
+
+        }
 
         return response()->json($attachments);
     }

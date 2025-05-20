@@ -40,10 +40,25 @@ class QuoteService extends ZohoCRMService
         $this->uploadAnAttachment('Quotes', $id, $filePath);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function getAttachments(string $id): ?array
     {
         $fields = ['id','File_Name'];
 
-        return $this->attachmentList('Quotes', $id,$fields);
+        return $this->attachmentList('Quotes', $id,$fields)['data'];
+    }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function downloadAttachment(string $id, string $attachmentId): ?array
+    {
+        return $this->getAttachment('Quotes', $id,$attachmentId);
     }
 }

@@ -42,9 +42,11 @@
     38 => 'Carbon\\Laravel\\ServiceProvider',
     39 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     40 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    41 => 'Spatie\\Permission\\PermissionServiceProvider',
-    42 => 'Zoho\\API\\ServiceProvider',
-    43 => 'App\\Providers\\AppServiceProvider',
+    41 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    42 => 'Spatie\\Permission\\PermissionServiceProvider',
+    43 => 'Zoho\\API\\ServiceProvider',
+    44 => 'App\\Providers\\AppServiceProvider',
+    45 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
   ),
   'eager' => 
   array (
@@ -74,9 +76,11 @@
     23 => 'Carbon\\Laravel\\ServiceProvider',
     24 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     25 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    26 => 'Spatie\\Permission\\PermissionServiceProvider',
-    27 => 'Zoho\\API\\ServiceProvider',
-    28 => 'App\\Providers\\AppServiceProvider',
+    26 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    27 => 'Spatie\\Permission\\PermissionServiceProvider',
+    28 => 'Zoho\\API\\ServiceProvider',
+    29 => 'App\\Providers\\AppServiceProvider',
+    30 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
   ),
   'deferred' => 
   array (

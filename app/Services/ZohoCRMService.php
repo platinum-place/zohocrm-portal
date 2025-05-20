@@ -80,10 +80,27 @@ class ZohoCRMService extends ZohoService
         ZohoCRM::uploadAttachment($module, $token, $id, $filePath);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function attachmentList(string $module, string $id, array $fields): ?array
     {
         $token = $this->getAccessToken();
 
         return ZohoCRM::attachmentList($module, $token, $id, $fields);
+    }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function getAttachment(string $module, string $id, string $attachmentId): ?array
+    {
+        $token = $this->getAccessToken();
+
+        return ZohoCRM::getAttachment($module, $token, $id, $attachmentId);
     }
 }
