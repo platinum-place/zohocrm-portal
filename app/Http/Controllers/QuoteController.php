@@ -14,8 +14,7 @@ use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
 use App\Http\Requests\Quote\IssueVehicleRequest;
 use App\Http\Requests\Quote\ValidateInspectionRequest;
-use App\Services\Zoho\ZohoQuoteService;
-use App\Services\Zoho\ZohoVehicle;
+use App\Services\QuoteService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +22,7 @@ use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected ZohoQuoteService $quoteService)
+    public function __construct(protected QuoteService $service)
     {
     }
 
@@ -90,34 +89,58 @@ class QuoteController extends Controller
             'Depurado' => true,
         ];
 
-        $this->quoteService->update($id, $data);
+        $this->service->update($id, $data);
 
         return response()->noContent();
     }
 
+    /**
+     * @throws \Exception
+     * @throws Throwable
+     */
     public function inspect(InspectRequest $request)
     {
         $id = $request->get('cotz_id');
 
-        $photo = $request->get('Foto1');
+        $photos = [
+            'Foto1',
+            'Foto2',
+            'Foto3',
+            'Foto4',
+            'Foto5',
+            'Foto6',
+            'Foto7',
+            'Foto8',
+            'Foto9',
+            'Foto13',
+            'Foto10',
+            'Foto11',
+            'Foto12',
+            'Foto14'
+        ];
 
-        $imageData = base64_decode($photo);
+        foreach ($photos as $photo) {
+            if (!$request->filled($photo)) {
+                continue;
+            }
 
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_buffer($finfo, $imageData);
+            $imageData = base64_decode($request->input($photo));
 
-        switch ($mimeType) {
-            case 'image/jpeg':
-                $extension = '.jpg';
-                break;
-            case 'image/png':
-                $extension = '.png';
-                break;
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_buffer($finfo, $imageData);
+            finfo_close($finfo);
+
+            $extension = match ($mimeType) {
+                'image/jpeg' => '.jpg',
+                'image/png' => '.png',
+                default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
+            };
+
+            $path = "photos/{$id}/" . uniqid() . $extension;
+
+            Storage::put($path, $imageData);
+            $this->service->uploadAttachment($id, $path);
         }
-
-        $path = "$id/photos" . uniqid() . $extension;
-
-        Storage::put($path, $imageData);
 
         return response()->noContent();
     }
