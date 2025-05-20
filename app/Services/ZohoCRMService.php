@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Zoho;
+namespace App\Services;
 
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
@@ -8,7 +8,7 @@ use Illuminate\Http\Client\RequestException;
 use Throwable;
 use ZohoCRM;
 
-class ZohoCRMService extends ZohoService
+class ZohoCRMService extends ZohoOAuthService
 {
     /**
      * @throws Throwable
@@ -109,6 +109,6 @@ class ZohoCRMService extends ZohoService
     {
         $token = $this->getAccessToken();
 
-        return ZohoCRM::insertRecords($module, $token, $data)['data'][0];
+        return ZohoCRM::insertRecords($module, $token, $data);
     }
 }

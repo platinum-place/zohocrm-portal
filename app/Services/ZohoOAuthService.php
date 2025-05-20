@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Zoho;
+namespace App\Services;
 
 use App\Models\Zoho\ZohoOauthAccessToken;
 use App\Models\Zoho\ZohoOauthRefreshToken;
@@ -9,7 +9,7 @@ use Illuminate\Http\Client\RequestException;
 use Throwable;
 use ZohoOAuth;
 
-abstract class ZohoService
+abstract class ZohoOAuthService
 {
     protected function createAccessToken(array $data): void
     {
