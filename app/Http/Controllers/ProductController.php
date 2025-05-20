@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Services\ProductService;
+use App\Services\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
 
 class ProductController extends Controller
 {
-    public function __construct(protected ProductService $service) {}
+    public function __construct(protected ZohoCRMService $crm)
+    {
+    }
 
     /**
      * @throws RequestException
@@ -18,10 +21,11 @@ class ProductController extends Controller
      */
     public function list()
     {
-        $list = $this->service->getList();
+        $criteria = 'Corredor:equals:3222373000092390001';
+        $list = $this->crm->searchRecords('Products', $criteria);
 
         return response()->json(
-            collect($list['data'])->map(fn ($value) => [
+            collect($list['data'])->map(fn($value) => [
                 $value['id'] => $value['Product_Category'],
             ])
         );
@@ -34,7 +38,8 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = $this->service->get($id)['data'][0];
+        $fields = ['id', 'Vendor_Name', 'Product_Name'];
+        $product = $this->crm->getRecords('Products', $fields, $id)['data'][0];
 
         return response()->json([
             $product['id'] => [
