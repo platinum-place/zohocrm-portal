@@ -99,4 +99,16 @@ class ZohoCRMService extends ZohoService
 
         return ZohoCRM::getAttachment($module, $token, $id, $attachmentId);
     }
+
+    /**
+     * @throws Throwable
+     * @throws ConnectionException
+     * @throws RequestException
+     */
+    public function insertRecords(string $module, array $data): ?array
+    {
+        $token = $this->getAccessToken();
+
+        return ZohoCRM::insertRecords($module, $token, $data)['data'][0];
+    }
 }

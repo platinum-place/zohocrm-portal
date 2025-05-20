@@ -73,4 +73,50 @@ class QuoteService extends ZohoCRMService
 
         return $this->searchRecords('Quotes', $criteria)['data'];
     }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function getLifeProducts(string $product): ?array
+    {
+        $criteria = '((Corredor:equals:' . env('ZOHO_ACCOUNT_ID') . ") and (Plan:equals:$product))";
+
+        return $this->searchRecords('Products', $criteria)['data'];
+    }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function getProductTaxes(string $productId): ?array
+    {
+        $criteria = "Plan:equals:$productId";
+
+        return $this->searchRecords('Tasas', $criteria)['data'];
+    }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function getProductAccountMaintenances(string $productId): ?array
+    {
+        $criteria = "Servicio:equals:$productId";
+
+        return $this->searchRecords('Mantenimientos_cuentas', $criteria)['data'];
+    }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function create(array $data): ?array
+    {
+        return $this->insertRecords('Quotes', $data);
+    }
 }

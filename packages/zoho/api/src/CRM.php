@@ -11,7 +11,7 @@ class CRM
 {
     protected function getApiUrl(): string
     {
-        return config('zoho.domains.api').'/'.config('zoho.crm.uri');
+        return config('zoho.domains.api') . '/' . config('zoho.crm.uri');
     }
 
     /**
@@ -107,5 +107,21 @@ class CRM
             ->get($url)
             ->throw()
             ->body();
+    }
+
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function insertRecords(string $module, string $token, array $data): ?array
+    {
+        $url = sprintf('%s/%s', $this->getApiUrl(), $module);
+
+        return Http::withToken($token, 'Zoho-oauthtoken')
+            ->post($url, [
+                'data' => [$data],
+            ])
+            ->throw()
+            ->json();
     }
 }
