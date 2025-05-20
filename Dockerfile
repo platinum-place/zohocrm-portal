@@ -1,23 +1,20 @@
-# Usar imagen base más ligera
+
 FROM php:8.4-apache
 
-# Instalar dependencias en una sola capa para reducir tamaño
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Update packages and install necessary dependencies
+RUN apt-get update && apt-get install -y \
     git \
     curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
+@@ -11,21 +11,50 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     default-mysql-client \
     libicu-dev \
     libsqlite3-dev \
     npm \
-    && rm -rf /var/lib/apt/lists/*
+    apache2-dev
 
-# Instalar extensiones PHP con limpieza
+# Install PHP extensions
 RUN docker-php-ext-install \
     pdo_mysql \
     mysqli \
@@ -28,78 +25,100 @@ RUN docker-php-ext-install \
     pcntl \
     bcmath \
     gd \
-    pdo_sqlite \
-    && docker-php-source delete
+    pdo_sqlite
 
-# Configuraciones de Apache
+# Enable SQLite support
+RUN docker-php-ext-enable pdo_sqlite
+
+# Enable mod_rewrite and headers for Apache
 RUN a2enmod rewrite headers
 
-# Usar multi-stage build para Composer
-FROM composer:latest AS composer
+# Disable server signature and expose version details
+RUN echo "ServerSignature Off" >> /etc/apache2/apache2.conf \
+    && echo "ServerTokens Prod" >> /etc/apache2/apache2.conf
 
-# Etapa final
-FROM php:8.4-apache-slim
+# Create security headers configuration
+RUN touch /etc/apache2/conf-available/security-headers.conf \
+    && echo "Header unset Server" >> /etc/apache2/conf-available/security-headers.conf \
+    && echo "Header unset X-Powered-By" >> /etc/apache2/conf-available/security-headers.conf \
+    && a2enconf security-headers
 
-# Copiar extensiones de la primera etapa
-COPY --from=php:8.4-apache-slim /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-COPY --from=php:8.4-apache-slim /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+# Disable PHP version exposure
+RUN echo "expose_php = Off" >> /usr/local/etc/php/conf.d/security.ini
 
-# Copiar Composer
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+# Define arguments for user and group
+ARG USERID
+ARG GROUPID
+ARG USER
+ARG GROUP
 
-# Reinstalar dependencias mínimas
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    curl \
-    npm \
-    && rm -rf /var/lib/apt/lists/*
+# Create non-root group and user (with verification)
+RUN set -e; \
+    if ! getent group "${GROUP}" > /dev/null; then \
+        addgroup --gid "${GROUPID}" "${GROUP}"; \
+@@ -34,42 +63,65 @@ RUN set -e; \
+        adduser --disabled-password --gecos "" --uid "${USERID}" --gid "${GROUPID}" "${USER}"; \
+    fi
 
-# Directorio de trabajo
+# Add the created user to Apache group (www-data)
+RUN usermod -aG www-data "${USER}"
+
+# Configure Apache to use non-root user and group
+RUN sed -i "s/^User www-data/User ${USER}/" /etc/apache2/apache2.conf \
+    && sed -i "s/^Group www-data/Group ${GROUP}/" /etc/apache2/apache2.conf
+
+# Set up project directory
 WORKDIR /var/www/html
 
-# Crear directorios con permisos
-RUN mkdir -p \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/framework/cache \
-    storage/logs \
-    database \
-    && touch database/database.sqlite \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html
+# Create necessary Laravel directories if they don't exist
+RUN mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/views \
+    && mkdir -p storage/framework/cache \
+    && mkdir -p storage/logs \
+    && mkdir -p database
 
-# Copiar archivos del proyecto
-COPY --chown=www-data:www-data . /var/www/html/
+# Ensure SQLite database file can be created and is writable
+RUN touch /var/www/html/database/database.sqlite \
+    && chmod 666 /var/www/html/database/database.sqlite
 
-# Instalar dependencias de Composer con optimización
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --optimize-autoloader \
-    --no-scripts \
-    --no-progress
+# Copy project files
+COPY . /var/www/html/
 
-# Instalar y construir assets de npm
-RUN npm ci && npm run build
+# Set correct permissions
+RUN chown -R "${USER}:${GROUP}" /var/www/html \
+    && chmod -R 775 /var/www/html \
+    && chmod -R 777 /var/www/html/storage \
+    && chmod -R 777 /var/www/html/storage/framework \
+    && chmod -R 777 /var/www/html/storage/logs \
+    && chmod -R 777 /var/www/html/database \
+    && chmod 666 /var/www/html/database/database.sqlite
 
-# Configuración de Apache
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Switch to non-root user to install Composer dependencies
+USER "${USER}"
+RUN composer install --no-dev --optimize-autoloader
+
+# Install npm dependencies and build assets
+RUN npm install && npm run build
+
+USER root
+
+# Configure Apache for Laravel
 RUN echo '<Directory /var/www/html/public>\n\
     Options Indexes FollowSymLinks\n\
     AllowOverride All\n\
     Require all granted\n\
 </Directory>' > /etc/apache2/conf-available/laravel.conf \
-    && a2enconf laravel \
-    && sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+    && a2enconf laravel
 
-# Configuraciones de seguridad
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
-    && echo "expose_php = Off" >> /usr/local/etc/php/conf.d/security.ini
+# Set Apache DocumentRoot to Laravel's public directory
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
-# Exponer puerto 80
+# Expose port 80
 EXPOSE 80
 
-# Usuario no root
-USER www-data
-
-# Comando de inicio
+# Run Apache in foreground as non-root user
+USER "${USER}"
 CMD ["apache2-foreground"]
