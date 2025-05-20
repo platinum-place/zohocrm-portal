@@ -1,12 +1,13 @@
-
 FROM php:8.4-apache
 
 # Update packages and install necessary dependencies
 RUN apt-get update && apt-get install -y \
     git \
-    curl
-
-RUN apt-get update && apt-get install -y \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
     unzip \
     libzip-dev \
     default-mysql-client \
@@ -57,7 +58,8 @@ ARG GROUP
 RUN set -e; \
     if ! getent group "${GROUP}" > /dev/null; then \
         addgroup --gid "${GROUPID}" "${GROUP}"; \
- -34,42 +63,65  RUN set -e; \
+    fi; \
+    if ! id -u "${USER}" > /dev/null 2>&1; then \
         adduser --disabled-password --gecos "" --uid "${USERID}" --gid "${GROUPID}" "${USER}"; \
     fi
 
@@ -104,6 +106,7 @@ RUN composer install --no-dev --optimize-autoloader
 # Install npm dependencies and build assets
 RUN npm install && npm run build
 
+# Run Apache in foreground as non-root user
 USER root
 
 # Configure Apache for Laravel
@@ -120,6 +123,4 @@ RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available
 # Expose port 80
 EXPOSE 80
 
-# Run Apache in foreground as non-root user
-USER "${USER}"
 CMD ["apache2-foreground"]
