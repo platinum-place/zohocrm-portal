@@ -34,7 +34,7 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = $this->service->get($id);
+        $product = $this->service->get($id)['data'][0];
 
         return response()->json([
             $product['id'] => [
