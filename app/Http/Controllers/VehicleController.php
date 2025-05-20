@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Zoho\ZohoVehicle;
+use App\Services\VehicleService;
 use Throwable;
 
 class VehicleController extends Controller
 {
-    public function __construct(protected ZohoVehicle $zohoVehicle) {}
+    public function __construct(protected VehicleService $service) {}
 
     /**
      * Get list of brands from Zoho
      */
     public function list()
     {
-        $brands = $this->zohoVehicle->brandList();
+        $brands = $this->service->brandList();
 
         $sortedBrands = collect($brands['data'])
             ->map(fn ($brand) => [$brand['id'] => $brand['Name']])
@@ -31,7 +31,7 @@ class VehicleController extends Controller
         $models = [];
         try {
             do {
-                $modelsData = $this->zohoVehicle->modelsList($brandId, $page);
+                $modelsData = $this->service->modelsList($brandId, $page);
 
                 if (! empty($modelsData)) {
                     $sortedModels = collect($modelsData['data'])

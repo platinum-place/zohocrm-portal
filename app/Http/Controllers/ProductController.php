@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Zoho\ZohoProduct;
-use App\Services\Zoho\ZohoVehicle;
+use App\Services\ProductService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
 
 class ProductController extends Controller
 {
-    public function __construct(protected ZohoProduct $zohoProduct)
+    public function __construct(protected ProductService $service)
     {
     }
 
@@ -21,7 +20,7 @@ class ProductController extends Controller
      */
     public function list()
     {
-        $list = $this->zohoProduct->getList();
+        $list = $this->service->getList();
 
         return response()->json(
             collect($list['data'])->map(fn($value) => [
@@ -37,7 +36,7 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = $this->zohoProduct->get($id);
+        $product = $this->service->get($id);
 
         return response()->json([
             $product['id'] => [
