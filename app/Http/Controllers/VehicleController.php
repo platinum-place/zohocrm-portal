@@ -52,7 +52,8 @@ class VehicleController extends Controller
                 }
             } while ($page > 0);
         } catch (Throwable $e) {
-
+            // Log the error but continue to return available models
+            report($e);
         }
 
         return response()->json($models);

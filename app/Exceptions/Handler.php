@@ -2,14 +2,18 @@
 
 namespace App\Exceptions;
 
-use Exception;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
 use Throwable;
 
-class Handler extends Exception
+class Handler extends ExceptionHandler
 {
     /**
      * Render the exception as an HTTP response.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Throwable  $e
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function render($request, Throwable $e)
     {
@@ -40,6 +44,6 @@ class Handler extends Exception
             ], $code);
         }
 
-        return false;
+        return parent::render($request, $e);
     }
 }
