@@ -2,7 +2,4 @@
 
 namespace App\Services\Quote;
 
-class QuoteLifeService
-{
-
-}
+class QuoteLifeService extends QuoteService {}

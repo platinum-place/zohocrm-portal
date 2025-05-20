@@ -6,7 +6,6 @@ use App\Http\Requests\Quote\CancelVehicleRequest;
 use App\Http\Requests\Quote\DisableVehicleLawRequest;
 use App\Http\Requests\Quote\EstimateFireRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentDebtRequest;
-use App\Http\Requests\Quote\EstimateUnemploymentRequest;
 use App\Http\Requests\Quote\EstimateVehicleLawRequest;
 use App\Http\Requests\Quote\EstimateVehicleRequest;
 use App\Http\Requests\Quote\InspectRequest;
@@ -23,9 +22,7 @@ use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected QuoteService $service)
-    {
-    }
+    public function __construct(protected QuoteService $service) {}
 
     public function estimateVehicle(EstimateVehicleRequest $request)
     {
@@ -107,7 +104,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -176,7 +173,7 @@ class QuoteController extends Controller
         ];
 
         foreach ($photos as $photo => $title) {
-            if (!$request->filled($photo)) {
+            if (! $request->filled($photo)) {
                 continue;
             }
 
@@ -192,7 +189,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
+            $path = "photos/{$id}/uploads/".date('YmdHis')."/$title.$extension";
 
             Storage::put($path, $imageData);
             $this->service->uploadAttachment($id, $path);
@@ -242,7 +239,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
+            $path = "photos/{$id}/downloads/".date('YmdHis')."/{$attachment['File_Name']}.$extension";
 
             Storage::put($path, $imageData);
 
@@ -257,8 +254,6 @@ class QuoteController extends Controller
      * @throws Throwable
      * @throws ConnectionException
      */
-
-
     public function estimateUnemploymentDebt(EstimateUnemploymentDebtRequest $request)
     {
         return response()->json([
@@ -333,86 +328,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
-                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
-                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
-                'Prima' => round($line['Net_Total'], 2),
-            ];
-
-            $this->service->update($id, $data);
-
-            break;
-        }
-
-        return response()->noContent();
-    }
-
-    public function estimateUnemployment(EstimateUnemploymentRequest $request)
-    {
-        return response()->json([
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano de Tal',
-                'Direccion' => 'Calle Primera',
-                'Fecha' => '01/01/2020',
-                'TipoEmpleado' => 'Privado',
-                'IdentCliente' => '00030489834989',
-                'Aseguradora ' => 'Mapfre',
-                'MontoOriginal' => '000.00',
-                'Cuota' => '000.00',
-                'PlazoMese' => '24',
-                'Total' => '000.00',
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano de Tal',
-                'Direccion' => 'Calle Primera',
-                'Fecha' => '01/01/2020',
-                'TipoEmpleado' => 'Privado',
-                'IdentCliente' => '00030489834989',
-                'Aseguradora ' => 'Mapfre',
-                'MontoOriginal' => '000.00',
-                'Cuota' => '000.00',
-                'PlazoMese' => '24',
-                'Total' => '000.00',
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano de Tal',
-                'Direccion' => 'Calle Primera',
-                'Fecha' => '01/01/2020',
-                'TipoEmpleado' => 'Privado',
-                'IdentCliente' => '00030489834989',
-                'Aseguradora ' => 'Mapfre',
-                'MontoOriginal' => '000.00',
-                'Cuota' => '000.00',
-                'PlazoMese' => '24',
-                'Total' => '000.00',
-            ],
-        ]);
-    }
-
-    public function issueUnemployment(IssueLifeRequest $request)
-    {
-        $id = $request->get('Identificador');
-
-        $quote = $this->service->get($id);
-
-        foreach ($quote['Quoted_Items'] as $line) {
-            $data = [
-                'Coberturas' => $line['Product_Name']['id'],
-                'Quote_Stage' => 'Emitida',
-                'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -512,7 +428,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -738,7 +654,7 @@ class QuoteController extends Controller
      */
     public function searchDocument(SearchDocumentRequest $request, string $identification)
     {
-//        $search = $request->get('NoDocumento');
+        //        $search = $request->get('NoDocumento');
 
         $quotes = $this->service->searchQuote($identification);
 

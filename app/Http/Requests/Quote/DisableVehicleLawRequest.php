@@ -22,8 +22,8 @@ class DisableVehicleLawRequest extends FormRequest
     public function rules(): array
     {
         return [
-//            'UsuarioAnula' => ['required', 'string', 'max:25'],
-//            'IDCotizador' => ['required', 'integer'],
+            //            'UsuarioAnula' => ['required', 'string', 'max:25'],
+            //            'IDCotizador' => ['required', 'integer'],
         ];
     }
 }

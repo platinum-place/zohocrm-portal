@@ -5,13 +5,19 @@ namespace App\Http\Controllers\Quote;
 use App\Http\Requests\Quote\EstimateLifeRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
 use App\Services\Quote\QuoteLifeService;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
+use Throwable;
 
 class QuoteLifeController
 {
-    public function __construct(protected QuoteLifeService $service)
-    {
-    }
+    public function __construct(protected QuoteLifeService $service) {}
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function estimateLife(EstimateLifeRequest $request)
     {
         $products = $this->service->getLifeProducts('Vida');
@@ -68,20 +74,20 @@ class QuoteLifeController
             }
 
             $data = [
-                "Subject" => $request->get('NombreCliente'),
-                "Valid_Till" => date("Y-m-d", strtotime(date("Y-m-d") . "+ 30 days")),
-                "Vigencia_desde" => date("Y-m-d"),
-                "Account_Name" => env('ZOHO_ACCOUNT_ID'),
-                "Contact_Name" => env('ZOHO_CONTACT_ID'),
-                "Quote_Stage" => "Cotizando",
-                "Nombre" => $request->get('NombreCliente'),
-                "RNC_C_dula" => $request->get('IdenCliente'),
-                "Direcci_n" => $request->get('Direccion'),
-                "Tel_Celular" => $request->get('Telefono1'),
-                "Plan" => 'Vida',
-                "Suma_asegurada" => $request->get('MontoOriginal'),
-                "Plazo" => $request->get('PlazoAnios'),
-                "Fuente" => 'API',
+                'Subject' => $request->get('NombreCliente'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 30 days')),
+                'Vigencia_desde' => date('Y-m-d'),
+                'Account_Name' => env('ZOHO_ACCOUNT_ID'),
+                'Contact_Name' => env('ZOHO_CONTACT_ID'),
+                'Quote_Stage' => 'Cotizando',
+                'Nombre' => $request->get('NombreCliente'),
+                'RNC_C_dula' => $request->get('IdenCliente'),
+                'Direcci_n' => $request->get('Direccion'),
+                'Tel_Celular' => $request->get('Telefono1'),
+                'Plan' => 'Vida',
+                'Suma_asegurada' => $request->get('MontoOriginal'),
+                'Plazo' => $request->get('PlazoAnios'),
+                'Fuente' => 'API',
                 'Quoted_Items' => [
                     [
                         'Quantity' => 1,
@@ -89,27 +95,27 @@ class QuoteLifeController
                         'Total' => $amount,
                         'Net_Total' => $amount,
                         'List_Price' => $amount,
-                    ]
-                ]
+                    ],
+                ],
             ];
 
             $responseProduct = $this->service->create($data);
 
             $response[] = [
-                "Impuesto" => null,
-                "PrimaPeriodo" => null,
-                "PrimaTotal" => $amount,
-                "identificador" => $responseProduct['details']['id'],
-                "Aseguradora" => $product['Vendor_Name']['name'],
-                "MontoOrig" => $request->get('MontoOriginal'),
-                "Anios" => null,
-                "EdadTerminar" => null,
-                "Cliente" => $request->get('NombreCliente'),
-                "Fecha" => date('d/m/Y'),
-                "Direccion" => $request->get('Direccion'),
-                "Edad" => $request->get('Edad'),
-                "IdenCliente" => $request->get('IdenCliente'),
-                "Codeudor" => null,
+                'Impuesto' => null,
+                'PrimaPeriodo' => null,
+                'PrimaTotal' => $amount,
+                'identificador' => $responseProduct['details']['id'],
+                'Aseguradora' => $product['Vendor_Name']['name'],
+                'MontoOrig' => $request->get('MontoOriginal'),
+                'Anios' => null,
+                'EdadTerminar' => null,
+                'Cliente' => $request->get('NombreCliente'),
+                'Fecha' => date('d/m/Y'),
+                'Direccion' => $request->get('Direccion'),
+                'Edad' => $request->get('Edad'),
+                'IdenCliente' => $request->get('IdenCliente'),
+                'Codeudor' => null,
                 'Alerta' => $alert,
             ];
         }
@@ -117,6 +123,11 @@ class QuoteLifeController
         return response()->json($response);
     }
 
+    /**
+     * @throws Throwable
+     * @throws ConnectionException
+     * @throws RequestException
+     */
     public function issueLife(IssueLifeRequest $request)
     {
         $id = $request->get('Identificador');
@@ -128,7 +139,7 @@ class QuoteLifeController
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),

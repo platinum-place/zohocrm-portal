@@ -29,10 +29,13 @@ Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner
 
     Route::post('cotizador/CotizaDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'estimateUnemploymentDebt']);
     Route::post('cotizador/EmitirDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'issueUnemploymentDebt']);
-    Route::post('cotizador/CotizaDesempleo', [\App\Http\Controllers\QuoteController::class, 'estimateUnemployment']);
-    Route::post('cotizador/EmitirDesempleo', [\App\Http\Controllers\QuoteController::class, 'issueUnemployment']);
+
+    Route::post('cotizador/CotizaDesempleo', [\App\Http\Controllers\Quote\QuoteUnemploymentController::class, 'estimateUnemployment']);
+    Route::post('cotizador/EmitirDesempleo', [\App\Http\Controllers\Quote\QuoteUnemploymentController::class, 'issueUnemployment']);
+
     Route::post('cotizador/CotizaIncendio', [\App\Http\Controllers\QuoteController::class, 'estimateFire']);
     Route::post('cotizador/EmitirIncendio', [\App\Http\Controllers\QuoteController::class, 'issueFire']);
+
     Route::get('cotizador/GetTipoEmpleado', [\App\Http\Controllers\QuoteController::class, 'employmentTypes']);
     Route::get('cotizador/GetGiroDelNegocio', [\App\Http\Controllers\QuoteController::class, 'businessTypes']);
     Route::get('cotizador/CancelarVida', [\App\Http\Controllers\QuoteController::class, 'cancelLife']);

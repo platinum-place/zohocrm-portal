@@ -70,7 +70,7 @@ class QuoteService extends ZohoCRMService
      */
     public function searchQuote(string $search): ?array
     {
-        $criteria = "((RNC_C_dula:equals:$search) and (Plan:equals:Anual Ley))";
+        $criteria = "((RNC_C_dula:equals:$search) and (Product_Category:equals:Anual Ley))";
 
         return $this->searchRecords('Quotes', $criteria)['data'];
     }
@@ -82,7 +82,7 @@ class QuoteService extends ZohoCRMService
      */
     public function getLifeProducts(string $product): ?array
     {
-        $criteria = '((Corredor:equals:' . env('ZOHO_ACCOUNT_ID') . ") and (Plan:equals:$product))";
+        $criteria = '((Corredor:equals:'.env('ZOHO_ACCOUNT_ID').") and (Product_Category:equals:$product))";
 
         return $this->searchRecords('Products', $criteria)['data'];
     }

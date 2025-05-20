@@ -22,7 +22,7 @@ class SearchDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //'NoDocumento' => ['required', 'string']
+            // 'NoDocumento' => ['required', 'string']
         ];
     }
 }
