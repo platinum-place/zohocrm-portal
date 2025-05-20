@@ -5,6 +5,7 @@ namespace Zoho\API;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class CRM
 {
@@ -59,6 +60,23 @@ class CRM
             ->put($url, [
                 'data' => [$data],
             ])
+            ->throw()
+            ->json();
+    }
+
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function uploadAnAttachment(string $module, string $token, string $id, string $file): ?array
+    {
+        $url = sprintf('%s/%s/%s/Attachments', $this->getApiUrl(), $module, $id);
+
+        $contents = fopen(Storage::path($file), 'rb');
+
+        return Http::withToken($token, 'Zoho-oauthtoken')
+            ->attach('file', $contents)
+            ->post($url)
             ->throw()
             ->json();
     }
