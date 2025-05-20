@@ -18,14 +18,12 @@ use App\Services\QuoteService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Storage;
-use Throwable;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected QuoteService $service)
-    {
-    }
+    public function __construct(protected QuoteService $service) {}
 
     public function estimateVehicle(EstimateVehicleRequest $request)
     {
@@ -63,8 +61,33 @@ class QuoteController extends Controller
         ]);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function issueVehicle(IssueVehicleRequest $request)
     {
+        $id = $request->get('cotzid');
+
+        $quote = $this->service->get($id);
+
+        foreach ($quote['Quoted_Items'] as $line) {
+            $data = [
+                'Coberturas' => $line['Product_Name']['id'],
+                'Quote_Stage' => 'Emitida',
+                'Vigencia_desde' => date('Y-m-d'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
+                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
+                'Prima' => round($line['Net_Total'], 2),
+            ];
+
+            $this->service->update($id, $data);
+
+            break;
+        }
+
         return response()->noContent();
     }
 
@@ -121,7 +144,7 @@ class QuoteController extends Controller
         ];
 
         foreach ($photos as $photo => $title) {
-            if (!$request->filled($photo)) {
+            if (! $request->filled($photo)) {
                 continue;
             }
 
@@ -137,7 +160,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
+            $path = "photos/{$id}/uploads/".date('YmdHis')."/$title.$extension";
 
             Storage::put($path, $imageData);
             $this->service->uploadAttachment($id, $path);
@@ -148,12 +171,16 @@ class QuoteController extends Controller
 
     public function getQRInspect(ValidateInspectionRequest $request)
     {
-//        $qr = base64_encode(QrCode::format('svg')
-//            ->size(80)
-//            ->generate($invoice?->dgii_qr_url));
+        $id = $request->get('cotz_id');
+
+        $this->service->get($id);
+
+        $qr = base64_encode(QrCode::format('svg')
+            ->size(80)
+            ->generate("https://gruponobesrl.zcrmportals.com/portal/GrupoNobeSRL/crm/tab/Quotes/$id"));
 
         return response()->json([
-            'QR' => '0iVBORw0KGgoAAAANSUhEUgAABCQAAAQkCAYAAAClls8JAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAL1ZSURBVHhe7NjBqmvJtiTR9',
+            'QR' => $qr,
         ]);
     }
 
@@ -183,7 +210,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
+            $path = "photos/{$id}/downloads/".date('YmdHis')."/{$attachment['File_Name']}.$extension";
 
             Storage::put($path, $imageData);
 
@@ -217,6 +244,26 @@ class QuoteController extends Controller
 
     public function issueLife(IssueLifeRequest $request)
     {
+        $id = $request->get('Identificador');
+
+        $quote = $this->service->get($id);
+
+        foreach ($quote['Quoted_Items'] as $line) {
+            $data = [
+                'Coberturas' => $line['Product_Name']['id'],
+                'Quote_Stage' => 'Emitida',
+                'Vigencia_desde' => date('Y-m-d'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
+                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
+                'Prima' => round($line['Net_Total'], 2),
+            ];
+
+            $this->service->update($id, $data);
+
+            break;
+        }
+
         return response()->noContent();
     }
 
@@ -247,6 +294,26 @@ class QuoteController extends Controller
 
     public function issueUnemploymentDebt(IssueLifeRequest $request)
     {
+        $id = $request->get('Identificador');
+
+        $quote = $this->service->get($id);
+
+        foreach ($quote['Quoted_Items'] as $line) {
+            $data = [
+                'Coberturas' => $line['Product_Name']['id'],
+                'Quote_Stage' => 'Emitida',
+                'Vigencia_desde' => date('Y-m-d'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
+                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
+                'Prima' => round($line['Net_Total'], 2),
+            ];
+
+            $this->service->update($id, $data);
+
+            break;
+        }
+
         return response()->noContent();
     }
 
@@ -274,6 +341,26 @@ class QuoteController extends Controller
 
     public function issueUnemployment(IssueLifeRequest $request)
     {
+        $id = $request->get('Identificador');
+
+        $quote = $this->service->get($id);
+
+        foreach ($quote['Quoted_Items'] as $line) {
+            $data = [
+                'Coberturas' => $line['Product_Name']['id'],
+                'Quote_Stage' => 'Emitida',
+                'Vigencia_desde' => date('Y-m-d'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
+                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
+                'Prima' => round($line['Net_Total'], 2),
+            ];
+
+            $this->service->update($id, $data);
+
+            break;
+        }
+
         return response()->noContent();
     }
 
@@ -308,6 +395,26 @@ class QuoteController extends Controller
 
     public function issueFire(IssueLifeRequest $request)
     {
+        $id = $request->get('Identificador');
+
+        $quote = $this->service->get($id);
+
+        foreach ($quote['Quoted_Items'] as $line) {
+            $data = [
+                'Coberturas' => $line['Product_Name']['id'],
+                'Quote_Stage' => 'Emitida',
+                'Vigencia_desde' => date('Y-m-d'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
+                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
+                'Prima' => round($line['Net_Total'], 2),
+            ];
+
+            $this->service->update($id, $data);
+
+            break;
+        }
+
         return response()->noContent();
     }
 
@@ -327,28 +434,73 @@ class QuoteController extends Controller
         ]);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function cancelLife(IssueLifeRequest $request)
     {
+        $id = $request->get('Identificador');
+
+        $data = [
+            'Quote_Stage' => 'Cancelada',
+        ];
+
+        $this->service->update($id, $data);
+
         return response()->noContent();
     }
 
     public function cancelFire(IssueLifeRequest $request)
     {
+        $id = $request->get('Identificador');
+
+        $data = [
+            'Quote_Stage' => 'Cancelada',
+        ];
+
+        $this->service->update($id, $data);
+
         return response()->noContent();
     }
 
     public function cancelUnemployment(IssueLifeRequest $request)
     {
+        $id = $request->get('Identificador');
+
+        $data = [
+            'Quote_Stage' => 'Cancelada',
+        ];
+
+        $this->service->update($id, $data);
+
         return response()->noContent();
     }
 
     public function cancelUnemploymentDebt(IssueLifeRequest $request)
     {
+        $id = $request->get('Identificador');
+
+        $data = [
+            'Quote_Stage' => 'Cancelada',
+        ];
+
+        $this->service->update($id, $data);
+
         return response()->noContent();
     }
 
     public function cancelVehicle(CancelVehicleRequest $request)
     {
+        $id = $request->get('IdCotizacion');
+
+        $data = [
+            'Quote_Stage' => 'Cancelada',
+        ];
+
+        $this->service->update($id, $data);
+
         return response()->noContent();
     }
 

@@ -9,9 +9,7 @@ use Throwable;
 
 class ProductController extends Controller
 {
-    public function __construct(protected ProductService $service)
-    {
-    }
+    public function __construct(protected ProductService $service) {}
 
     /**
      * @throws RequestException
@@ -23,8 +21,8 @@ class ProductController extends Controller
         $list = $this->service->getList();
 
         return response()->json(
-            collect($list['data'])->map(fn($value) => [
-                $value['id'] => $value['Product_Category']
+            collect($list['data'])->map(fn ($value) => [
+                $value['id'] => $value['Product_Category'],
             ])
         );
     }
@@ -41,9 +39,9 @@ class ProductController extends Controller
         return response()->json([
             $product['id'] => [
                 [
-                    $product['Vendor_Name']['id'] => $product['Product_Name']
-                ]
-            ]
+                    $product['Vendor_Name']['id'] => $product['Product_Name'],
+                ],
+            ],
         ]);
     }
 }

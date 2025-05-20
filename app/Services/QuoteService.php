@@ -15,7 +15,7 @@ class QuoteService extends ZohoCRMService
      */
     public function get(string $id): ?array
     {
-        $fields = ['id'];
+        $fields = ['id', 'Quoted_Items'];
 
         return $this->getRecords('Quotes', $fields, $id);
     }
@@ -47,9 +47,9 @@ class QuoteService extends ZohoCRMService
      */
     public function getAttachments(string $id): ?array
     {
-        $fields = ['id','File_Name'];
+        $fields = ['id', 'File_Name'];
 
-        return $this->attachmentList('Quotes', $id,$fields)['data'];
+        return $this->attachmentList('Quotes', $id, $fields)['data'];
     }
 
     /**
@@ -59,6 +59,6 @@ class QuoteService extends ZohoCRMService
      */
     public function downloadAttachment(string $id, string $attachmentId): ?string
     {
-        return $this->getAttachment('Quotes', $id,$attachmentId);
+        return $this->getAttachment('Quotes', $id, $attachmentId);
     }
 }
