@@ -21,7 +21,7 @@ Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner
     Route::post('cotizador/ValidarInspeccion', [\App\Http\Controllers\QuoteController::class, 'validateInspection']);
     Route::post('cotizador/Inspeccionar', [\App\Http\Controllers\QuoteController::class, 'inspect']);
     Route::post('cotizador/ObtenerQRInspeccion', [\App\Http\Controllers\QuoteController::class, 'getQRInspect']);
-    Route::post('cotizador/ObtenerImagenes', [\App\Http\Controllers\QuoteController::class, 'getQR']);
+    Route::post('cotizador/ObtenerImagenes', [\App\Http\Controllers\QuoteController::class, 'getPhotos']);
     Route::post('cotizador/CotizaVida', [\App\Http\Controllers\QuoteController::class, 'estimateLife']);
     Route::post('cotizador/EmitirVida', [\App\Http\Controllers\QuoteController::class, 'issueLife']);
     Route::post('cotizador/CotizaDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'estimateUnemploymentDebt']);

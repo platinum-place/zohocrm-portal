@@ -12,7 +12,7 @@ use Throwable;
 use ZohoCRM;
 use ZohoOAuth;
 
- class ZohoCRMService extends ZohoService
+class ZohoCRMService extends ZohoService
 {
     /**
      * @throws Throwable
@@ -77,6 +77,13 @@ use ZohoOAuth;
     {
         $token = $this->getAccessToken();
 
-        ZohoCRM::uploadAnAttachment($module, $token, $id, $filePath);
+        ZohoCRM::uploadAttachment($module, $token, $id, $filePath);
+    }
+
+    public function attachmentList(string $module, string $id, array $fields): ?array
+    {
+        $token = $this->getAccessToken();
+
+        return ZohoCRM::attachmentList($module, $token, $id, $fields);
     }
 }

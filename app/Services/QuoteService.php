@@ -39,4 +39,11 @@ class QuoteService extends ZohoCRMService
     {
         $this->uploadAnAttachment('Quotes', $id, $filePath);
     }
+
+    public function getAttachments(string $id): ?array
+    {
+        $fields = ['id','File_Name'];
+
+        return $this->attachmentList('Quotes', $id,$fields);
+    }
 }

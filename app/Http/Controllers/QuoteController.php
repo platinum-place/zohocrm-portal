@@ -103,23 +103,23 @@ class QuoteController extends Controller
         $id = $request->get('cotz_id');
 
         $photos = [
-            'Foto1',
-            'Foto2',
-            'Foto3',
-            'Foto4',
-            'Foto5',
-            'Foto6',
-            'Foto7',
-            'Foto8',
-            'Foto9',
-            'Foto13',
-            'Foto10',
-            'Foto11',
-            'Foto12',
-            'Foto14'
+            'Foto1' => 'Foto Parte frontal',
+            'Foto2' => 'Foto Parte trasera',
+            'Foto3' => 'Foto Lateral Derecho',
+            'Foto4' => 'FoFoto Interior Baul',
+            'Foto5' => 'Foto Lateral Derecho',
+            'Foto6' => 'Foto Chasis',
+            'Foto7' => 'Foto Odometro',
+            'Foto8' => 'Foto Interior',
+            'Foto9' => 'Foto Motor',
+            'Foto10' => 'Foto Repuesta',
+            'Foto11' => 'Foto Interiooor2',
+            'Foto12' => 'Foto Identificador Cliente',
+            'Foto13' => 'Foto Matricula BL',
+            'Foto14' => 'Otra foto',
         ];
 
-        foreach ($photos as $photo) {
+        foreach ($photos as $photo => $title) {
             if (!$request->filled($photo)) {
                 continue;
             }
@@ -136,7 +136,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/" . uniqid() . $extension;
+            $path = "photos/{$id}" . date('YmdHis') . "/$title.$extension";
 
             Storage::put($path, $imageData);
             $this->service->uploadAttachment($id, $path);
@@ -152,11 +152,11 @@ class QuoteController extends Controller
         ]);
     }
 
-    public function getQR(ValidateInspectionRequest $request)
+    public function getPhotos(ValidateInspectionRequest $request)
     {
-        return response()->json([
-            'partefrontal' => '0iVBORw0KGgoAAAANSUhEUgAABCQAAAQkCAYAAAClls8JAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAL1ZSURBVHhe7NjBqmvJtiTR9',
-        ]);
+        $attachments = $this->service->getAttachments($request->get('cotz_id'));
+
+        return response()->json($attachments);
     }
 
     public function estimateLife(EstimateLifeRequest $request)

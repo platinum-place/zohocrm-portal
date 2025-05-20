@@ -68,7 +68,7 @@ class CRM
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function uploadAnAttachment(string $module, string $token, string $id, string $file): ?array
+    public function uploadAttachment(string $module, string $token, string $id, string $file): ?array
     {
         $url = sprintf('%s/%s/%s/Attachments', $this->getApiUrl(), $module, $id);
 
@@ -77,6 +77,16 @@ class CRM
         return Http::withToken($token, 'Zoho-oauthtoken')
             ->attach('file', $contents)
             ->post($url)
+            ->throw()
+            ->json();
+    }
+
+    public function attachmentList(string $module, string $token, string $id, array $fields): ?array
+    {
+        $url = sprintf('%s/%s/%s/Attachments', $this->getApiUrl(), $module, $id);
+
+        return Http::withToken($token, 'Zoho-oauthtoken')
+            ->get($url,['fields' => implode(',', $fields)])
             ->throw()
             ->json();
     }
