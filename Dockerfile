@@ -5,7 +5,9 @@ FROM php:8.4-apache
 RUN apt-get update && apt-get install -y \
     git \
     curl \
-@@ -11,21 +11,50 @@ RUN apt-get update && apt-get install -y \
+ -11,21 +11,50
+
+RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     default-mysql-client \
@@ -56,7 +58,7 @@ ARG GROUP
 RUN set -e; \
     if ! getent group "${GROUP}" > /dev/null; then \
         addgroup --gid "${GROUPID}" "${GROUP}"; \
-@@ -34,42 +63,65 @@ RUN set -e; \
+ -34,42 +63,65  RUN set -e; \
         adduser --disabled-password --gecos "" --uid "${USERID}" --gid "${GROUPID}" "${USER}"; \
     fi
 
