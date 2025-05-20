@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     libsqlite3-dev \
     npm \
-    apache2-dev
+    apache2-dev \
+    libcap2-bin  # Add libcap2-bin for setcap
 
 # Install PHP extensions
 RUN docker-php-ext-install \
@@ -117,9 +118,14 @@ RUN echo '<Directory /var/www/html/public>\n\
 # Set Apache DocumentRoot to Laravel's public directory
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
+# Switch back to root to set capabilities and run Apache
+USER root
+
+# Grant capability to bind to privileged ports
+RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/apache2ctl
+
 # Expose port 80
 EXPOSE 80
 
-# Run Apache in foreground as non-root user
-USER root
+# Run Apache in foreground
 CMD ["apache2-foreground"]
