@@ -421,7 +421,7 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $quote = $this->service->get($id)['data'][0];;
+        $quote = $this->service->get($id)['data'][0];
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -467,7 +467,7 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id);
+        $this->service->get($id)['data'][0];
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -482,7 +482,7 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id);
+        $this->service->get($id)['data'][0];
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -497,7 +497,7 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id);
+        $this->service->get($id)['data'][0];
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -512,7 +512,7 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id);
+        $this->service->get($id)['data'][0];
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -527,7 +527,7 @@ class QuoteController extends Controller
     {
         $id = $request->get('IdCotizacion');
 
-        $this->service->get($id);
+        $this->service->get($id)['data'][0];
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -701,7 +701,7 @@ class QuoteController extends Controller
      */
     public function disableVehicleLaw(DisableVehicleLawRequest $request, string $id)
     {
-        $this->service->get($id);
+        $this->service->get($id)['data'][0];
 
         $data = [
             'Quote_Stage' => 'Cancelada',

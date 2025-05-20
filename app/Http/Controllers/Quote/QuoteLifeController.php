@@ -132,7 +132,7 @@ class QuoteLifeController
     {
         $id = $request->get('Identificador');
 
-        $quote = $this->service->get($id);
+        $quote = $this->service->get($id)['data'][0];
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
