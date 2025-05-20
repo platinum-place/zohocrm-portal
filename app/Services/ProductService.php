@@ -16,7 +16,7 @@ class ProductService extends ZohoCRMService
      */
     public function getList(?int $page = 1, ?int $perPage = 200): ?array
     {
-        $criteria = 'Corredor:equals:'.env('ZOHO_ACCOUNT_ID');
+        $criteria = 'Corredor:equals:3222373000092390001';
 
         return $this->searchRecords('Products', $criteria, $page, $perPage);
     }

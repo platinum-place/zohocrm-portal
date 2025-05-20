@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if (!$this->app->environment('debug')) {
+        if ($this->app->environment('debug')) {
             $this->app->singleton(
                 ExceptionHandler::class,
                 Handler::class

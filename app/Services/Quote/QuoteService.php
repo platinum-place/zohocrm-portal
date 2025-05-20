@@ -82,7 +82,7 @@ class QuoteService extends ZohoCRMService
      */
     public function getLifeProducts(string $product): ?array
     {
-        $criteria = '((Corredor:equals:'.env('ZOHO_ACCOUNT_ID').") and (Product_Category:equals:$product))";
+        $criteria = '((Corredor:equals:3222373000092390001'.") and (Product_Category:equals:$product))";
 
         return $this->searchRecords('Products', $criteria)['data'];
     }
