@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\Zoho;
+namespace App\Services;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
 
-class ZohoQuoteService extends ZohoService
+class QuoteService extends ZohoCRMService
 {
     /**
      * @throws RequestException
@@ -28,5 +28,15 @@ class ZohoQuoteService extends ZohoService
     public function update(string $id, array $data): ?array
     {
         return $this->updateRecords('Quotes', $id, $data);
+    }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function uploadAttachment(string $id, string $filePath): void
+    {
+        $this->uploadAnAttachment('Quotes', $id, $filePath);
     }
 }

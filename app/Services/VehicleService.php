@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\Zoho;
+namespace App\Services;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
 
-class ZohoVehicle extends ZohoService
+class VehicleService extends ZohoCRMService
 {
     /**
      * @throws RequestException
