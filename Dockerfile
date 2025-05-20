@@ -4,8 +4,7 @@ FROM php:8.4-apache
 # Update packages and install necessary dependencies
 RUN apt-get update && apt-get install -y \
     git \
-    curl \
- -11,21 +11,50
+    curl
 
 RUN apt-get update && apt-get install -y \
     unzip \
