@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Quote;
 
+use App\Services\Zoho\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;

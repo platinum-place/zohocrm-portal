@@ -17,13 +17,16 @@ Route::middleware(['auth:api'])->group(function () {
 Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner::class])->group(function () {
     Route::post('cotizador/colectiva', [\App\Http\Controllers\QuoteController::class, 'estimateVehicle']);
     Route::post('cotizador/EmitirAuto', [\App\Http\Controllers\QuoteController::class, 'issueVehicle']);
+
     Route::get('cotizador/ValorPromedio', [\App\Http\Controllers\QuoteController::class, 'valueVehicle']);
     Route::post('cotizador/ValidarInspeccion', [\App\Http\Controllers\QuoteController::class, 'validateInspection']);
     Route::post('cotizador/Inspeccionar', [\App\Http\Controllers\QuoteController::class, 'inspect']);
     Route::post('cotizador/ObtenerQRInspeccion', [\App\Http\Controllers\QuoteController::class, 'getQRInspect']);
     Route::post('cotizador/ObtenerImagenes', [\App\Http\Controllers\QuoteController::class, 'getPhotos']);
-    Route::post('cotizador/CotizaVida', [\App\Http\Controllers\QuoteController::class, 'estimateLife']);
-    Route::post('cotizador/EmitirVida', [\App\Http\Controllers\QuoteController::class, 'issueLife']);
+
+    Route::post('cotizador/CotizaVida', [\App\Http\Controllers\Quote\QuoteLifeController::class, 'estimateLife']);
+    Route::post('cotizador/EmitirVida', [\App\Http\Controllers\Quote\QuoteLifeController::class, 'issueLife']);
+
     Route::post('cotizador/CotizaDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'estimateUnemploymentDebt']);
     Route::post('cotizador/EmitirDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'issueUnemploymentDebt']);
     Route::post('cotizador/CotizaDesempleo', [\App\Http\Controllers\QuoteController::class, 'estimateUnemployment']);

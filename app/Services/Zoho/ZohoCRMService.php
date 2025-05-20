@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Zoho;
 
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
