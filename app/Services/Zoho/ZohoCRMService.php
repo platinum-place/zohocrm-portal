@@ -43,7 +43,7 @@ class ZohoCRMService extends ZohoService
             throw new Exception(__('Not Found'));
         }
 
-        return $response['data'][0];
+        return $response;
     }
 
     /**
