@@ -4,7 +4,7 @@ namespace App\Http\Requests\Quote;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DisableVehicleLawRequest extends FormRequest
+class SearchDocumentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,7 @@ class DisableVehicleLawRequest extends FormRequest
     public function rules(): array
     {
         return [
-//            'UsuarioAnula' => ['required', 'string', 'max:25'],
-//            'IDCotizador' => ['required', 'integer'],
+            //'NoDocumento' => ['required', 'string']
         ];
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Requests\Quote\EstimateVehicleRequest;
 use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
 use App\Http\Requests\Quote\IssueVehicleRequest;
+use App\Http\Requests\Quote\SearchDocumentRequest;
 use App\Http\Requests\Quote\ValidateInspectionRequest;
 use App\Services\QuoteService;
 use Illuminate\Http\Client\ConnectionException;
@@ -23,7 +24,9 @@ use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected QuoteService $service) {}
+    public function __construct(protected QuoteService $service)
+    {
+    }
 
     public function estimateVehicle(EstimateVehicleRequest $request)
     {
@@ -77,7 +80,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -108,6 +111,8 @@ class QuoteController extends Controller
     public function validateInspection(ValidateInspectionRequest $request)
     {
         $id = $request->get('cotz_id');
+
+        $this->service->get($id);
 
         $data = [
             'Depurado' => true,
@@ -144,7 +149,7 @@ class QuoteController extends Controller
         ];
 
         foreach ($photos as $photo => $title) {
-            if (! $request->filled($photo)) {
+            if (!$request->filled($photo)) {
                 continue;
             }
 
@@ -160,7 +165,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/uploads/".date('YmdHis')."/$title.$extension";
+            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
 
             Storage::put($path, $imageData);
             $this->service->uploadAttachment($id, $path);
@@ -210,7 +215,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/downloads/".date('YmdHis')."/{$attachment['File_Name']}.$extension";
+            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
 
             Storage::put($path, $imageData);
 
@@ -253,7 +258,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -303,7 +308,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -350,7 +355,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -404,7 +409,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -443,6 +448,8 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
+        $this->service->get($id);
+
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
@@ -455,6 +462,8 @@ class QuoteController extends Controller
     public function cancelFire(IssueLifeRequest $request)
     {
         $id = $request->get('Identificador');
+
+        $this->service->get($id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -469,6 +478,8 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
+        $this->service->get($id);
+
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
@@ -482,6 +493,8 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
+        $this->service->get($id);
+
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
@@ -494,6 +507,8 @@ class QuoteController extends Controller
     public function cancelVehicle(CancelVehicleRequest $request)
     {
         $id = $request->get('IdCotizacion');
+
+        $this->service->get($id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -553,42 +568,68 @@ class QuoteController extends Controller
         ]);
     }
 
-    public function searchDocument()
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function searchDocument(SearchDocumentRequest $request, string $identification)
     {
-        return response()->json([
-            [
-                'IDCliente' => '00102793585',
-                'NombreCliente' => 'PEDRO ALMONTE',
-                'Direccion' => 'calle anacaona no 56',
-                'Telefono' => '(809)-3659595',
-                'IDTipoVehiculo' => 2,
-                'TipoVehiculo' => 'AUTOMOVIL, JEEP, STATION 6 CIL',
-                'Marca' => 'BMW',
-                'Modelo' => 'SERIE 6',
-                'Correo' => 'palmonte@gmail.com',
-                'Anio' => 2015,
-                'Color' => 'AZUL CLARO',
-                'Chassis' => '1804808484480480',
-                'Placa' => '18094848',
-                'Poliza' => '1-500-00000',
-                'Prima' => 1940,
+//        $search = $request->get('NoDocumento');
+
+        $quotes = $this->service->searchQuote($identification);
+
+        $response = [];
+
+        foreach ($quotes as $quote) {
+            $response[] = [
+                'IDCliente' => $identification,
+                'NombreCliente' => $quote['Nombre'],
+                'Direccion' => $quote['Direcci_n'],
+                'Telefono' => $quote['Tel_Residencia'],
+                'IDTipoVehiculo' => null,
+                'TipoVehiculo' => $quote['Tipo_veh_culo'],
+                'Marca' => $quote['Marca']['name'],
+                'Modelo' => $quote['Modelo']['name'],
+                'Correo' => $quote['Correo_electr_nico'],
+                'Anio' => $quote['A_o'],
+                'Color' => $quote['Color'],
+                'Chassis' => $quote['Chasis'],
+                'Placa' => $quote['Placa'],
+                'Poliza' => null,
+                'Prima' => $quote['Created_Time'],
                 'Vigencia' => '12 Meses',
-                'Cobertura' => '100/100/200',
-                'FianzaJudicial' => 250000,
-                'FechaEmision' => '2019-04-30T16:56:06',
-                'Estado' => 1,
-                'Usuario' => 'oficial1',
+                'Cobertura' => null,
+                'FianzaJudicial' => null,
+                'FechaEmision' => $quote['Created_Time'],
+                'Estado' => $quote['Quote_Stage'] === 'Cancelada' ? 0 : 1,
+                'Usuario' => null,
                 'PDV' => null,
                 'C3_Meses' => null,
                 'C6_Meses' => null,
                 'C12_Meses' => null,
                 'Error' => null,
-            ],
-        ]);
+            ];
+        }
+
+        return response()->json($response);
     }
 
-    public function disableVehicleLaw(DisableVehicleLawRequest $request)
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function disableVehicleLaw(DisableVehicleLawRequest $request, string $id)
     {
+        $this->service->get($id);
+
+        $data = [
+            'Quote_Stage' => 'Cancelada',
+        ];
+
+        $this->service->update($id, $data);
+
         return response()->noContent();
     }
 }

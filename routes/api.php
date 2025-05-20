@@ -40,8 +40,8 @@ Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner
 
     Route::post('SegurosLeyApi/GuardarSeguro', [\App\Http\Controllers\QuoteController::class, 'estimateVehicleLaw']);
     Route::get('SegurosLeyApi/Obtener/MetodosDePago', [\App\Http\Controllers\QuoteController::class, 'paymentType']);
-    Route::get('SegurosLeyApi/Buscar/PorNoDocumento', [\App\Http\Controllers\QuoteController::class, 'searchDocument']);
-    Route::get('SegurosLeyApi/Anular', [\App\Http\Controllers\QuoteController::class, 'disableVehicleLaw']);
+    Route::get('SegurosLeyApi/Buscar/PorNoDocumento/{identification}', [\App\Http\Controllers\QuoteController::class, 'searchDocument']);
+    Route::get('SegurosLeyApi/Anular/{id}', [\App\Http\Controllers\QuoteController::class, 'disableVehicleLaw']);
 
     Route::post('vehiculos/Marca', [\App\Http\Controllers\VehicleController::class, 'list']);
     Route::post('vehiculos/Modelos/{brandId}', [\App\Http\Controllers\VehicleController::class, 'getModel']);

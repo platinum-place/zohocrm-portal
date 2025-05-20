@@ -61,4 +61,16 @@ class QuoteService extends ZohoCRMService
     {
         return $this->getAttachment('Quotes', $id, $attachmentId);
     }
+
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
+    public function searchQuote(string $search): ?array
+    {
+        $criteria = "((RNC_C_dula:equals:$search) and (Plan:equals:Anual Ley))";
+
+        return $this->searchRecords('Quotes', $criteria)['data'];
+    }
 }
