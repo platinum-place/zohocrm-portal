@@ -57,7 +57,7 @@ class QuoteService extends ZohoCRMService
      * @throws Throwable
      * @throws ConnectionException
      */
-    public function downloadAttachment(string $id, string $attachmentId): ?array
+    public function downloadAttachment(string $id, string $attachmentId): ?string
     {
         return $this->getAttachment('Quotes', $id,$attachmentId);
     }

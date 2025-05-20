@@ -90,7 +90,7 @@ class CRM
         $url = sprintf('%s/%s/%s/Attachments', $this->getApiUrl(), $module, $id);
 
         return Http::withToken($token, 'Zoho-oauthtoken')
-            ->get($url,['fields' => implode(',', $fields)])
+            ->get($url, ['fields' => implode(',', $fields)])
             ->throw()
             ->json();
     }
@@ -99,13 +99,13 @@ class CRM
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function getAttachment(string $module, string $token, string $id, string $attachmentId): ?array
+    public function getAttachment(string $module, string $token, string $id, string $attachmentId): string
     {
-        $url = sprintf('%s/%s/%s/Attachments/%s', $this->getApiUrl(), $module, $id,$attachmentId);
+        $url = sprintf('%s/%s/%s/Attachments/%s', $this->getApiUrl(), $module, $id, $attachmentId);
 
         return Http::withToken($token, 'Zoho-oauthtoken')
             ->get($url)
             ->throw()
-            ->json();
+            ->body();
     }
 }

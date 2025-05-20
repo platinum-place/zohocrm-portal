@@ -132,12 +132,12 @@ class QuoteController extends Controller
             finfo_close($finfo);
 
             $extension = match ($mimeType) {
-                'image/jpeg' => '.jpg',
-                'image/png' => '.png',
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}" . date('YmdHis') . "/$title.$extension";
+            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
 
             Storage::put($path, $imageData);
             $this->service->uploadAttachment($id, $path);
@@ -148,23 +148,49 @@ class QuoteController extends Controller
 
     public function getQRInspect(ValidateInspectionRequest $request)
     {
+//        $qr = base64_encode(QrCode::format('svg')
+//            ->size(80)
+//            ->generate($invoice?->dgii_qr_url));
+
         return response()->json([
             'QR' => '0iVBORw0KGgoAAAANSUhEUgAABCQAAAQkCAYAAAClls8JAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAL1ZSURBVHhe7NjBqmvJtiTR9',
         ]);
     }
 
+    /**
+     * @throws Throwable
+     * @throws ConnectionException
+     * @throws RequestException
+     */
     public function getPhotos(ValidateInspectionRequest $request)
     {
         $id = $request->get('cotz_id');
 
         $attachments = $this->service->getAttachments($id);
 
-        foreach ($attachments as $attachment) {
-          $this->service->downloadAttachment($id, $attachment['id']);
+        $response = [];
 
+        foreach ($attachments as $attachment) {
+            $imageData = $this->service->downloadAttachment($id, $attachment['id']);
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_buffer($finfo, $imageData);
+            finfo_close($finfo);
+
+            $extension = match ($mimeType) {
+                'image/jpeg' => '.jpg',
+                'image/png' => '.png',
+                default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
+            };
+
+            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
+
+            Storage::put($path, $imageData);
+
+            $response[] = [$attachment['File_Name'] => base64_encode($imageData)];
         }
 
-        return response()->json($attachments);
+        return response()->json($response);
     }
 
     public function estimateLife(EstimateLifeRequest $request)

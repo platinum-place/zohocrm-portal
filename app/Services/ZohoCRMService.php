@@ -97,7 +97,7 @@ class ZohoCRMService extends ZohoService
      * @throws Throwable
      * @throws ConnectionException
      */
-    public function getAttachment(string $module, string $id, string $attachmentId): ?array
+    public function getAttachment(string $module, string $id, string $attachmentId): ?string
     {
         $token = $this->getAccessToken();
 
