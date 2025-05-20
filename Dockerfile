@@ -1,5 +1,5 @@
 # Usar imagen base más ligera
-FROM php:8.4-apache-slim
+FROM php:8.4-apache
 
 # Instalar dependencias en una sola capa para reducir tamaño
 RUN apt-get update && apt-get install -y --no-install-recommends \
