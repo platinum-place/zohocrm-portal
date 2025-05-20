@@ -67,8 +67,8 @@ RUN set -e; \
 RUN usermod -aG www-data "${USER}"
 
 # Configure Apache to use non-root user and group
-RUN sed -i "s/^User www-data/User ${USER}/" /etc/apache2/apache2.conf \
-    && sed -i "s/^Group www-data/Group ${GROUP}/" /etc/apache2/apache2.conf
+#RUN sed -i "s/^User www-data/User ${USER}/" /etc/apache2/apache2.conf \
+#    && sed -i "s/^Group www-data/Group ${GROUP}/" /etc/apache2/apache2.conf
 
 # Set up project directory
 WORKDIR /var/www/html
