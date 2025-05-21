@@ -2,7 +2,7 @@ services:
     laravel.test:
         container_name: backend
         build:
-            context: './vendor/laravel/sail/runtimes/8.4'
+            context: './docker/8.4'
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
@@ -30,6 +30,12 @@ services:
             - no-new-privileges:true
         cap_drop:
             - ALL
+        cap_add:
+            - SETUID
+            - SETGID
+            - CHOWN
+            - DAC_OVERRIDE
+            - NET_BIND_SERVICE
 
     pgsql:
         image: 'postgres:17'
@@ -42,7 +48,7 @@ services:
             POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
         volumes:
             - 'sail-pgsql:/var/lib/postgresql/data'
-            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+            - './docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
         networks:
             - sail
         healthcheck:
