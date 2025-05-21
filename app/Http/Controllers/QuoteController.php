@@ -156,47 +156,6 @@ class QuoteController extends Controller
      */
     public function inspect(Request $request)
     {
-        $id = $request->get('cotz_id');
-
-        $photos = [
-            'Foto1' => 'Foto Parte frontal',
-            'Foto2' => 'Foto Parte trasera',
-            'Foto3' => 'Foto Lateral Derecho',
-            'Foto4' => 'FoFoto Interior Baul',
-            'Foto5' => 'Foto Lateral Derecho',
-            'Foto6' => 'Foto Chasis',
-            'Foto7' => 'Foto Odometro',
-            'Foto8' => 'Foto Interior',
-            'Foto9' => 'Foto Motor',
-            'Foto10' => 'Foto Repuesta',
-            'Foto11' => 'Foto Interiooor2',
-            'Foto12' => 'Foto Identificador Cliente',
-            'Foto13' => 'Foto Matricula BL',
-            'Foto14' => 'Otra foto',
-        ];
-
-        foreach ($photos as $photo => $title) {
-            if (!$request->filled($photo)) {
-                continue;
-            }
-
-            $imageData = base64_decode($request->input($photo));
-
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mimeType = finfo_buffer($finfo, $imageData);
-            finfo_close($finfo);
-
-            $extension = match ($mimeType) {
-                'image/jpeg' => 'jpg',
-                'image/png' => 'png',
-                default => throw new \Exception(__('validation.mimetypes', ['attribute' => $title, 'values' => '.jpg,.png']))
-            };
-
-            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
-
-            Storage::put($path, $imageData);
-            $this->service->uploadAttachment($id, $path);
-        }
 
         return response()->noContent(200);
     }
@@ -225,9 +184,29 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotz_id');
 
+        $attachments = $this->service->getAttachments($id);
 
         $response = [];
 
+        foreach ($attachments as $attachment) {
+            $imageData = $this->service->downloadAttachment($id, $attachment['id']);
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_buffer($finfo, $imageData);
+            finfo_close($finfo);
+
+            $extension = match ($mimeType) {
+                'image/jpeg' => '.jpg',
+                'image/png' => '.png',
+                default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
+            };
+
+            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
+
+            Storage::put($path, $imageData);
+
+            $response[] = [$attachment['File_Name'] => base64_encode($imageData)];
+        }
 
         return response()->json($response);
     }
