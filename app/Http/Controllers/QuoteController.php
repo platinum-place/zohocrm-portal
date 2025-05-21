@@ -13,6 +13,7 @@ use App\Http\Requests\Quote\IssueLifeRequest;
 use App\Http\Requests\Quote\IssueVehicleRequest;
 use App\Http\Requests\Quote\ValidateInspectionRequest;
 use App\Services\QuoteService;
+use App\Services\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Storage;
@@ -21,56 +22,40 @@ use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected QuoteService $service)
+    public function __construct(protected ZohoCRMService $crm)
     {
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function estimateVehicle(EstimateVehicleRequest $request)
     {
-        return response()->json([
-            [
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Auto))';
+        $products = $this->crm->searchRecords('Products', $criteria);
+
+        $response = [];
+
+        foreach ($products['data'] as $product) {
+            $response[] = [
                 'Passcode' => '4821',
                 'OfertaID' => 105,
                 'Prima' => 12500.75,
                 'Impuesto' => 1875.11,
                 'PrimaTotal' => 14375.86,
                 'PrimaCuota' => 1197.99,
-                'Planid' => 3222373000214282001,
+                'Planid' => 11111,
                 'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 789654,
+                'Aseguradora' => $product['Vendor_Name']['name'],
+                'Idcotizacion' => 3222373000214282001,
                 'Fecha' => now()->toDateTimeString(),
                 'CoberturasList' => null,
-            ],
-            [
-                'Passcode' => '4821',
-                'OfertaID' => 105,
-                'Prima' => 12500.75,
-                'Impuesto' => 1875.11,
-                'PrimaTotal' => 14375.86,
-                'PrimaCuota' => 1197.99,
-                'Planid' => 3222373000214281014,
-                'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 789654,
-                'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => null,
-            ],
-            [
-                'Passcode' => '4821',
-                'OfertaID' => 105,
-                'Prima' => 12500.75,
-                'Impuesto' => 1875.11,
-                'PrimaTotal' => 14375.86,
-                'PrimaCuota' => 1197.99,
-                'Planid' => 3222373000214281001,
-                'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 789654,
-                'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => null,
-            ],
-        ]);
+            ];
+        }
+
+        return response()->json($response);
     }
 
     /**
@@ -82,7 +67,8 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotzid');
 
-        $quote = $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -95,7 +81,7 @@ class QuoteController extends Controller
                 'Prima' => round($line['Net_Total'], 2),
             ];
 
-            $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
             break;
         }
@@ -121,13 +107,13 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotz_id');
 
-        $this->service->get($id);
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Depurado' => true,
         ];
-
-        $this->service->update($id, $data);
+        $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -177,24 +163,31 @@ class QuoteController extends Controller
             $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
 
             Storage::put($path, $imageData);
-            $this->service->uploadAttachment($id, $path);
+
+            $this->crm->uploadAnAttachment('Quotes', $id, $path);
         }
 
         return response()->noContent(200);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function getQRInspect(ValidateInspectionRequest $request)
     {
         $id = $request->get('cotz_id');
 
-        $this->service->get($id);
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $qr = base64_encode(QrCode::format('svg')
             ->size(80)
             ->generate("https://gruponobesrl.zcrmportals.com/portal/GrupoNobeSRL/crm/tab/Quotes/$id"));
 
         return response()->json([
-            'QR' => $qr,
+            'QR' => $qr
         ]);
     }
 
@@ -207,12 +200,13 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotz_id');
 
-        $attachments = $this->service->getAttachments($id);
+        $fields = ['id', 'File_Name'];
+        $attachments = $this->crm->attachmentList('Quotes', $id, $fields);
 
         $response = [];
 
-        foreach ($attachments as $attachment) {
-            $imageData = $this->service->downloadAttachment($id, $attachment['id']);
+        foreach ($attachments['data'] as $attachment) {
+            $imageData = $this->crm->getAttachment('Quotes', $id, $attachment['id']);
 
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_buffer($finfo, $imageData);
@@ -241,72 +235,47 @@ class QuoteController extends Controller
      */
     public function estimateUnemploymentDebt(EstimateUnemploymentDebtRequest $request)
     {
-        return response()->json([
-            [
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida/Desempleo))';
+        $products = $this->crm->searchRecords('Products', $criteria);
+
+        $response = [];
+
+        foreach ($products['data'] as $product) {
+            $response[] = [
                 'Impuesto' => '18.5',
                 'PrimaPeriodo' => '000.00',
                 'PrimaTotal' => '000.00',
                 'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano del tal',
-                'Direccion' => 'Calle Primera',
+                'Cliente' => $request->get('Cliente'),
+                'Direccion' => $request->get('Direccion'),
                 'TipoEmpleado' => 'Publico',
-                'Fecha' => '01/01/2020',
-                'IdenCliente' => '000101001002030',
-                'Telefono' => '809390903',
-                'Aseguradora' => 'Mapfre',
+                'Fecha' => date('d/m/Y'),
+                'IdenCliente' => $request->get('IdenCliente'),
+                'Telefono' => $request->get('Telefono'),
+                'Aseguradora' => $product['Vendor_Name']['name'],
                 'MontoPrestamo' => '50000',
-                'Cuota' => '5000',
-                'PlazoMese' => '24',
+                'Cuota' => $request->get('Cuota'),
+                'PlazoMese' => $request->get('Plazo') / 12,
                 'Desempleo' => '6000',
                 'Deuda' => '8000',
                 'To tal' => '10000',
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano del tal',
-                'Direccion' => 'Calle Primera',
-                'TipoEmpleado' => 'Publico',
-                'Fecha' => '01/01/2020',
-                'IdenCliente' => '000101001002030',
-                'Telefono' => '809390903',
-                'Aseguradora' => 'Mapfre',
-                'MontoPrestamo' => '50000',
-                'Cuota' => '5000',
-                'PlazoMese' => '24',
-                'Desempleo' => '6000',
-                'Deuda' => '8000',
-                'To tal' => '10000',
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano del tal',
-                'Direccion' => 'Calle Primera',
-                'TipoEmpleado' => 'Publico',
-                'Fecha' => '01/01/2020',
-                'IdenCliente' => '000101001002030',
-                'Telefono' => '809390903',
-                'Aseguradora' => 'Mapfre',
-                'MontoPrestamo' => '50000',
-                'Cuota' => '5000',
-                'PlazoMese' => '24',
-                'Desempleo' => '6000',
-                'Deuda' => '8000',
-                'To tal' => '10000',
-            ],
-        ]);
+            ];
+        }
+
+        return response()->json($response);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function issueUnemploymentDebt(IssueLifeRequest $request)
     {
         $id = $request->get('Identificador');
 
-        $quote = $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -319,7 +288,7 @@ class QuoteController extends Controller
                 'Prima' => round($line['Net_Total'], 2),
             ];
 
-            $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
             break;
         }
@@ -327,86 +296,52 @@ class QuoteController extends Controller
         return response()->noContent(200);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function estimateFire(EstimateFireRequest $request)
     {
-        return response()->json([
-            [
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Incendio))';
+        $products = $this->crm->searchRecords('Products', $criteria);
+
+        $response = [];
+
+        foreach ($products['data'] as $product) {
+            $response[] = [
                 'Impuesto' => '18.5',
                 'PrimaPeriodo' => '000.00',
                 'PrimaTotal' => '000.00',
                 'PrimaVida' => '000.00',
                 'PrimaTotalVida' => '000.00',
                 'identificador' => '3222373000214281001',
-                'Aseguradora' => 'Mapfre',
+                'Aseguradora' => $product['Vendor_Name']['name'],
                 'Anios' => '5',
                 'Valor' => '000.00',
                 'EdadTerminar' => '35',
                 'Codeudor' => 'Fulanito',
                 'EdadCodeudor' => '30',
                 'IdentiCodeudor' => '000000000',
-                'CoberturasListInc' => [
-                    'Cobertura' => 'Incendio',
-                    'Valor' => '100%',
-                ],
-                'CoberturasListVid' => [
-                    'Cobertura' => 'Vida',
-                    'Valor' => '100%',
-                ],
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'PrimaVida' => '000.00',
-                'PrimaTotalVida' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Aseguradora' => 'Mapfre',
-                'Anios' => '5',
-                'Valor' => '000.00',
-                'EdadTerminar' => '35',
-                'Codeudor' => 'Fulanito',
-                'EdadCodeudor' => '30',
-                'IdentiCodeudor' => '000000000',
-                'CoberturasListInc' => [
-                    'Cobertura' => 'Incendio',
-                    'Valor' => '100%',
-                ],
-                'CoberturasListVid' => [
-                    'Cobertura' => 'Vida',
-                    'Valor' => '100%',
-                ],
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'PrimaVida' => '000.00',
-                'PrimaTotalVida' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Aseguradora' => 'Mapfre',
-                'Anios' => '5',
-                'Valor' => '000.00',
-                'EdadTerminar' => '35',
-                'Codeudor' => 'Fulanito',
-                'EdadCodeudor' => '30',
-                'IdentiCodeudor' => '000000000',
-                'CoberturasListInc' => [
-                    'Cobertura' => 'Incendio',
-                    'Valor' => '100%',
-                ],
-                'CoberturasListVid' => [
-                    'Cobertura' => 'Vida',
-                    'Valor' => '100%',
-                ],
-            ],
-        ]);
+                'CoberturasListInc' => null,
+                'CoberturasListVid' => null,
+            ];
+        }
+
+        return response()->json($response);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function issueFire(IssueLifeRequest $request)
     {
         $id = $request->get('Identificador');
 
-        $quote = $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -419,7 +354,7 @@ class QuoteController extends Controller
                 'Prima' => round($line['Net_Total'], 2),
             ];
 
-            $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
             break;
         }
@@ -452,13 +387,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -467,13 +403,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -482,13 +419,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -497,13 +435,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -512,13 +451,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('IdCotizacion');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -531,7 +471,8 @@ class QuoteController extends Controller
      */
     public function estimateLife(EstimateLifeRequest $request)
     {
-        $products = $this->service->getLifeProducts('Vida');
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida))';
+        $products = $this->crm->searchRecords('Products', $criteria);
 
         $response = [];
 
@@ -551,9 +492,10 @@ class QuoteController extends Controller
             $amount = 0;
 
             try {
-                $taxes = $this->service->getProductTaxes($product['id']);
+                        $criteria = "Plan:equals:".$product['id'];
+                $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
-                foreach ($taxes as $tax) {
+                foreach ($taxes['data'] as $tax) {
                     if ($request->get('Edad') >= $tax['Edad_min'] and $request->get('Edad') <= $tax['Edad_max']) {
                         $debtTax = $tax['Name'] / 100;
                     } else {
@@ -610,7 +552,7 @@ class QuoteController extends Controller
                 ],
             ];
 
-            $responseProduct = $this->service->create($data);
+            $responseProduct = $this->crm->insertRecords('Quotes', $data);
 
             $response[] = [
                 'Impuesto' => null,
@@ -643,7 +585,8 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $quote = $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -656,7 +599,7 @@ class QuoteController extends Controller
                 'Prima' => round($line['Net_Total'], 2),
             ];
 
-            $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
             break;
         }
@@ -664,9 +607,15 @@ class QuoteController extends Controller
         return response()->noContent(200);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function estimateUnemployment(EstimateUnemploymentRequest $request)
     {
-        $products = $this->service->getLifeProducts('Desempleo');
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Desempleo))';
+        $products = $this->crm->searchRecords('Products', $criteria);
 
         $response = [];
 
@@ -692,11 +641,17 @@ class QuoteController extends Controller
         return response()->json($response);
     }
 
+    /**
+     * @throws Throwable
+     * @throws ConnectionException
+     * @throws RequestException
+     */
     public function issueUnemployment(IssueLifeRequest $request)
     {
         $id = $request->get('Identificador');
 
-        $quote = $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -709,7 +664,7 @@ class QuoteController extends Controller
                 'Prima' => round($line['Net_Total'], 2),
             ];
 
-            $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
             break;
         }

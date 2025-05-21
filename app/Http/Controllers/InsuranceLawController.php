@@ -23,7 +23,7 @@ class InsuranceLawController
      */
     public function estimateVehicleLaw(EstimateVehicleLawRequest $request)
     {
-        $criteria = '((Corredor:equals:3222373000092390001' . ") and (Product_Category:equals:Vida))";
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida))';
         $products = $this->crm->searchRecords('Products', $criteria);
 
         $response = [];
@@ -37,27 +37,11 @@ class InsuranceLawController
                 'PrimaTotal' => 14375.86,
                 'PrimaCuota' => 1197.99,
                 'Planid' => 3,
-                'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
+                'Plan' => 'Plan Básico ley',
+                'Aseguradora' => $product['Vendor_Name']['name'],
                 'Idcotizacion' => 3222373000214281001,
                 'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => [
-                    [
-                        'id' => 1,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 2,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 3,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                ],
+                'CoberturasList' => null,
             ];
         }
 
@@ -128,16 +112,17 @@ class InsuranceLawController
      * @throws RequestException
      * @throws Throwable
      * @throws ConnectionException
+     * @throws \Throwable
      */
     public function disableVehicleLaw(DisableVehicleLawRequest $request, string $id)
     {
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
-
-        $this->service->update($id, $data);
+        $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
