@@ -186,7 +186,7 @@ class QuoteController extends Controller
             $extension = match ($mimeType) {
                 'image/jpeg' => 'jpg',
                 'image/png' => 'png',
-                default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
+                default => throw new \Exception(__('validation.mimetypes', ['attribute' =>$title  ,'values' => '.jpg,.png']))
             };
 
             $path = "photos/{$id}/uploads/".date('YmdHis')."/$title.$extension";

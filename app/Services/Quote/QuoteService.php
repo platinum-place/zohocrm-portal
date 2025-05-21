@@ -70,7 +70,7 @@ class QuoteService extends ZohoCRMService
      */
     public function searchQuote(string $search): ?array
     {
-        $criteria = "((RNC_C_dula:equals:$search) and (Product_Category:equals:Anual Ley))";
+        $criteria = "((RNC_C_dula:equals:$search) and (Plan:equals:Auto))";
 
         return $this->searchRecords('Quotes', $criteria)['data'];
     }
