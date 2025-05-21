@@ -2,23 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\VehicleService;
+use App\Services\ZohoCRMService;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Throwable;
 
 class VehicleController extends Controller
 {
-    public function __construct(protected VehicleService $service) {}
+    public function __construct(protected ZohoCRMService $crm)
+    {
+    }
 
     /**
-     * Get list of brands from Zoho
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
      */
     public function list()
     {
-        $brands = $this->service->brandList();
+        $fields = ['id', 'Name'];
+        $brands = $this->crm->getRecords('Marcas', $fields);
 
         $sortedBrands = collect($brands['data'])
-            ->map(fn ($brand) => [$brand['id'] => $brand['Name']])
-            ->sortBy(fn ($brand) => reset($brand))
+            ->map(fn($brand) => [$brand['id'] => $brand['Name']])
+            ->sortBy(fn($brand) => reset($brand))
             ->values()
             ->toArray();
 
@@ -29,32 +36,30 @@ class VehicleController extends Controller
     {
         $page = 1;
         $models = [];
-        try {
-            do {
-                $modelsData = $this->service->modelsList($brandId, $page);
 
-                if (! empty($modelsData)) {
-                    $sortedModels = collect($modelsData['data'])
-                        ->map(fn ($model) => [
-                            'id' => $model['id'],
-                            'name' => $model['Name'],
-                            'type' => $model['Tipo'],
-                        ])
-                        ->sortBy('name')
-                        ->map(fn ($model) => [$brandId => [$model['id'] => $model['name']]])
-                        ->values()
-                        ->toArray();
+        do {
+            try {
+                $criteria = "Marca:equals:$brandId";
+                $modelsData = $this->crm->searchRecords('Modelos', $criteria);
 
-                    $models = array_merge($models, $sortedModels);
-                    $page++;
-                } else {
-                    $page = 0;
-                }
-            } while ($page > 0);
-        } catch (Throwable $e) {
-            // Log the error but continue to return available models
-            report($e);
-        }
+                $sortedModels = collect($modelsData['data'])
+                    ->map(fn($model) => [
+                        'id' => $model['id'],
+                        'name' => $model['Name'],
+                        'type' => $model['Tipo'],
+                    ])
+                    ->sortBy('name')
+                    ->map(fn($model) => [$brandId => [$model['id'] => $model['name']]])
+                    ->values()
+                    ->toArray();
+
+                $models = array_merge($models, $sortedModels);
+                $page++;
+
+            } catch (Throwable $e) {
+                $page = 0;
+            }
+        } while ($page > 0);
 
         return response()->json($models);
     }
