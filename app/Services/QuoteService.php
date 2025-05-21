@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Services\Quote;
+namespace App\Services;
 
-use App\Services\Zoho\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Throwable;
@@ -70,7 +69,7 @@ class QuoteService extends ZohoCRMService
      */
     public function searchQuote(string $search): ?array
     {
-        $criteria = "((RNC_C_dula:equals:$search) and (Product_Category:equals:Anual Ley))";
+        $criteria = "((RNC_C_dula:equals:$search) and (Product_Category:equals:Auto))";
 
         return $this->searchRecords('Quotes', $criteria)['data'];
     }
