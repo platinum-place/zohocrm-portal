@@ -39,8 +39,105 @@ class QuoteController extends Controller
         $response = [];
 
         foreach ($products['data'] as $product) {
+            $alert = '';
+
+            if (in_array($request->get('Actividad'), $product['Restringir_veh_culos_de_uso'])) {
+                return "Uso del vehículo restringido.";
+            }
+
+            if ((date("Y") - $request->get('Anio')) > $product['Max_antig_edad']) {
+                $alert = 'La antigüedad del vehículo es mayor al limite establecido.';
+            }
+
+            if ($request->get('MontoOriginal') < $product['Suma_asegurada_min'] || $request->get('MontoOriginal') > $product['Suma_asegurada_max']) {
+                $alert = 'El plazo es mayor al limite establecido.';
+            }
+
+            try {
+                $criteria = "((Marca:equals:" . $request->get('Marca') . ") and (Aseguradora:equals:" . $product['Vendor_Name']['id'] . "))";
+                $brands = $this->crm->searchRecords('Restringidos', $criteria);
+
+                foreach ($brands['data'] as $brand) {
+                    if (empty($brand['Modelo'])) {
+                        $alert = "Marca restrigida.";
+                    } elseif ($request->get('Marca') == $brand['Modelo']['id']) {
+                        $alert = "Modelo restrigido.";
+                    }
+                }
+            } catch (Throwable $throwable) {
+
+            }
+
+
+            $debtTax = 0;
+            $coDebtTax = 0;
+            $amount = 0;
+
+            try {
+                $criteria = "Plan:equals:" . $product['id'];
+                $taxes = $this->crm->searchRecords('Tasas', $criteria);
+
+                foreach ($taxes['data'] as $tax) {
+                    if ($request->get('Edad') >= $tax['Edad_min'] and $request->get('Edad') <= $tax['Edad_max']) {
+                        $debtTax = $tax['Name'] / 100;
+                    } else {
+                        $alert = 'La edad del deudor no estan dentro del limite permitido.';
+                    }
+
+                    if ($request->get('codeudor') and $request->get('EdadCodeudor')) {
+                        if ($request->get('EdadCodeudor') >= $tax['Edad_min'] and $request->get('EdadCodeudor') <= $tax['Edad_max']) {
+                            $coDebtTax = $tax['Codeudor'] / 100;
+                        } else {
+                            $alert = 'La edad del codeudor no estan dentro del limite permitido.';
+                        }
+                    }
+                }
+            } catch (Throwable $throwable) {
+
+            }
+
+            if (empty($alert)) {
+                if ($debtTax && $coDebtTax) {
+                    $amountDebt = ($request->get('MontoOriginal') / 1000) * $debtTax;
+                    $amountCoDebt = ($request->get('MontoOriginal') / 1000) * ($coDebtTax - $debtTax);
+                    $amount = $amountDebt + $amountCoDebt;
+                } elseif ($debtTax) {
+                    $amount = ($request->get('MontoOriginal') / 1000) * $debtTax;
+                }
+
+                $amount = round($amount, 2);
+            }
+
+            $data = [
+                'Subject' => $request->get('NombreCliente'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 30 days')),
+                'Vigencia_desde' => date('Y-m-d'),
+                'Account_Name' => 3222373000092390001,
+                'Contact_Name' => 3222373000203318001,
+                'Quote_Stage' => 'Cotizando',
+                'Nombre' => $request->get('NombreCliente'),
+                'RNC_C_dula' => $request->get('IdenCliente'),
+                'Direcci_n' => $request->get('Direccion'),
+                'Tel_Celular' => $request->get('Telefono1'),
+                'Plan' => 'Vida',
+                'Suma_asegurada' => $request->get('MontoOriginal'),
+                'Plazo' => $request->get('PlazoAnios'),
+                'Fuente' => 'API',
+                'Quoted_Items' => [
+                    [
+                        'Quantity' => 1,
+                        'Product_Name' => $product['id'],
+                        'Total' => $amount,
+                        'Net_Total' => $amount,
+                        'List_Price' => $amount,
+                    ],
+                ],
+            ];
+
+            $responseProduct = $this->crm->insertRecords('Quotes', $data);
+
             $response[] = [
-                'Passcode' => '4821',
+                'Passcode' => null,
                 'OfertaID' => 105,
                 'Prima' => 12500.75,
                 'Impuesto' => 1875.11,
