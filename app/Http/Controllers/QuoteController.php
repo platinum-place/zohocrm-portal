@@ -16,13 +16,16 @@ use App\Http\Requests\Quote\ValidateInspectionRequest;
 use App\Services\Quote\QuoteService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected QuoteService $service) {}
+    public function __construct(protected QuoteService $service)
+    {
+    }
 
     public function estimateVehicle(EstimateVehicleRequest $request)
     {
@@ -104,7 +107,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -151,7 +154,7 @@ class QuoteController extends Controller
      * @throws \Exception
      * @throws Throwable
      */
-    public function inspect(InspectRequest $request)
+    public function inspect(Request $request)
     {
         $id = $request->get('cotz_id');
 
@@ -173,7 +176,7 @@ class QuoteController extends Controller
         ];
 
         foreach ($photos as $photo => $title) {
-            if (! $request->filled($photo)) {
+            if (!$request->filled($photo)) {
                 continue;
             }
 
@@ -186,10 +189,10 @@ class QuoteController extends Controller
             $extension = match ($mimeType) {
                 'image/jpeg' => 'jpg',
                 'image/png' => 'png',
-                default => throw new \Exception(__('validation.mimetypes', ['attribute' =>$title  ,'values' => '.jpg,.png']))
+                default => throw new \Exception(__('validation.mimetypes', ['attribute' => $title, 'values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/uploads/".date('YmdHis')."/$title.$extension";
+            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
 
             Storage::put($path, $imageData);
             $this->service->uploadAttachment($id, $path);
@@ -239,7 +242,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/downloads/".date('YmdHis')."/{$attachment['File_Name']}.$extension";
+            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
 
             Storage::put($path, $imageData);
 
@@ -328,7 +331,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -359,25 +362,8 @@ class QuoteController extends Controller
                 'Codeudor' => 'Fulanito',
                 'EdadCodeudor' => '30',
                 'IdentiCodeudor' => '000000000',
-      'CoberturasListInc' => null,
-                'CoberturasListVid' =>null,
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'PrimaVida' => '000.00',
-                'PrimaTotalVida' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Aseguradora' => 'Mapfre',
-                'Anios' => '5',
-                'Valor' => '000.00',
-                'EdadTerminar' => '35',
-                'Codeudor' => 'Fulanito',
-                'EdadCodeudor' => '30',
-                'IdentiCodeudor' => '000000000',
-      'CoberturasListInc' => null,
-                'CoberturasListVid' =>null,
+                'CoberturasListInc' => null,
+                'CoberturasListVid' => null,
             ],
             [
                 'Impuesto' => '18.5',
@@ -394,7 +380,24 @@ class QuoteController extends Controller
                 'EdadCodeudor' => '30',
                 'IdentiCodeudor' => '000000000',
                 'CoberturasListInc' => null,
-                'CoberturasListVid' =>null,
+                'CoberturasListVid' => null,
+            ],
+            [
+                'Impuesto' => '18.5',
+                'PrimaPeriodo' => '000.00',
+                'PrimaTotal' => '000.00',
+                'PrimaVida' => '000.00',
+                'PrimaTotalVida' => '000.00',
+                'identificador' => '3222373000214281001',
+                'Aseguradora' => 'Mapfre',
+                'Anios' => '5',
+                'Valor' => '000.00',
+                'EdadTerminar' => '35',
+                'Codeudor' => 'Fulanito',
+                'EdadCodeudor' => '30',
+                'IdentiCodeudor' => '000000000',
+                'CoberturasListInc' => null,
+                'CoberturasListVid' => null,
             ],
         ]);
     }
@@ -410,7 +413,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
