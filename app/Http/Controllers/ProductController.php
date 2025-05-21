@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\ProductService;
 use App\Services\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -10,9 +9,7 @@ use Throwable;
 
 class ProductController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm)
-    {
-    }
+    public function __construct(protected ZohoCRMService $crm) {}
 
     /**
      * @throws RequestException
@@ -25,7 +22,7 @@ class ProductController extends Controller
         $list = $this->crm->searchRecords('Products', $criteria);
 
         return response()->json(
-            collect($list['data'])->map(fn($value) => [
+            collect($list['data'])->map(fn ($value) => [
                 $value['id'] => $value['Product_Category'],
             ])
         );
