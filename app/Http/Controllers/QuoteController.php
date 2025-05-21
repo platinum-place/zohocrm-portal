@@ -359,14 +359,8 @@ class QuoteController extends Controller
                 'Codeudor' => 'Fulanito',
                 'EdadCodeudor' => '30',
                 'IdentiCodeudor' => '000000000',
-                'CoberturasListInc' => [
-                    'Cobertura' => 'Incendio',
-                    'Valor' => '100%',
-                ],
-                'CoberturasListVid' => [
-                    'Cobertura' => 'Vida',
-                    'Valor' => '100%',
-                ],
+      'CoberturasListInc' => null,
+                'CoberturasListVid' =>null,
             ],
             [
                 'Impuesto' => '18.5',
@@ -382,14 +376,8 @@ class QuoteController extends Controller
                 'Codeudor' => 'Fulanito',
                 'EdadCodeudor' => '30',
                 'IdentiCodeudor' => '000000000',
-                'CoberturasListInc' => [
-                    'Cobertura' => 'Incendio',
-                    'Valor' => '100%',
-                ],
-                'CoberturasListVid' => [
-                    'Cobertura' => 'Vida',
-                    'Valor' => '100%',
-                ],
+      'CoberturasListInc' => null,
+                'CoberturasListVid' =>null,
             ],
             [
                 'Impuesto' => '18.5',
@@ -405,14 +393,8 @@ class QuoteController extends Controller
                 'Codeudor' => 'Fulanito',
                 'EdadCodeudor' => '30',
                 'IdentiCodeudor' => '000000000',
-                'CoberturasListInc' => [
-                    'Cobertura' => 'Incendio',
-                    'Valor' => '100%',
-                ],
-                'CoberturasListVid' => [
-                    'Cobertura' => 'Vida',
-                    'Valor' => '100%',
-                ],
+                'CoberturasListInc' => null,
+                'CoberturasListVid' =>null,
             ],
         ]);
     }
