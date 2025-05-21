@@ -115,7 +115,7 @@ class QuoteController extends Controller
             break;
         }
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function valueVehicle()
@@ -144,7 +144,7 @@ class QuoteController extends Controller
 
         $this->service->update($id, $data);
 
-        return response()->noContent();
+        return response()->status();
     }
 
     /**
@@ -195,7 +195,7 @@ class QuoteController extends Controller
             $this->service->uploadAttachment($id, $path);
         }
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function getQRInspect(ValidateInspectionRequest $request)
@@ -339,7 +339,7 @@ class QuoteController extends Controller
             break;
         }
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function estimateFire(EstimateFireRequest $request)
@@ -421,7 +421,7 @@ class QuoteController extends Controller
             break;
         }
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function employmentTypes()
@@ -457,7 +457,7 @@ class QuoteController extends Controller
 
         $this->service->update($id, $data);
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function cancelFire(IssueLifeRequest $request)
@@ -472,7 +472,7 @@ class QuoteController extends Controller
 
         $this->service->update($id, $data);
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function cancelUnemployment(IssueLifeRequest $request)
@@ -487,7 +487,7 @@ class QuoteController extends Controller
 
         $this->service->update($id, $data);
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function cancelUnemploymentDebt(IssueLifeRequest $request)
@@ -502,7 +502,7 @@ class QuoteController extends Controller
 
         $this->service->update($id, $data);
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function cancelVehicle(CancelVehicleRequest $request)
@@ -517,7 +517,7 @@ class QuoteController extends Controller
 
         $this->service->update($id, $data);
 
-        return response()->noContent();
+        return response()->status();
     }
 
     public function estimateVehicleLaw(EstimateVehicleLawRequest $request)
@@ -643,6 +643,6 @@ class QuoteController extends Controller
 
         $this->service->update($id, $data);
 
-        return response()->noContent();
+        return response()->status();
     }
 }
