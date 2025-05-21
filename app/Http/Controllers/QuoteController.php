@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Quote\CancelVehicleRequest;
 use App\Http\Requests\Quote\EstimateFireRequest;
+use App\Http\Requests\Quote\EstimateLifeRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentDebtRequest;
+use App\Http\Requests\Quote\EstimateUnemploymentRequest;
 use App\Http\Requests\Quote\EstimateVehicleRequest;
 use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
@@ -38,23 +40,7 @@ class QuoteController extends Controller
                 'Aseguradora' => 'Seguros XYZ',
                 'Idcotizacion' => 789654,
                 'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => [
-                    [
-                        'id' => 1,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 2,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 3,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                ],
+                'CoberturasList' => null,
             ],
             [
                 'Passcode' => '4821',
