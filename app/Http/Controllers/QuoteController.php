@@ -19,6 +19,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use TheSeer\Tokenizer\Exception;
 use Throwable;
 
 class QuoteController extends Controller
@@ -324,7 +325,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $quote = $this->service->get($id)['data'][0];;
+        try {
+            $quote = $this->service->get($id)['data'][0];;
+        } catch (Exception $exception) {
+            return response(status: 404)->json([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ]);
+        }
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
