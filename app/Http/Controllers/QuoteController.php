@@ -553,23 +553,7 @@ class QuoteController extends Controller
                 'Aseguradora' => 'Seguros XYZ',
                 'Idcotizacion' => 3222373000214281001,
                 'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => [
-                    [
-                        'id' => 1,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 2,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 3,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                ],
+                'CoberturasList' => null,
             ],
             [
                 'Passcode' => '4821',
@@ -583,23 +567,7 @@ class QuoteController extends Controller
                 'Aseguradora' => 'Seguros XYZ',
                 'Idcotizacion' => 3222373000214281001,
                 'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => [
-                    [
-                        'id' => 1,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 2,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 3,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                ],
+                'CoberturasList' => null,
             ],
             [
                 'Passcode' => '4821',
