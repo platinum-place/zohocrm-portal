@@ -1,7 +1,8 @@
 services:
     laravel.test:
+        container_name: backend
         build:
-            context: './vendor/laravel/sail/runtimes/8.4'
+            context: './docker/8.4'
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
@@ -11,6 +12,7 @@ services:
         ports:
             - '${APP_PORT:-80}:80'
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - '${HTTPS_PORT:-443}:443'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
@@ -19,10 +21,22 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - './ssl:/etc/nginx/ssl'
         networks:
             - sail
         depends_on:
             - pgsql
+        security_opt:
+            - no-new-privileges:true
+        cap_drop:
+            - ALL
+        cap_add:
+            - SETUID
+            - SETGID
+            - CHOWN
+            - DAC_OVERRIDE
+            - NET_BIND_SERVICE
+
     pgsql:
         image: 'postgres:17'
         ports:
@@ -34,7 +48,7 @@ services:
             POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
         volumes:
             - 'sail-pgsql:/var/lib/postgresql/data'
-            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+            - './docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
         networks:
             - sail
         healthcheck:
