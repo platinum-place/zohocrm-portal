@@ -328,10 +328,10 @@ class QuoteController extends Controller
         try {
             $quote = $this->service->get($id)['data'][0];;
         } catch (Throwable $exception) {
-            return response(status: 404)->json([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ]);
+            return response([
+                                            'Error' => $exception->getMessage(),
+                                            'code' => 404
+                                        ], 404);
         }
 
         foreach ($quote['Quoted_Items'] as $line) {
