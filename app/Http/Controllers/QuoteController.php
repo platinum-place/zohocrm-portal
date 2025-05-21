@@ -497,7 +497,7 @@ class QuoteController extends Controller
 
         $response = [];
 
-        foreach ($products as $product) {
+        foreach ($products['data'] as $product) {
             $alert = '';
 
             if ($request->get('PlazoDias') > $product['Plazo_max']) {
@@ -640,7 +640,7 @@ class QuoteController extends Controller
 
         $response = [];
 
-        foreach ($products as $product) {
+        foreach ($products['data'] as $product) {
             $response[] = [
                 'Impuesto' => '18.5',
                 'PrimaPeriodo' => '000.00',
