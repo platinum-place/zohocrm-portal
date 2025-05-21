@@ -20,7 +20,11 @@ Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner
 
     Route::get('cotizador/ValorPromedio', [\App\Http\Controllers\QuoteController::class, 'valueVehicle']);
     Route::post('cotizador/ValidarInspeccion', [\App\Http\Controllers\QuoteController::class, 'validateInspection']);
-    Route::post('cotizador/Inspeccionar', [\App\Http\Controllers\QuoteController::class, 'inspect']);
+
+
+    //Route::post('cotizador/Inspeccionar', [\App\Http\Controllers\QuoteController::class, 'inspect']);
+
+
     Route::post('cotizador/ObtenerQRInspeccion', [\App\Http\Controllers\QuoteController::class, 'getQRInspect']);
     Route::post('cotizador/ObtenerImagenes', [\App\Http\Controllers\QuoteController::class, 'getPhotos']);
 
