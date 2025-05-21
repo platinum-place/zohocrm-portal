@@ -17,29 +17,19 @@ Route::middleware(['auth:api'])->group(function () {
 Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner::class])->group(function () {
     Route::post('cotizador/colectiva', [\App\Http\Controllers\QuoteController::class, 'estimateVehicle']);
     Route::post('cotizador/EmitirAuto', [\App\Http\Controllers\QuoteController::class, 'issueVehicle']);
-
     Route::get('cotizador/ValorPromedio', [\App\Http\Controllers\QuoteController::class, 'valueVehicle']);
     Route::post('cotizador/ValidarInspeccion', [\App\Http\Controllers\QuoteController::class, 'validateInspection']);
-
-
     Route::post('cotizador/Inspeccionar', [\App\Http\Controllers\QuoteController::class, 'inspect']);
-
-
     Route::post('cotizador/ObtenerQRInspeccion', [\App\Http\Controllers\QuoteController::class, 'getQRInspect']);
     Route::post('cotizador/ObtenerImagenes', [\App\Http\Controllers\QuoteController::class, 'getPhotos']);
-
-    Route::post('cotizador/CotizaVida', [\App\Http\Controllers\Quote\QuoteLifeController::class, 'estimateLife']);
-    Route::post('cotizador/EmitirVida', [\App\Http\Controllers\Quote\QuoteLifeController::class, 'issueLife']);
-
+    Route::post('cotizador/CotizaVida', [\App\Http\Controllers\QuoteController::class, 'estimateLife']);
+    Route::post('cotizador/EmitirVida', [\App\Http\Controllers\QuoteController::class, 'issueLife']);
     Route::post('cotizador/CotizaDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'estimateUnemploymentDebt']);
     Route::post('cotizador/EmitirDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'issueUnemploymentDebt']);
-
-    Route::post('cotizador/CotizaDesempleo', [\App\Http\Controllers\Quote\QuoteUnemploymentController::class, 'estimateUnemployment']);
-    Route::post('cotizador/EmitirDesempleo', [\App\Http\Controllers\Quote\QuoteUnemploymentController::class, 'issueUnemployment']);
-
+    Route::post('cotizador/CotizaDesempleo', [\App\Http\Controllers\QuoteController::class, 'estimateUnemployment']);
+    Route::post('cotizador/EmitirDesempleo', [\App\Http\Controllers\QuoteController::class, 'issueUnemployment']);
     Route::post('cotizador/CotizaIncendio', [\App\Http\Controllers\QuoteController::class, 'estimateFire']);
     Route::post('cotizador/EmitirIncendio', [\App\Http\Controllers\QuoteController::class, 'issueFire']);
-
     Route::get('cotizador/GetTipoEmpleado', [\App\Http\Controllers\QuoteController::class, 'employmentTypes']);
     Route::get('cotizador/GetGiroDelNegocio', [\App\Http\Controllers\QuoteController::class, 'businessTypes']);
     Route::get('cotizador/CancelarVida', [\App\Http\Controllers\QuoteController::class, 'cancelLife']);
@@ -48,10 +38,10 @@ Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner
     Route::get('cotizador/CancelarDesempleoDeuda', [\App\Http\Controllers\QuoteController::class, 'cancelUnemploymentDebt']);
     Route::get('cotizador/CancelarAuto', [\App\Http\Controllers\QuoteController::class, 'cancelVehicle']);
 
-    Route::post('SegurosLeyApi/GuardarSeguro', [\App\Http\Controllers\QuoteController::class, 'estimateVehicleLaw']);
-    Route::get('SegurosLeyApi/Obtener/MetodosDePago', [\App\Http\Controllers\QuoteController::class, 'paymentType']);
-    Route::get('SegurosLeyApi/Buscar/PorNoDocumento/{identification}', [\App\Http\Controllers\QuoteController::class, 'searchDocument']);
-    Route::get('SegurosLeyApi/Anular/{id}', [\App\Http\Controllers\QuoteController::class, 'disableVehicleLaw']);
+    Route::post('SegurosLeyApi/GuardarSeguro', [\App\Http\Controllers\InsuranceLawController::class, 'estimateVehicleLaw']);
+    Route::get('SegurosLeyApi/Obtener/MetodosDePago', [\App\Http\Controllers\InsuranceLawController::class, 'paymentType']);
+    Route::get('SegurosLeyApi/Buscar/PorNoDocumento/{identification}', [\App\Http\Controllers\InsuranceLawController::class, 'searchDocument']);
+    Route::get('SegurosLeyApi/Anular/{id}', [\App\Http\Controllers\InsuranceLawController::class, 'disableVehicleLaw']);
 
     Route::post('vehiculos/Marca', [\App\Http\Controllers\VehicleController::class, 'list']);
     Route::post('vehiculos/Modelos/{brandId}', [\App\Http\Controllers\VehicleController::class, 'getModel']);

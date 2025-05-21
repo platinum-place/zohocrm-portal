@@ -3,93 +3,59 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Quote\CancelVehicleRequest;
-use App\Http\Requests\Quote\DisableVehicleLawRequest;
 use App\Http\Requests\Quote\EstimateFireRequest;
+use App\Http\Requests\Quote\EstimateLifeRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentDebtRequest;
-use App\Http\Requests\Quote\EstimateVehicleLawRequest;
+use App\Http\Requests\Quote\EstimateUnemploymentRequest;
 use App\Http\Requests\Quote\EstimateVehicleRequest;
 use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
 use App\Http\Requests\Quote\IssueVehicleRequest;
-use App\Http\Requests\Quote\SearchDocumentRequest;
 use App\Http\Requests\Quote\ValidateInspectionRequest;
-use App\Services\Quote\QuoteService;
+use App\Services\QuoteService;
+use App\Services\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use TheSeer\Tokenizer\Exception;
 use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected QuoteService $service)
+    public function __construct(protected ZohoCRMService $crm)
     {
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function estimateVehicle(EstimateVehicleRequest $request)
     {
-        return response()->json([
-            [
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Auto))';
+        $products = $this->crm->searchRecords('Products', $criteria);
+
+        $response = [];
+
+        foreach ($products['data'] as $product) {
+            $response[] = [
                 'Passcode' => '4821',
                 'OfertaID' => 105,
                 'Prima' => 12500.75,
                 'Impuesto' => 1875.11,
                 'PrimaTotal' => 14375.86,
                 'PrimaCuota' => 1197.99,
-                'Planid' => 3222373000214282001,
+                'Planid' => 11111,
                 'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 789654,
-                'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => [
-                    [
-                        'id' => 1,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 2,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                    [
-                        'id' => 3,
-                        'nombre' => 'Cobertura Total',
-                        'descripcion' => 'Cobertura completa del vehículo',
-                    ],
-                ],
-            ],
-            [
-                'Passcode' => '4821',
-                'OfertaID' => 105,
-                'Prima' => 12500.75,
-                'Impuesto' => 1875.11,
-                'PrimaTotal' => 14375.86,
-                'PrimaCuota' => 1197.99,
-                'Planid' => 3222373000214281014,
-                'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 789654,
+                'Aseguradora' => $product['Vendor_Name']['name'],
+                'Idcotizacion' => 3222373000214282001,
                 'Fecha' => now()->toDateTimeString(),
                 'CoberturasList' => null,
-            ],
-            [
-                'Passcode' => '4821',
-                'OfertaID' => 105,
-                'Prima' => 12500.75,
-                'Impuesto' => 1875.11,
-                'PrimaTotal' => 14375.86,
-                'PrimaCuota' => 1197.99,
-                'Planid' => 3222373000214281001,
-                'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 789654,
-                'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => null,
-            ],
-        ]);
+            ];
+        }
+
+        return response()->json($response);
     }
 
     /**
@@ -101,7 +67,8 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotzid');
 
-        $quote = $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -114,7 +81,7 @@ class QuoteController extends Controller
                 'Prima' => round($line['Net_Total'], 2),
             ];
 
-            $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
             break;
         }
@@ -140,13 +107,20 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotz_id');
 
-        $this->service->get($id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $data = [
             'Depurado' => true,
         ];
-
-        $this->service->update($id, $data);
+        $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -190,30 +164,44 @@ class QuoteController extends Controller
             $extension = match ($mimeType) {
                 'image/jpeg' => 'jpg',
                 'image/png' => 'png',
-                default => throw new \Exception(__('validation.mimetypes', ['attribute' => $title, 'values' => '.jpg,.png']))
+                default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
             $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
 
             Storage::put($path, $imageData);
-            $this->service->uploadAttachment($id, $path);
+
+            $this->crm->uploadAnAttachment('Quotes', $id, $path);
         }
 
         return response()->noContent(200);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function getQRInspect(ValidateInspectionRequest $request)
     {
         $id = $request->get('cotz_id');
 
-        $this->service->get($id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $qr = base64_encode(QrCode::format('svg')
             ->size(80)
             ->generate("https://gruponobesrl.zcrmportals.com/portal/GrupoNobeSRL/crm/tab/Quotes/$id"));
 
         return response()->json([
-            'QR' => $qr,
+            'QR' => $qr
         ]);
     }
 
@@ -226,12 +214,20 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotz_id');
 
-        $attachments = $this->service->getAttachments($id);
+        try {
+            $fields = ['id', 'File_Name'];
+            $attachments = $this->crm->attachmentList('Quotes', $id, $fields);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $response = [];
 
-        foreach ($attachments as $attachment) {
-            $imageData = $this->service->downloadAttachment($id, $attachment['id']);
+        foreach ($attachments['data'] as $attachment) {
+            $imageData = $this->crm->getAttachment('Quotes', $id, $attachment['id']);
 
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_buffer($finfo, $imageData);
@@ -260,79 +256,47 @@ class QuoteController extends Controller
      */
     public function estimateUnemploymentDebt(EstimateUnemploymentDebtRequest $request)
     {
-        return response()->json([
-            [
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida/Desempleo))';
+        $products = $this->crm->searchRecords('Products', $criteria);
+
+        $response = [];
+
+        foreach ($products['data'] as $product) {
+            $response[] = [
                 'Impuesto' => '18.5',
                 'PrimaPeriodo' => '000.00',
                 'PrimaTotal' => '000.00',
                 'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano del tal',
-                'Direccion' => 'Calle Primera',
+                'Cliente' => $request->get('Cliente'),
+                'Direccion' => $request->get('Direccion'),
                 'TipoEmpleado' => 'Publico',
-                'Fecha' => '01/01/2020',
-                'IdenCliente' => '000101001002030',
-                'Telefono' => '809390903',
-                'Aseguradora' => 'Mapfre',
+                'Fecha' => date('d/m/Y'),
+                'IdenCliente' => $request->get('IdenCliente'),
+                'Telefono' => $request->get('Telefono'),
+                'Aseguradora' => $product['Vendor_Name']['name'],
                 'MontoPrestamo' => '50000',
-                'Cuota' => '5000',
-                'PlazoMese' => '24',
+                'Cuota' => $request->get('Cuota'),
+                'PlazoMese' => $request->get('Plazo') / 12,
                 'Desempleo' => '6000',
                 'Deuda' => '8000',
                 'To tal' => '10000',
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano del tal',
-                'Direccion' => 'Calle Primera',
-                'TipoEmpleado' => 'Publico',
-                'Fecha' => '01/01/2020',
-                'IdenCliente' => '000101001002030',
-                'Telefono' => '809390903',
-                'Aseguradora' => 'Mapfre',
-                'MontoPrestamo' => '50000',
-                'Cuota' => '5000',
-                'PlazoMese' => '24',
-                'Desempleo' => '6000',
-                'Deuda' => '8000',
-                'To tal' => '10000',
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano del tal',
-                'Direccion' => 'Calle Primera',
-                'TipoEmpleado' => 'Publico',
-                'Fecha' => '01/01/2020',
-                'IdenCliente' => '000101001002030',
-                'Telefono' => '809390903',
-                'Aseguradora' => 'Mapfre',
-                'MontoPrestamo' => '50000',
-                'Cuota' => '5000',
-                'PlazoMese' => '24',
-                'Desempleo' => '6000',
-                'Deuda' => '8000',
-                'To tal' => '10000',
-            ],
-        ]);
+            ];
+        }
+
+        return response()->json($response);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function issueUnemploymentDebt(IssueLifeRequest $request)
     {
         $id = $request->get('Identificador');
 
-        try {
-            $quote = $this->service->get($id)['data'][0];;
-        } catch (Throwable $exception) {
-            return response([
-                                            'Error' => $exception->getMessage(),
-                                            'code' => 404
-                                        ], 404);
-        }
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -345,7 +309,7 @@ class QuoteController extends Controller
                 'Prima' => round($line['Net_Total'], 2),
             ];
 
-            $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
             break;
         }
@@ -353,17 +317,27 @@ class QuoteController extends Controller
         return response()->noContent(200);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function estimateFire(EstimateFireRequest $request)
     {
-        return response()->json([
-            [
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Incendio))';
+        $products = $this->crm->searchRecords('Products', $criteria);
+
+        $response = [];
+
+        foreach ($products['data'] as $product) {
+            $response[] = [
                 'Impuesto' => '18.5',
                 'PrimaPeriodo' => '000.00',
                 'PrimaTotal' => '000.00',
                 'PrimaVida' => '000.00',
                 'PrimaTotalVida' => '000.00',
                 'identificador' => '3222373000214281001',
-                'Aseguradora' => 'Mapfre',
+                'Aseguradora' => $product['Vendor_Name']['name'],
                 'Anios' => '5',
                 'Valor' => '000.00',
                 'EdadTerminar' => '35',
@@ -372,49 +346,23 @@ class QuoteController extends Controller
                 'IdentiCodeudor' => '000000000',
                 'CoberturasListInc' => null,
                 'CoberturasListVid' => null,
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'PrimaVida' => '000.00',
-                'PrimaTotalVida' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Aseguradora' => 'Mapfre',
-                'Anios' => '5',
-                'Valor' => '000.00',
-                'EdadTerminar' => '35',
-                'Codeudor' => 'Fulanito',
-                'EdadCodeudor' => '30',
-                'IdentiCodeudor' => '000000000',
-                'CoberturasListInc' => null,
-                'CoberturasListVid' => null,
-            ],
-            [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'PrimaVida' => '000.00',
-                'PrimaTotalVida' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Aseguradora' => 'Mapfre',
-                'Anios' => '5',
-                'Valor' => '000.00',
-                'EdadTerminar' => '35',
-                'Codeudor' => 'Fulanito',
-                'EdadCodeudor' => '30',
-                'IdentiCodeudor' => '000000000',
-                'CoberturasListInc' => null,
-                'CoberturasListVid' => null,
-            ],
-        ]);
+            ];
+        }
+
+        return response()->json($response);
     }
 
+    /**
+     * @throws RequestException
+     * @throws Throwable
+     * @throws ConnectionException
+     */
     public function issueFire(IssueLifeRequest $request)
     {
         $id = $request->get('Identificador');
 
-        $quote = $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -427,7 +375,7 @@ class QuoteController extends Controller
                 'Prima' => round($line['Net_Total'], 2),
             ];
 
-            $this->service->update($id, $data);
+            $this->crm->updateRecords('Quotes', $id, $data);
 
             break;
         }
@@ -460,13 +408,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+        $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -475,13 +424,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+        $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -490,13 +440,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+        $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -505,13 +456,14 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+        $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
@@ -520,119 +472,125 @@ class QuoteController extends Controller
     {
         $id = $request->get('IdCotizacion');
 
-        $this->service->get($id)['data'][0];
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
 
         $data = [
             'Quote_Stage' => 'Cancelada',
         ];
 
-        $this->service->update($id, $data);
+        $this->crm->updateRecords('Quotes', $id, $data);
 
         return response()->noContent(200);
     }
 
-    public function estimateVehicleLaw(EstimateVehicleLawRequest $request)
-    {
-        return response()->json([
-            [
-                'Passcode' => '4821',
-                'OfertaID' => 105,
-                'Prima' => 12500.75,
-                'Impuesto' => 1875.11,
-                'PrimaTotal' => 14375.86,
-                'PrimaCuota' => 1197.99,
-                'Planid' => 3,
-                'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 3222373000214281001,
-                'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => null,
-            ],
-            [
-                'Passcode' => '4821',
-                'OfertaID' => 105,
-                'Prima' => 12500.75,
-                'Impuesto' => 1875.11,
-                'PrimaTotal' => 14375.86,
-                'PrimaCuota' => 1197.99,
-                'Planid' => 3,
-                'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 3222373000214281001,
-                'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => null,
-            ],
-            [
-                'Passcode' => '4821',
-                'OfertaID' => 105,
-                'Prima' => 12500.75,
-                'Impuesto' => 1875.11,
-                'PrimaTotal' => 14375.86,
-                'PrimaCuota' => 1197.99,
-                'Planid' => 3,
-                'Plan' => 'Plan Básico',
-                'Aseguradora' => 'Seguros XYZ',
-                'Idcotizacion' => 3222373000214281001,
-                'Fecha' => now()->toDateTimeString(),
-                'CoberturasList' => null,
-            ],
-        ]);
-    }
-
-    public function paymentType()
-    {
-        return response()->json([
-            [
-                'ID' => 1,
-                'TIPOVEHICULOID' => 1.0,
-                'TIPOVEHICULO' => 'Motocicletas hasta 250 CC',
-                'COBERTURADPAYRC' => '50/50/100',
-                'FINANZAJUDICIAL' => '50000',
-            ],
-        ]);
-    }
 
     /**
      * @throws RequestException
      * @throws Throwable
      * @throws ConnectionException
      */
-    public function searchDocument(SearchDocumentRequest $request, string $identification)
+    public function estimateLife(EstimateLifeRequest $request)
     {
-        //        $search = $request->get('NoDocumento');
-
-        $quotes = $this->service->searchQuote($identification);
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida))';
+        $products = $this->crm->searchRecords('Products', $criteria);
 
         $response = [];
 
-        foreach ($quotes as $quote) {
+        foreach ($products as $product) {
+            $alert = '';
+
+            if ($request->get('PlazoDias') > $product['Plazo_max']) {
+                $alert = 'El plazo es mayor al limite establecido.';
+            }
+
+            if ($request->get('MontoOriginal') < $product['Suma_asegurada_min'] || $request->get('MontoOriginal') > $product['Suma_asegurada_max']) {
+                $alert = 'El plazo es mayor al limite establecido.';
+            }
+
+            $debtTax = 0;
+            $coDebtTax = 0;
+            $amount = 0;
+
+            try {
+                $criteria = "Plan:equals:" . $product['id'];
+                $taxes = $this->crm->searchRecords('Tasas', $criteria);
+
+                foreach ($taxes['data'] as $tax) {
+                    if ($request->get('Edad') >= $tax['Edad_min'] and $request->get('Edad') <= $tax['Edad_max']) {
+                        $debtTax = $tax['Name'] / 100;
+                    } else {
+                        $alert = 'La edad del deudor no estan dentro del limite permitido.';
+                    }
+
+                    if ($request->get('codeudor') and $request->get('EdadCodeudor')) {
+                        if ($request->get('EdadCodeudor') >= $tax['Edad_min'] and $request->get('EdadCodeudor') <= $tax['Edad_max']) {
+                            $coDebtTax = $tax['Codeudor'] / 100;
+                        } else {
+                            $alert = 'La edad del codeudor no estan dentro del limite permitido.';
+                        }
+                    }
+                }
+            } catch (Throwable $throwable) {
+
+            }
+
+            if (empty($alert)) {
+                if ($debtTax && $coDebtTax) {
+                    $amountDebt = ($request->get('MontoOriginal') / 1000) * $debtTax;
+                    $amountCoDebt = ($request->get('MontoOriginal') / 1000) * ($coDebtTax - $debtTax);
+                    $amount = $amountDebt + $amountCoDebt;
+                } elseif ($debtTax) {
+                    $amount = ($request->get('MontoOriginal') / 1000) * $debtTax;
+                }
+
+                $amount = round($amount, 2);
+            }
+
+            $data = [
+                'Subject' => $request->get('NombreCliente'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 30 days')),
+                'Vigencia_desde' => date('Y-m-d'),
+                'Account_Name' => 3222373000092390001,
+                'Contact_Name' => 3222373000203318001,
+                'Quote_Stage' => 'Cotizando',
+                'Nombre' => $request->get('NombreCliente'),
+                'RNC_C_dula' => $request->get('IdenCliente'),
+                'Direcci_n' => $request->get('Direccion'),
+                'Tel_Celular' => $request->get('Telefono1'),
+                'Plan' => 'Vida',
+                'Suma_asegurada' => $request->get('MontoOriginal'),
+                'Plazo' => $request->get('PlazoAnios'),
+                'Fuente' => 'API',
+                'Quoted_Items' => [
+                    [
+                        'Quantity' => 1,
+                        'Product_Name' => $product['id'],
+                        'Total' => $amount,
+                        'Net_Total' => $amount,
+                        'List_Price' => $amount,
+                    ],
+                ],
+            ];
+
+            $responseProduct = $this->crm->insertRecords('Quotes', $data);
+
             $response[] = [
-                'IDCliente' => $identification,
-                'NombreCliente' => $quote['Nombre'],
-                'Direccion' => $quote['Direcci_n'],
-                'Telefono' => $quote['Tel_Residencia'],
-                'IDTipoVehiculo' => null,
-                'TipoVehiculo' => $quote['Tipo_veh_culo'],
-                'Marca' => $quote['Marca']['name'],
-                'Modelo' => $quote['Modelo']['name'],
-                'Correo' => $quote['Correo_electr_nico'],
-                'Anio' => $quote['A_o'],
-                'Color' => $quote['Color'],
-                'Chassis' => $quote['Chasis'],
-                'Placa' => $quote['Placa'],
-                'Poliza' => null,
-                'Prima' => $quote['Created_Time'],
-                'Vigencia' => '12 Meses',
-                'Cobertura' => null,
-                'FianzaJudicial' => null,
-                'FechaEmision' => $quote['Created_Time'],
-                'Estado' => $quote['Quote_Stage'] === 'Cancelada' ? 0 : 1,
-                'Usuario' => null,
-                'PDV' => null,
-                'C3_Meses' => null,
-                'C6_Meses' => null,
-                'C12_Meses' => null,
-                'Error' => null,
+                'Impuesto' => null,
+                'PrimaPeriodo' => null,
+                'PrimaTotal' => $amount,
+                'identificador' => $responseProduct['details']['id'],
+                'Aseguradora' => $product['Vendor_Name']['name'],
+                'MontoOrig' => $request->get('MontoOriginal'),
+                'Anios' => null,
+                'EdadTerminar' => null,
+                'Cliente' => $request->get('NombreCliente'),
+                'Fecha' => date('d/m/Y'),
+                'Direccion' => $request->get('Direccion'),
+                'Edad' => $request->get('Edad'),
+                'IdenCliente' => $request->get('IdenCliente'),
+                'Codeudor' => null,
+                'Alerta' => $alert,
             ];
         }
 
@@ -640,19 +598,97 @@ class QuoteController extends Controller
     }
 
     /**
+     * @throws Throwable
+     * @throws ConnectionException
+     * @throws RequestException
+     */
+    public function issueLife(IssueLifeRequest $request)
+    {
+        $id = $request->get('Identificador');
+
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+
+        foreach ($quote['Quoted_Items'] as $line) {
+            $data = [
+                'Coberturas' => $line['Product_Name']['id'],
+                'Quote_Stage' => 'Emitida',
+                'Vigencia_desde' => date('Y-m-d'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
+                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
+                'Prima' => round($line['Net_Total'], 2),
+            ];
+
+            $this->crm->updateRecords('Quotes', $id, $data);
+
+            break;
+        }
+
+        return response()->noContent(200);
+    }
+
+    /**
      * @throws RequestException
      * @throws Throwable
      * @throws ConnectionException
      */
-    public function disableVehicleLaw(DisableVehicleLawRequest $request, string $id)
+    public function estimateUnemployment(EstimateUnemploymentRequest $request)
     {
-        $this->service->get($id)['data'][0];
+        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Desempleo))';
+        $products = $this->crm->searchRecords('Products', $criteria);
 
-        $data = [
-            'Quote_Stage' => 'Cancelada',
-        ];
+        $response = [];
 
-        $this->service->update($id, $data);
+        foreach ($products as $product) {
+            $response[] = [
+                'Impuesto' => '18.5',
+                'PrimaPeriodo' => '000.00',
+                'PrimaTotal' => '000.00',
+                'identificador' => '3222373000214281001',
+                'Cliente' => 'Fulano de Tal',
+                'Direccion' => 'Calle Primera',
+                'Fecha' => '01/01/2020',
+                'TipoEmpleado' => 'Privado',
+                'IdentCliente' => '00030489834989',
+                'Aseguradora ' => 'Mapfre',
+                'MontoOriginal' => '000.00',
+                'Cuota' => '000.00',
+                'PlazoMese' => '24',
+                'Total' => '000.00',
+            ];
+        }
+
+        return response()->json($response);
+    }
+
+    /**
+     * @throws Throwable
+     * @throws ConnectionException
+     * @throws RequestException
+     */
+    public function issueUnemployment(IssueLifeRequest $request)
+    {
+        $id = $request->get('Identificador');
+
+        $fields = ['id', 'Quoted_Items'];
+        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+
+        foreach ($quote['Quoted_Items'] as $line) {
+            $data = [
+                'Coberturas' => $line['Product_Name']['id'],
+                'Quote_Stage' => 'Emitida',
+                'Vigencia_desde' => date('Y-m-d'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
+                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
+                'Prima' => round($line['Net_Total'], 2),
+            ];
+
+            $this->crm->updateRecords('Quotes', $id, $data);
+
+            break;
+        }
 
         return response()->noContent(200);
     }
