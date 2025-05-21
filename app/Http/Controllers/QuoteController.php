@@ -295,8 +295,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -361,8 +368,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -408,8 +422,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -424,8 +445,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -440,8 +468,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -456,8 +491,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -472,8 +514,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('IdCotizacion');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $data = [
             'Quote_Stage' => 'Cancelada',
@@ -606,8 +655,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
@@ -671,9 +727,15 @@ class QuoteController extends Controller
     {
         $id = $request->get('Identificador');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
-
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
                 'Coberturas' => $line['Product_Name']['id'],
