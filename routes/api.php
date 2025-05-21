@@ -22,7 +22,7 @@ Route::middleware([\Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner
     Route::post('cotizador/ValidarInspeccion', [\App\Http\Controllers\QuoteController::class, 'validateInspection']);
 
 
-    //Route::post('cotizador/Inspeccionar', [\App\Http\Controllers\QuoteController::class, 'inspect']);
+    Route::post('cotizador/Inspeccionar', [\App\Http\Controllers\QuoteController::class, 'inspect']);
 
 
     Route::post('cotizador/ObtenerQRInspeccion', [\App\Http\Controllers\QuoteController::class, 'getQRInspect']);
