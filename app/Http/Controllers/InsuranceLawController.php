@@ -139,6 +139,6 @@ class InsuranceLawController
 
         $this->service->update($id, $data);
 
-        return response()->noContent();
+        return response()->noContent(200);
     }
 }
