@@ -698,20 +698,20 @@ class QuoteController extends Controller
 
         foreach ($products['data'] as $product) {
             $response[] = [
-                'Impuesto' => '18.5',
-                'PrimaPeriodo' => '000.00',
-                'PrimaTotal' => '000.00',
-                'identificador' => '3222373000214281001',
-                'Cliente' => 'Fulano de Tal',
-                'Direccion' => 'Calle Primera',
-                'Fecha' => '01/01/2020',
-                'TipoEmpleado' => 'Privado',
-                'IdentCliente' => '00030489834989',
+                'Impuesto' => null,
+                'PrimaPeriodo' => null,
+                'PrimaTotal' => null,
+                'identificador' => 3222373000214282001,
+                'Cliente' => $request->get('Cliente'),
+                'Direccion' => $request->get('Direccion'),
+                'Fecha' => date('d/m/Y'),
+                'TipoEmpleado' => null,
+                'IdentCliente' => $request->get('IdentCliente'),
                 'Aseguradora ' => $product['Vendor_Name']['name'],
-                'MontoOriginal' => '000.00',
-                'Cuota' => '000.00',
-                'PlazoMese' => '24',
-                'Total' => '000.00',
+                'MontoOriginal' => $request->get('MontoOriginal'),
+                'Cuota' => $request->get('Cuota'),
+                'PlazoMese' => $request->get('Plazo') * 12,
+                'Total' => null,
             ];
         }
 
