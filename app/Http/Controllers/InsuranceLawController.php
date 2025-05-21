@@ -28,7 +28,7 @@ class InsuranceLawController
 
         $response = [];
 
-        foreach ($products as $product) {
+        foreach ($products['data'] as $product) {
             $response[] = [
                 'Passcode' => '4821',
                 'OfertaID' => 105,
@@ -81,16 +81,16 @@ class InsuranceLawController
      * @throws RequestException
      * @throws Throwable
      * @throws ConnectionException
+     * @throws \Throwable
      */
     public function searchDocument(SearchDocumentRequest $request, string $identification)
     {
-        //        $search = $request->get('NoDocumento');
-
-        $quotes = $this->service->searchQuote($identification);
+        $criteria = "((RNC_C_dula:equals:$identification) and (Plan:equals:Auto))";
+        $quotes = $this->crm->searchRecords('Quotes', $criteria);
 
         $response = [];
 
-        foreach ($quotes as $quote) {
+        foreach ($quotes['data'] as $quote) {
             $response[] = [
                 'IDCliente' => $identification,
                 'NombreCliente' => $quote['Nombre'],
