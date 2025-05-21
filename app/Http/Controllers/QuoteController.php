@@ -707,7 +707,7 @@ class QuoteController extends Controller
                 'Fecha' => '01/01/2020',
                 'TipoEmpleado' => 'Privado',
                 'IdentCliente' => '00030489834989',
-                'Aseguradora ' => 'Mapfre',
+                'Aseguradora ' => $product['Vendor_Name']['name'],
                 'MontoOriginal' => '000.00',
                 'Cuota' => '000.00',
                 'PlazoMese' => '24',

@@ -116,8 +116,15 @@ class InsuranceLawController
      */
     public function disableVehicleLaw(DisableVehicleLawRequest $request, string $id)
     {
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (\Throwable $exception) {
+            return response([
+                'Error' => $exception->getMessage(),
+                'code' => 404
+            ], 404);
+        }
 
         $data = [
             'Quote_Stage' => 'Cancelada',
