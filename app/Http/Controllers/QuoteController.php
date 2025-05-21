@@ -68,27 +68,24 @@ class QuoteController extends Controller
 
             }
 
-
-            $debtTax = 0;
-            $coDebtTax = 0;
-            $amount = 0;
+            $taxAmount = 0;
 
             try {
                 $criteria = "Plan:equals:" . $product['id'];
                 $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
                 foreach ($taxes['data'] as $tax) {
-                    if ($request->get('Edad') >= $tax['Edad_min'] and $request->get('Edad') <= $tax['Edad_max']) {
-                        $debtTax = $tax['Name'] / 100;
-                    } else {
-                        $alert = 'La edad del deudor no estan dentro del limite permitido.';
-                    }
-
-                    if ($request->get('codeudor') and $request->get('EdadCodeudor')) {
-                        if ($request->get('EdadCodeudor') >= $tax['Edad_min'] and $request->get('EdadCodeudor') <= $tax['Edad_max']) {
-                            $coDebtTax = $tax['Codeudor'] / 100;
+                    if (in_array($request->get('TipoVehiculo'), $tax['Grupo_de_veh_culo'])) {
+                        if (!empty($tax['Suma_limite'])) {
+                            if ($request->get('MontoOriginal') >= $tax['Suma_limite']) {
+                                if (empty($tax['Suma_hasta'])) {
+                                    $taxAmount = $tax['Name'] / 100;
+                                } elseif ($request->get('MontoOriginal') < $tax['Suma_hasta']) {
+                                    $taxAmount = $tax['Name'] / 100;
+                                }
+                            }
                         } else {
-                            $alert = 'La edad del codeudor no estan dentro del limite permitido.';
+                            $taxAmount = $tax['Name'] / 100;
                         }
                     }
                 }
@@ -96,33 +93,84 @@ class QuoteController extends Controller
 
             }
 
+            if (!$taxAmount) {
+                $alert = 'No se encontraron tasas.';
+            }
+
+            $surchargeAmount = 0;
+
+            try {
+                $criteria = "((Marca:equals:" . $request->get('Marca') . ") and (Aseguradora:equals:" . $product['Vendor_Name']['id'] . "))";
+                $surcharges = $this->crm->searchRecords('Recargos', $criteria);
+
+                foreach ($surcharges['data'] as $surcharge) {
+                    $modeloTipo = $request->get('TipoVehiculo');
+                    $modeloId = $request->get('Modelo');
+                    $ano = $request->get('Marca');
+
+                    $tipo = $surcharge['Tipo'];
+                    $modelo = $surcharge['Modelo'];
+                    $desde = $surcharge['Desde'];
+                    $hasta = $surcharge['Hasta'];
+
+                    $resultado = (
+                        ($ano >= $desde && $ano <= $hasta && empty($modelo) && empty($tipo)) ||
+                        ($ano >= $desde && $ano <= $hasta && empty($modelo) && $tipo == $modeloTipo) ||
+                        ($ano >= $desde && $ano <= $hasta && $modelo == $modeloId && empty($tipo)) ||
+                        ($ano >= $desde && $ano <= $hasta && $modelo == $modeloId && $tipo == $modeloTipo) ||
+                        (empty($desde) && empty($hasta) && $modelo == $modeloId && $tipo == $modeloTipo) ||
+                        (empty($desde) && $ano <= $hasta && $modelo == $modeloId && $tipo == $modeloTipo) ||
+                        ($ano >= $desde && empty($hasta) && $modelo == $modeloId && $tipo == $modeloTipo) ||
+                        ($ano >= $desde && empty($hasta) && empty($modelo) && empty($tipo)) ||
+                        (empty($desde) && $ano <= $hasta && empty($modelo) && empty($tipo)) ||
+                        (empty($desde) && empty($hasta) && $modelo == $modeloId && empty($tipo)) ||
+                        (empty($desde) && empty($hasta) && empty($modelo) && $tipo == $modeloTipo) ||
+                        (empty($desde) && empty($hasta) && empty($modelo) && empty($tipo))
+                    );
+
+                    if ($resultado) {
+                        $surchargeAmount = $surcharge['Name'] / 100;
+                    }
+                }
+            } catch (Throwable $throwable) {
+
+            }
+
+            $amount = 0;
+
             if (empty($alert)) {
-                if ($debtTax && $coDebtTax) {
-                    $amountDebt = ($request->get('MontoOriginal') / 1000) * $debtTax;
-                    $amountCoDebt = ($request->get('MontoOriginal') / 1000) * ($coDebtTax - $debtTax);
-                    $amount = $amountDebt + $amountCoDebt;
-                } elseif ($debtTax) {
-                    $amount = ($request->get('MontoOriginal') / 1000) * $debtTax;
+                $amount = $request->get('MontoAsegurado') * ($taxAmount + ($taxAmount * $surchargeAmount));
+
+                if ($amount > 0 and $amount < $product['Prima_m_nima']) {
+                    $amount = $product['Prima_m_nima'];
                 }
 
                 $amount = round($amount, 2);
             }
 
             $data = [
-                'Subject' => $request->get('NombreCliente'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 30 days')),
-                'Vigencia_desde' => date('Y-m-d'),
+                "Subject" => $request->get('NombreCliente'),
+                "Valid_Till" => date("Y-m-d", strtotime(date("Y-m-d") . "+ 30 days")),
+                "Vigencia_desde" => date("Y-m-d"),
                 'Account_Name' => 3222373000092390001,
                 'Contact_Name' => 3222373000203318001,
-                'Quote_Stage' => 'Cotizando',
-                'Nombre' => $request->get('NombreCliente'),
-                'RNC_C_dula' => $request->get('IdenCliente'),
-                'Direcci_n' => $request->get('Direccion'),
-                'Tel_Celular' => $request->get('Telefono1'),
-                'Plan' => 'Vida',
-                'Suma_asegurada' => $request->get('MontoOriginal'),
-                'Plazo' => $request->get('PlazoAnios'),
-                'Fuente' => 'API',
+                "Quote_Stage" => "Cotizando",
+                "Nombre" => $request->get('NombreCliente'),
+                "Fecha_de_nacimiento" => $request->get('FechaNacimiento'),
+                "RNC_C_dula" => $request->get('IdCliente'),
+                "Correo_electr_nico" => $request->get('Email'),
+                "Tel_Celular" => $request->get('TelefMovil'),
+                "Tel_Residencia" => $request->get('TelefResidencia'),
+                "Tel_Trabajo" => $request->get('TelefTrabajo'),
+                "Plan" => 'Mensual Full',
+                "Suma_asegurada" => $request->get('MontoAsegurado'),
+                "A_o" => $request->get('Anio'),
+                "Marca" => $request->get('Marca'),
+                "Modelo" => $request->get('Modelo'),
+                "Tipo_veh_culo" => $request->get('TipoVehiculo'),
+                "Chasis" => $request->get('Chasis'),
+                "Placa" => $request->get('Placa'),
+                "Fuente" => 'API',
                 'Quoted_Items' => [
                     [
                         'Quantity' => 1,
@@ -138,17 +186,18 @@ class QuoteController extends Controller
 
             $response[] = [
                 'Passcode' => null,
-                'OfertaID' => 105,
-                'Prima' => 12500.75,
-                'Impuesto' => 1875.11,
-                'PrimaTotal' => 14375.86,
-                'PrimaCuota' => 1197.99,
-                'Planid' => 11111,
-                'Plan' => 'Plan Básico',
+                'OfertaID' => null,
+                'Prima' => $amount - ($amount * 1.16),
+                'Impuesto' => $amount * 0.16,
+                'PrimaTotal' => $amount,
+                'PrimaCuota' => null,
+                'Planid' => $product['id'],
+                'Plan' => 'Plan Mensual Full',
                 'Aseguradora' => $product['Vendor_Name']['name'],
-                'Idcotizacion' => 3222373000214282001,
+                'Idcotizacion' => $responseProduct['data'][0]['details']['id'],
                 'Fecha' => now()->toDateTimeString(),
                 'CoberturasList' => null,
+                'Alerta' => $alert,
             ];
         }
 
