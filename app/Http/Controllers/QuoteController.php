@@ -225,29 +225,9 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotz_id');
 
-        $attachments = $this->service->getAttachments($id);
 
         $response = [];
 
-        foreach ($attachments as $attachment) {
-            $imageData = $this->service->downloadAttachment($id, $attachment['id']);
-
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mimeType = finfo_buffer($finfo, $imageData);
-            finfo_close($finfo);
-
-            $extension = match ($mimeType) {
-                'image/jpeg' => '.jpg',
-                'image/png' => '.png',
-                default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
-            };
-
-            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
-
-            Storage::put($path, $imageData);
-
-            $response[] = [$attachment['File_Name'] => base64_encode($imageData)];
-        }
 
         return response()->json($response);
     }
