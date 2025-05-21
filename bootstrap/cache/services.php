@@ -46,7 +46,8 @@
     42 => 'Spatie\\Permission\\PermissionServiceProvider',
     43 => 'Zoho\\API\\ServiceProvider',
     44 => 'App\\Providers\\AppServiceProvider',
-    45 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    45 => 'App\\Providers\\PassportServiceProvider',
+    46 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
   ),
   'eager' => 
   array (
@@ -80,7 +81,8 @@
     27 => 'Spatie\\Permission\\PermissionServiceProvider',
     28 => 'Zoho\\API\\ServiceProvider',
     29 => 'App\\Providers\\AppServiceProvider',
-    30 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    30 => 'App\\Providers\\PassportServiceProvider',
+    31 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
   ),
   'deferred' => 
   array (
