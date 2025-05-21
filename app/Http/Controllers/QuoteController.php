@@ -579,7 +579,7 @@ class QuoteController extends Controller
                 'Impuesto' => null,
                 'PrimaPeriodo' => null,
                 'PrimaTotal' => $amount,
-                'identificador' => $responseProduct['details']['id'],
+                'identificador' => $responseProduct['data'][0]['details']['id'],
                 'Aseguradora' => $product['Vendor_Name']['name'],
                 'MontoOrig' => $request->get('MontoOriginal'),
                 'Anios' => null,
