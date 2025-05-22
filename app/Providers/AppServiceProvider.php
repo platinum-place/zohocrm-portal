@@ -3,12 +3,11 @@
 namespace App\Providers;
 
 use App\Exceptions\Handler;
-use App\Models\User\Client;
-use Carbon\CarbonInterval;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Support\Facades\App;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if (!config('app.debug')) {
+        if (! config('app.debug')) {
             $this->app->singleton(
                 ExceptionHandler::class,
                 Handler::class
@@ -30,12 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Passport::tokensExpireIn(CarbonInterval::days(15));
-        Passport::refreshTokensExpireIn(CarbonInterval::days(30));
-        Passport::personalAccessTokensExpireIn(CarbonInterval::months(6));
-
-        Passport::useClientModel(Client::class);
-
-        Passport::enablePasswordGrant();
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
     }
 }
