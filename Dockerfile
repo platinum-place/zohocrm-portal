@@ -1,4 +1,4 @@
-FROM php:8.4-fpm
+FROM php:8.2-fpm
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -19,18 +19,27 @@ RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN groupadd -g ${GROUP_ID} ${GROUP_NAME} \
-    && useradd -u ${USER_ID} -g ${GROUP_NAME} -m -s /bin/bash ${USER_NAME}
+# Solo crear usuario/grupo si no es root (ID != 0)
+RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
+        groupadd -g ${GROUP_ID} ${GROUP_NAME} \
+        && useradd -u ${USER_ID} -g ${GROUP_NAME} -m -s /bin/bash ${USER_NAME}; \
+    fi
 
 WORKDIR /var/www/html
 
 COPY . .
 
-RUN chown -R ${USER_NAME}:${GROUP_NAME} /var/www/html \
+# Establecer los permisos correctos
+RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
+        chown -R ${USER_NAME}:${GROUP_NAME} /var/www/html; \
+    else \
+        chown -R root:root /var/www/html; \
+    fi \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-USER ${USER_NAME}
+# Cambiar al usuario especificado o mantener root
+USER ${USER_ID}
 
 RUN composer install --no-interaction --optimize-autoloader
 
