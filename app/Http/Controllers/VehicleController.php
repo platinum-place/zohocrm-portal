@@ -43,9 +43,9 @@ class VehicleController extends Controller
 
                 foreach ($modelsData['data'] as $modelo) {
                     $modelos_sort[] = [
-                        'id' => $modelo->getEntityId(),
-                        'name' => $modelo->getFieldValue('Name'),
-                        'tipo' => $modelo->getFieldValue('Tipo'),
+                        'id' => $modelo['id'],
+                        'name' => $modelo['Name'],
+                        'tipo' => $modelo['Tipo'],
                     ];
                 }
 
