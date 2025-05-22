@@ -22,6 +22,7 @@ services:
         volumes:
             - '.:/var/www/html'
             - './ssl:/etc/nginx/ssl'
+            - './docker/8.4/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf'
         networks:
             - sail
         depends_on:
