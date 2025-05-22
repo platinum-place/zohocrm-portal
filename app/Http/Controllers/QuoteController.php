@@ -216,7 +216,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -260,7 +260,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (Throwable $exception) {
             return response([
                 'Error' => $exception->getMessage(),
@@ -339,7 +339,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -446,7 +446,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -520,7 +520,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -571,7 +571,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -591,7 +591,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -611,7 +611,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -631,7 +631,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -651,7 +651,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -792,7 +792,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
@@ -865,7 +865,7 @@ class QuoteController extends Controller
 
         try {
             $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
         }
