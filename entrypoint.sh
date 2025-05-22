@@ -68,15 +68,25 @@ log_errors = On
 error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
 EOL
 
-# Asegurar que los directorios críticos tengan los permisos correctos
+# Configurar Git para permitir el directorio como seguro
+git config --global --add safe.directory /var/www/html
+
+# Asegurar que los directorios críticos existan y tengan los permisos correctos
+mkdir -p /var/www/html/storage/logs
+mkdir -p /var/www/html/storage/framework/cache
+mkdir -p /var/www/html/storage/framework/sessions
+mkdir -p /var/www/html/storage/framework/views
+mkdir -p /var/www/html/bootstrap/cache
+
+# Asegurar que los archivos de log existan
+touch /var/www/html/storage/logs/laravel.log
+
+# Establecer permisos adecuados
 chown -R www-data:www-data /var/www/html/storage
 chown -R www-data:www-data /var/www/html/bootstrap/cache
-chmod -R 755 /var/www/html/storage
-chmod -R 755 /var/www/html/bootstrap/cache
-
-# Crear directorios de caché si no existen
-mkdir -p /var/www/html/bootstrap/cache
-chmod -R 755 /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage
+chmod -R 775 /var/www/html/bootstrap/cache
+chmod 664 /var/www/html/storage/logs/laravel.log
 
 # Ejecutar el comando original
 exec "$@"

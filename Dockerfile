@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Configurar Git para permitir el directorio como seguro
+RUN git config --global --add safe.directory /var/www/html
+
 # Instalar y configurar extensiones PHP recomendadas para Laravel
 RUN docker-php-ext-install \
     pdo \
@@ -43,29 +46,44 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# Preparar directorios de Laravel antes de cualquier otra operación
+RUN mkdir -p /var/www/html/storage/logs \
+    && mkdir -p /var/www/html/storage/framework/cache \
+    && mkdir -p /var/www/html/storage/framework/sessions \
+    && mkdir -p /var/www/html/storage/framework/views \
+    && mkdir -p /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html
+
 # Copiar primero solo los archivos necesarios para la instalación de dependencias
-COPY composer.json composer.lock* ./
-COPY packages ./packages
+COPY --chown=www-data:www-data composer.json composer.lock* ./
+COPY --chown=www-data:www-data packages ./packages
 
 # Instalar dependencias como www-data
 USER www-data
 RUN composer install --no-scripts --no-autoloader --prefer-dist
 
-# Copiar el resto de los archivos
+# Copiar el resto de los archivos y asegurar permisos correctos
 USER root
-COPY . .
+COPY --chown=www-data:www-data . .
 COPY entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Asegurar que los directorios críticos existan y tengan los permisos correctos
+RUN mkdir -p /var/www/html/storage/logs \
+    && mkdir -p /var/www/html/storage/framework/cache \
+    && mkdir -p /var/www/html/storage/framework/sessions \
+    && mkdir -p /var/www/html/storage/framework/views \
+    && mkdir -p /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache \
+    && touch /var/www/html/storage/logs/laravel.log \
+    && chown www-data:www-data /var/www/html/storage/logs/laravel.log \
+    && chmod 664 /var/www/html/storage/logs/laravel.log
 
 # Completar la instalación de composer
 USER www-data
 RUN composer dump-autoload --optimize
-
-# Configurar permisos
-USER root
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
 
 EXPOSE 9000
 
