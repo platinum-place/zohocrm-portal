@@ -11,9 +11,7 @@ class InspectRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::channel('single')->info('Form Request - Content Length: ' . $_SERVER['CONTENT_LENGTH'] ?? 'unknown');
-        \Log::channel('single')->info('Form Request - PHP Limits:', ['post_max_size' => ini_get('post_max_size'), 'memory_limit' => ini_get('memory_limit'), 'max_input_vars' => ini_get('max_input_vars')]);
-        return true;
+        return false;
     }
 
     /**
@@ -23,8 +21,6 @@ class InspectRequest extends FormRequest
      */
     public function rules(): array
     {
-        \Log::channel('single')->info('Form Request rules() called');
-
         return [
             'cotz_id' => ['required', 'integer'],
             'passcode' => ['required', 'string', 'size:4'],
@@ -48,12 +44,5 @@ class InspectRequest extends FormRequest
             'Foto12' => ['nullable', 'string'],
             'Foto14' => ['nullable', 'string'],
         ];
-    }
-
-    public function prepareForValidation()
-    {
-        \Log::channel('single')->info('Request size: ' . strlen(serialize($this->all())));
-        \Log::channel('single')->info('Post max size: ' . ini_get('post_max_size'));
-        \Log::channel('single')->info('Memory limit: ' . ini_get('memory_limit'));
     }
 }
