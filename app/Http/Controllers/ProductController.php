@@ -9,9 +9,7 @@ use Throwable;
 
 class ProductController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm)
-    {
-    }
+    public function __construct(protected ZohoCRMService $crm) {}
 
     /**
      * @throws RequestException
@@ -20,11 +18,15 @@ class ProductController extends Controller
      */
     public function list()
     {
-        $criteria = 'Corredor:equals:3222373000092390001';
-        $list = $this->crm->searchRecords('Products', $criteria);
+        try {
+            $criteria = 'Corredor:equals:3222373000092390001';
+            $list = $this->crm->searchRecords('Products', $criteria);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         return response()->json(
-            collect($list['data'])->map(fn($value) => [
+            collect($list['data'])->map(fn ($value) => [
                 $value['id'] => $value['Product_Category'],
             ])
         );
@@ -37,8 +39,12 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $fields = ['id', 'Vendor_Name', 'Product_Name'];
-        $product = $this->crm->getRecords('Products', $fields, $id)['data'][0];
+        try {
+            $fields = ['id', 'Vendor_Name', 'Product_Name'];
+            $product = $this->crm->getRecords('Products', $fields, $id)['data'][0];
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         return response()->json([
             $product['id'] => [
