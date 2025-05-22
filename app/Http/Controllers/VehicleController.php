@@ -9,9 +9,7 @@ use Throwable;
 
 class VehicleController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm)
-    {
-    }
+    public function __construct(protected ZohoCRMService $crm) {}
 
     /**
      * @throws RequestException
@@ -24,8 +22,8 @@ class VehicleController extends Controller
         $brands = $this->crm->getRecords('Marcas', $fields);
 
         $sortedBrands = collect($brands['data'])
-            ->map(fn($brand) => [$brand['id'] => $brand['Name']])
-            ->sortBy(fn($brand) => reset($brand))
+            ->map(fn ($brand) => [$brand['id'] => $brand['Name']])
+            ->sortBy(fn ($brand) => reset($brand))
             ->values()
             ->toArray();
 
@@ -43,13 +41,13 @@ class VehicleController extends Controller
                 $modelsData = $this->crm->searchRecords('Modelos', $criteria);
 
                 $sortedModels = collect($modelsData['data'])
-                    ->map(fn($model) => [
+                    ->map(fn ($model) => [
                         'id' => $model['id'],
                         'name' => $model['Name'],
                         'type' => $model['Tipo'],
                     ])
                     ->sortBy('name')
-                    ->map(fn($model) => [$brandId => [$model['id'] => $model['name']]])
+                    ->map(fn ($model) => [$brandId => [$model['id'] => $model['name']]])
                     ->values()
                     ->toArray();
 
