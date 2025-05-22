@@ -38,7 +38,11 @@ class VehicleController extends Controller
         do {
             try {
                 $criteria = "Marca:equals:$brandId";
-                $modelsData = $this->crm->searchRecords('Modelos', $criteria);
+                $modelsData = $this->crm->searchRecords('Modelos', $criteria, $page);
+
+                if (empty($modelsData['data'])) {
+                    break;
+                }
 
                 $sortedModels = collect($modelsData['data'])
                     ->map(fn ($model) => [
@@ -55,9 +59,9 @@ class VehicleController extends Controller
                 $page++;
 
             } catch (Throwable $e) {
-                $page = 0;
+                break;
             }
-        } while ($page > 0);
+        } while (true);
 
         return response()->json($models);
     }
