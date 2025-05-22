@@ -34,36 +34,35 @@ class VehicleController extends Controller
     {
         $page = 1;
         $models = [];
-
+        $criteria = "Marca:equals:$brandId";
         do {
-            try {
-                $criteria = "Marca:equals:$brandId";
-                $modelsData = $this->crm->searchRecords('Modelos', $criteria, $page);
+            $modelsData = $this->crm->searchRecords('Modelos', $criteria, $page);
 
-                if (empty($modelsData['data'])) {
-                    break;
+            if (!empty($modelsData)) {
+                $modelos_sort = array();
+
+                foreach ($modelsData as $modelo) {
+                    $modelos_sort[] = [
+                        'id' => $modelo->getEntityId(),
+                        'name' => $modelo->getFieldValue('Name'),
+                        'tipo' => $modelo->getFieldValue('Tipo'),
+                    ];
                 }
 
-                $sortedModels = collect($modelsData['data'])
-                    ->map(fn ($model) => [
-                        'id' => $model['id'],
-                        'name' => $model['Name'],
-                        'type' => $model['Tipo'],
-                    ])
-                    ->sortBy('name')
-                    ->map(fn ($model) => [$brandId => [$model['id'] => $model['name']]])
-                    ->values()
-                    ->toArray();
+                usort($modelos_sort, function ($a, $b) {
+                    return strcmp($a['name'], $b['name']);
+                });
 
-                $models = array_merge($models, $sortedModels);
                 $page++;
-
-            } catch (Throwable $e) {
-                break;
+                foreach ($modelos_sort as $modelo_sort) {
+                    $models[][$brandId] = [$modelo_sort['id'] => $modelo_sort['name']];
+                }
+            } else {
+                $page = 0;
             }
-        } while (true);
+        } while ($page > 0);
 
-        return response()->json($models);
+        return response()->json($modelos_sort);
     }
 
     public function typeList()
