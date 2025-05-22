@@ -32,7 +32,6 @@ class VehicleController extends Controller
 
     public function getModel(string $brandId)
     {
-        $page = 1;
         $models = [];
         $criteria = "Marca:equals:$brandId";
         $modelsData = $this->crm->searchRecords('Modelos', $criteria);
