@@ -62,7 +62,7 @@ class VehicleController extends Controller
             }
         } while ($page > 0);
 
-        return response()->json($modelos_sort);
+        return response()->json($models);
     }
 
     public function typeList()
