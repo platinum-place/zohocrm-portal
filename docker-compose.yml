@@ -18,7 +18,7 @@ services:
             LARAVEL_SAIL: 1
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+#            IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
 #            - './ssl:/etc/nginx/ssl'
@@ -26,17 +26,17 @@ services:
             - sail
         depends_on:
             - pgsql
-        security_opt:
-            - no-new-privileges:true
-        cap_drop:
-            - ALL
-        cap_add:
-            - SETUID
-            - SETGID
-            - CHOWN
-            - DAC_OVERRIDE
-            - NET_BIND_SERVICE
-            - SYS_CHROOT
+#        security_opt:
+#            - no-new-privileges:true
+#        cap_drop:
+#            - ALL
+#        cap_add:
+#            - SETUID
+#            - SETGID
+#            - CHOWN
+#            - DAC_OVERRIDE
+#            - NET_BIND_SERVICE
+#            - SYS_CHROOT
 
     pgsql:
         container_name: postgres
