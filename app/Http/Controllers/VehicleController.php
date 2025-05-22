@@ -41,7 +41,7 @@ class VehicleController extends Controller
             if (!empty($modelsData)) {
                 $modelos_sort = array();
 
-                foreach ($modelsData as $modelo) {
+                foreach ($modelsData['data'] as $modelo) {
                     $modelos_sort[] = [
                         'id' => $modelo->getEntityId(),
                         'name' => $modelo->getFieldValue('Name'),
