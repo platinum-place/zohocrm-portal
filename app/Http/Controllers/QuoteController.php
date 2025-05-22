@@ -12,7 +12,6 @@ use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
 use App\Http\Requests\Quote\IssueVehicleRequest;
 use App\Http\Requests\Quote\ValidateInspectionRequest;
-use App\Services\QuoteService;
 use App\Services\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -22,9 +21,7 @@ use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm)
-    {
-    }
+    public function __construct(protected ZohoCRMService $crm) {}
 
     /**
      * @throws RequestException
@@ -33,8 +30,12 @@ class QuoteController extends Controller
      */
     public function estimateVehicle(EstimateVehicleRequest $request)
     {
-        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Auto))';
-        $products = $this->crm->searchRecords('Products', $criteria);
+        try {
+            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Auto))';
+            $products = $this->crm->searchRecords('Products', $criteria);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         $response = [];
 
@@ -42,10 +43,10 @@ class QuoteController extends Controller
             $alert = '';
 
             if (in_array($request->get('Actividad'), $product['Restringir_veh_culos_de_uso'])) {
-                return "Uso del vehículo restringido.";
+                return 'Uso del vehículo restringido.';
             }
 
-            if ((date("Y") - $request->get('Anio')) > $product['Max_antig_edad']) {
+            if ((date('Y') - $request->get('Anio')) > $product['Max_antig_edad']) {
                 $alert = 'La antigüedad del vehículo es mayor al limite establecido.';
             }
 
@@ -54,14 +55,14 @@ class QuoteController extends Controller
             }
 
             try {
-                $criteria = "((Marca:equals:" . $request->get('Marca') . ") and (Aseguradora:equals:" . $product['Vendor_Name']['id'] . "))";
+                $criteria = '((Marca:equals:'.$request->get('Marca').') and (Aseguradora:equals:'.$product['Vendor_Name']['id'].'))';
                 $brands = $this->crm->searchRecords('Restringidos', $criteria);
 
                 foreach ($brands['data'] as $brand) {
                     if (empty($brand['Modelo'])) {
-                        $alert = "Marca restrigida.";
+                        $alert = 'Marca restrigida.';
                     } elseif ($request->get('Marca') == $brand['Modelo']['id']) {
-                        $alert = "Modelo restrigido.";
+                        $alert = 'Modelo restrigido.';
                     }
                 }
             } catch (Throwable $throwable) {
@@ -71,12 +72,12 @@ class QuoteController extends Controller
             $taxAmount = 0;
 
             try {
-                $criteria = "Plan:equals:" . $product['id'];
+                $criteria = 'Plan:equals:'.$product['id'];
                 $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
                 foreach ($taxes['data'] as $tax) {
                     if (in_array($request->get('TipoVehiculo'), $tax['Grupo_de_veh_culo'])) {
-                        if (!empty($tax['Suma_limite'])) {
+                        if (! empty($tax['Suma_limite'])) {
                             if ($request->get('MontoOriginal') >= $tax['Suma_limite']) {
                                 if (empty($tax['Suma_hasta'])) {
                                     $taxAmount = $tax['Name'] / 100;
@@ -93,14 +94,14 @@ class QuoteController extends Controller
 
             }
 
-            if (!$taxAmount) {
+            if (! $taxAmount) {
                 $alert = 'No se encontraron tasas.';
             }
 
             $surchargeAmount = 0;
 
             try {
-                $criteria = "((Marca:equals:" . $request->get('Marca') . ") and (Aseguradora:equals:" . $product['Vendor_Name']['id'] . "))";
+                $criteria = '((Marca:equals:'.$request->get('Marca').') and (Aseguradora:equals:'.$product['Vendor_Name']['id'].'))';
                 $surcharges = $this->crm->searchRecords('Recargos', $criteria);
 
                 foreach ($surcharges['data'] as $surcharge) {
@@ -149,28 +150,28 @@ class QuoteController extends Controller
             }
 
             $data = [
-                "Subject" => $request->get('NombreCliente'),
-                "Valid_Till" => date("Y-m-d", strtotime(date("Y-m-d") . "+ 30 days")),
-                "Vigencia_desde" => date("Y-m-d"),
+                'Subject' => $request->get('NombreCliente'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 30 days')),
+                'Vigencia_desde' => date('Y-m-d'),
                 'Account_Name' => 3222373000092390001,
                 'Contact_Name' => 3222373000203318001,
-                "Quote_Stage" => "Cotizando",
-                "Nombre" => $request->get('NombreCliente'),
-                "Fecha_de_nacimiento" => $request->get('FechaNacimiento'),
-                "RNC_C_dula" => $request->get('IdCliente'),
-                "Correo_electr_nico" => $request->get('Email'),
-                "Tel_Celular" => $request->get('TelefMovil'),
-                "Tel_Residencia" => $request->get('TelefResidencia'),
-                "Tel_Trabajo" => $request->get('TelefTrabajo'),
-                "Plan" => 'Mensual Full',
-                "Suma_asegurada" => $request->get('MontoAsegurado'),
-                "A_o" => $request->get('Anio'),
-                "Marca" => $request->get('Marca'),
-                "Modelo" => $request->get('Modelo'),
-                "Tipo_veh_culo" => $request->get('TipoVehiculo'),
-                "Chasis" => $request->get('Chasis'),
-                "Placa" => $request->get('Placa'),
-                "Fuente" => 'API',
+                'Quote_Stage' => 'Cotizando',
+                'Nombre' => $request->get('NombreCliente'),
+                'Fecha_de_nacimiento' => $request->get('FechaNacimiento'),
+                'RNC_C_dula' => $request->get('IdCliente'),
+                'Correo_electr_nico' => $request->get('Email'),
+                'Tel_Celular' => $request->get('TelefMovil'),
+                'Tel_Residencia' => $request->get('TelefResidencia'),
+                'Tel_Trabajo' => $request->get('TelefTrabajo'),
+                'Plan' => 'Mensual Full',
+                'Suma_asegurada' => $request->get('MontoAsegurado'),
+                'A_o' => $request->get('Anio'),
+                'Marca' => $request->get('Marca'),
+                'Modelo' => $request->get('Modelo'),
+                'Tipo_veh_culo' => $request->get('TipoVehiculo'),
+                'Chasis' => $request->get('Chasis'),
+                'Placa' => $request->get('Placa'),
+                'Fuente' => 'API',
                 'Quoted_Items' => [
                     [
                         'Quantity' => 1,
@@ -213,15 +214,19 @@ class QuoteController extends Controller
     {
         $id = $request->get('cotzid');
 
-        $fields = ['id', 'Quoted_Items'];
-        $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        try {
+            $fields = ['id', 'Quoted_Items'];
+            $quote = $this->crm->getRecords('Quotes', $fields, $id);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -259,7 +264,7 @@ class QuoteController extends Controller
         } catch (Throwable $exception) {
             return response([
                 'Error' => $exception->getMessage(),
-                'code' => 404
+                'code' => 404,
             ], 404);
         }
 
@@ -297,7 +302,7 @@ class QuoteController extends Controller
         ];
 
         foreach ($photos as $photo => $title) {
-            if (!$request->filled($photo)) {
+            if (! $request->filled($photo)) {
                 continue;
             }
 
@@ -313,7 +318,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
+            $path = "photos/{$id}/uploads/".date('YmdHis')."/$title.$extension";
 
             Storage::put($path, $imageData);
 
@@ -335,11 +340,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         $qr = base64_encode(QrCode::format('svg')
@@ -347,7 +349,7 @@ class QuoteController extends Controller
             ->generate("https://gruponobesrl.zcrmportals.com/portal/GrupoNobeSRL/crm/tab/Quotes/$id"));
 
         return response()->json([
-            'QR' => $qr
+            'QR' => $qr,
         ]);
     }
 
@@ -363,11 +365,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'File_Name'];
             $attachments = $this->crm->attachmentList('Quotes', $id, $fields);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         $response = [];
@@ -385,7 +384,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
+            $path = "photos/{$id}/downloads/".date('YmdHis')."/{$attachment['File_Name']}.$extension";
 
             Storage::put($path, $imageData);
 
@@ -402,8 +401,12 @@ class QuoteController extends Controller
      */
     public function estimateUnemploymentDebt(EstimateUnemploymentDebtRequest $request)
     {
-        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida/Desempleo))';
-        $products = $this->crm->searchRecords('Products', $criteria);
+        try {
+            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida/Desempleo))';
+            $products = $this->crm->searchRecords('Products', $criteria);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         $response = [];
 
@@ -444,11 +447,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         foreach ($quote['Quoted_Items'] as $line) {
@@ -456,7 +456,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -477,8 +477,12 @@ class QuoteController extends Controller
      */
     public function estimateFire(EstimateFireRequest $request)
     {
-        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Incendio))';
-        $products = $this->crm->searchRecords('Products', $criteria);
+        try {
+            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Incendio))';
+            $products = $this->crm->searchRecords('Products', $criteria);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         $response = [];
 
@@ -517,11 +521,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         foreach ($quote['Quoted_Items'] as $line) {
@@ -529,7 +530,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -571,11 +572,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         $data = [
@@ -594,11 +592,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         $data = [
@@ -617,11 +612,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         $data = [
@@ -640,11 +632,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         $data = [
@@ -663,11 +652,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         $data = [
@@ -679,7 +665,6 @@ class QuoteController extends Controller
         return response()->noContent(200);
     }
 
-
     /**
      * @throws RequestException
      * @throws Throwable
@@ -687,8 +672,12 @@ class QuoteController extends Controller
      */
     public function estimateLife(EstimateLifeRequest $request)
     {
-        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida))';
-        $products = $this->crm->searchRecords('Products', $criteria);
+        try {
+            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida))';
+            $products = $this->crm->searchRecords('Products', $criteria);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         $response = [];
 
@@ -708,7 +697,7 @@ class QuoteController extends Controller
             $amount = 0;
 
             try {
-                $criteria = "Plan:equals:" . $product['id'];
+                $criteria = 'Plan:equals:'.$product['id'];
                 $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
                 foreach ($taxes['data'] as $tax) {
@@ -744,7 +733,7 @@ class QuoteController extends Controller
 
             $data = [
                 'Subject' => $request->get('NombreCliente'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 30 days')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 30 days')),
                 'Vigencia_desde' => date('Y-m-d'),
                 'Account_Name' => 3222373000092390001,
                 'Contact_Name' => 3222373000203318001,
@@ -804,11 +793,8 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         foreach ($quote['Quoted_Items'] as $line) {
@@ -816,7 +802,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -837,8 +823,12 @@ class QuoteController extends Controller
      */
     public function estimateUnemployment(EstimateUnemploymentRequest $request)
     {
-        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Desempleo))';
-        $products = $this->crm->searchRecords('Products', $criteria);
+        try {
+            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Desempleo))';
+            $products = $this->crm->searchRecords('Products', $criteria);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         $response = [];
 
@@ -876,18 +866,16 @@ class QuoteController extends Controller
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
+
         foreach ($quote['Quoted_Items'] as $line) {
             $data = [
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
