@@ -425,7 +425,7 @@ class QuoteController extends Controller
                 'Aseguradora' => $product['Vendor_Name']['name'],
                 'MontoPrestamo' => '50000',
                 'Cuota' => $request->get('Cuota'),
-                'PlazoMese' => $request->get('Plazo') / 12,
+                'PlazoMese' => $request->get('Plazo') * 12,
                 'Desempleo' => '6000',
                 'Deuda' => '8000',
                 'To tal' => '10000',
