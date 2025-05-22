@@ -29,7 +29,7 @@ class InspectRequest extends FormRequest
             'Cilindros' => ['required', 'integer'],
             'Odómetro' => ['required', 'integer'],
             'unidadOdometro' => ['required', 'string'],
-            'Foto1' => ['required', 'string','max:10000000'],
+            'Foto1' => ['required', 'string','max:100000000000000'],
             'Foto2' => ['required', 'string'],
             'Foto3' => ['required', 'string'],
             'Foto4' => ['required', 'string'],
