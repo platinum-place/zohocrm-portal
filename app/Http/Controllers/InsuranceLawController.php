@@ -8,23 +8,25 @@ use App\Http\Requests\InsuranceLaw\SearchDocumentRequest;
 use App\Services\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
-use PHPUnit\Event\Code\Throwable;
+use Throwable;
 
 class InsuranceLawController
 {
-    public function __construct(protected ZohoCRMService $crm)
-    {
-    }
+    public function __construct(protected ZohoCRMService $crm) {}
 
     /**
      * @throws RequestException
-     * @throws \Throwable
+     * @throws Throwable
      * @throws ConnectionException
      */
     public function estimateVehicleLaw(EstimateVehicleLawRequest $request)
- {
-        $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Auto))';
-        $products = $this->crm->searchRecords('Products', $criteria);
+    {
+        try {
+            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Auto))';
+            $products = $this->crm->searchRecords('Products', $criteria);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         $response = [];
 
@@ -32,10 +34,10 @@ class InsuranceLawController
             $alert = '';
 
             if (in_array($request->get('Actividad'), $product['Restringir_veh_culos_de_uso'])) {
-                return "Uso del vehículo restringido.";
+                return 'Uso del vehículo restringido.';
             }
 
-            if ((date("Y") - $request->get('Anio')) > $product['Max_antig_edad']) {
+            if ((date('Y') - $request->get('Anio')) > $product['Max_antig_edad']) {
                 $alert = 'La antigüedad del vehículo es mayor al limite establecido.';
             }
 
@@ -44,14 +46,14 @@ class InsuranceLawController
             }
 
             try {
-                $criteria = "((Marca:equals:" . $request->get('Marca') . ") and (Aseguradora:equals:" . $product['Vendor_Name']['id'] . "))";
+                $criteria = '((Marca:equals:'.$request->get('Marca').') and (Aseguradora:equals:'.$product['Vendor_Name']['id'].'))';
                 $brands = $this->crm->searchRecords('Restringidos', $criteria);
 
                 foreach ($brands['data'] as $brand) {
                     if (empty($brand['Modelo'])) {
-                        $alert = "Marca restrigida.";
+                        $alert = 'Marca restrigida.';
                     } elseif ($request->get('Marca') == $brand['Modelo']['id']) {
-                        $alert = "Modelo restrigido.";
+                        $alert = 'Modelo restrigido.';
                     }
                 }
             } catch (Throwable $throwable) {
@@ -61,12 +63,12 @@ class InsuranceLawController
             $taxAmount = 0;
 
             try {
-                $criteria = "Plan:equals:" . $product['id'];
+                $criteria = 'Plan:equals:'.$product['id'];
                 $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
                 foreach ($taxes['data'] as $tax) {
                     if (in_array($request->get('TipoVehiculo'), $tax['Grupo_de_veh_culo'])) {
-                        if (!empty($tax['Suma_limite'])) {
+                        if (! empty($tax['Suma_limite'])) {
                             if ($request->get('MontoOriginal') >= $tax['Suma_limite']) {
                                 if (empty($tax['Suma_hasta'])) {
                                     $taxAmount = $tax['Name'] / 100;
@@ -83,14 +85,14 @@ class InsuranceLawController
 
             }
 
-            if (!$taxAmount) {
+            if (! $taxAmount) {
                 $alert = 'No se encontraron tasas.';
             }
 
             $surchargeAmount = 0;
 
             try {
-                $criteria = "((Marca:equals:" . $request->get('Marca') . ") and (Aseguradora:equals:" . $product['Vendor_Name']['id'] . "))";
+                $criteria = '((Marca:equals:'.$request->get('Marca').') and (Aseguradora:equals:'.$product['Vendor_Name']['id'].'))';
                 $surcharges = $this->crm->searchRecords('Recargos', $criteria);
 
                 foreach ($surcharges['data'] as $surcharge) {
@@ -139,28 +141,28 @@ class InsuranceLawController
             }
 
             $data = [
-                "Subject" => $request->get('NombreCliente'),
-                "Valid_Till" => date("Y-m-d", strtotime(date("Y-m-d") . "+ 30 days")),
-                "Vigencia_desde" => date("Y-m-d"),
+                'Subject' => $request->get('NombreCliente'),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 30 days')),
+                'Vigencia_desde' => date('Y-m-d'),
                 'Account_Name' => 3222373000092390001,
                 'Contact_Name' => 3222373000203318001,
-                "Quote_Stage" => "Cotizando",
-                "Nombre" => $request->get('NombreCliente'),
-                "Fecha_de_nacimiento" => $request->get('FechaNacimiento'),
-                "RNC_C_dula" => $request->get('IdCliente'),
-                "Correo_electr_nico" => $request->get('Email'),
-                "Tel_Celular" => $request->get('TelefMovil'),
-                "Tel_Residencia" => $request->get('TelefResidencia'),
-                "Tel_Trabajo" => $request->get('TelefTrabajo'),
-                "Plan" => 'Mensual Full',
-                "Suma_asegurada" => $request->get('MontoAsegurado'),
-                "A_o" => $request->get('Anio'),
-                "Marca" => $request->get('Marca'),
-                "Modelo" => $request->get('Modelo'),
-                "Tipo_veh_culo" => $request->get('TipoVehiculo'),
-                "Chasis" => $request->get('Chasis'),
-                "Placa" => $request->get('Placa'),
-                "Fuente" => 'API',
+                'Quote_Stage' => 'Cotizando',
+                'Nombre' => $request->get('NombreCliente'),
+                'Fecha_de_nacimiento' => $request->get('FechaNacimiento'),
+                'RNC_C_dula' => $request->get('IdCliente'),
+                'Correo_electr_nico' => $request->get('Email'),
+                'Tel_Celular' => $request->get('TelefMovil'),
+                'Tel_Residencia' => $request->get('TelefResidencia'),
+                'Tel_Trabajo' => $request->get('TelefTrabajo'),
+                'Plan' => 'Mensual Full',
+                'Suma_asegurada' => $request->get('MontoAsegurado'),
+                'A_o' => $request->get('Anio'),
+                'Marca' => $request->get('Marca'),
+                'Modelo' => $request->get('Modelo'),
+                'Tipo_veh_culo' => $request->get('TipoVehiculo'),
+                'Chasis' => $request->get('Chasis'),
+                'Placa' => $request->get('Placa'),
+                'Fuente' => 'API',
                 'Quoted_Items' => [
                     [
                         'Quantity' => 1,
@@ -211,12 +213,15 @@ class InsuranceLawController
      * @throws RequestException
      * @throws Throwable
      * @throws ConnectionException
-     * @throws \Throwable
      */
     public function searchDocument(SearchDocumentRequest $request, string $identification)
     {
-        $criteria = "((RNC_C_dula:equals:$identification) and (Plan:equals:Auto))";
-        $quotes = $this->crm->searchRecords('Quotes', $criteria);
+        try {
+            $criteria = "((RNC_C_dula:equals:$identification) and (Plan:equals:Auto))";
+            $quotes = $this->crm->searchRecords('Quotes', $criteria);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
+        }
 
         $response = [];
 
@@ -258,18 +263,15 @@ class InsuranceLawController
      * @throws RequestException
      * @throws Throwable
      * @throws ConnectionException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function disableVehicleLaw(DisableVehicleLawRequest $request, string $id)
     {
         try {
             $fields = ['id', 'Quoted_Items'];
             $quote = $this->crm->getRecords('Quotes', $fields, $id);
-        } catch (\Throwable $exception) {
-            return response([
-                'Error' => $exception->getMessage(),
-                'code' => 404
-            ], 404);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => $e->getMessage()], 404);
         }
 
         $data = [
