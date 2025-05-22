@@ -29,7 +29,7 @@ class InspectRequest extends FormRequest
             'Cilindros' => ['required', 'integer'],
             'Odómetro' => ['required', 'integer'],
             'unidadOdometro' => ['required', 'string'],
-            'Foto1' => ['required', 'string','max:100000000000000'],
+            'Foto1' => ['required', 'string'],
             'Foto2' => ['required', 'string'],
             'Foto3' => ['required', 'string'],
             'Foto4' => ['required', 'string'],
@@ -44,5 +44,12 @@ class InspectRequest extends FormRequest
             'Foto12' => ['nullable', 'string'],
             'Foto14' => ['nullable', 'string'],
         ];
+    }
+
+    public function prepareForValidation()
+    {
+        \Log::channel('single')->info('Request size: ' . strlen(serialize($this->all())));
+        \Log::channel('single')->info('Post max size: ' . ini_get('post_max_size'));
+        \Log::channel('single')->info('Memory limit: ' . ini_get('memory_limit'));
     }
 }
