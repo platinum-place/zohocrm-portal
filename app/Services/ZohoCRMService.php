@@ -85,7 +85,13 @@ class ZohoCRMService extends ZohoOAuthService
     {
         $token = $this->getAccessToken();
 
-        return ZohoCRM::attachmentList($module, $token, $id, $fields);
+        $response = ZohoCRM::attachmentList($module, $token, $id, $fields);
+
+        if (empty($response)) {
+            throw new Exception(__('Not Found'));
+        }
+
+        return $response;
     }
 
     /**
@@ -97,7 +103,13 @@ class ZohoCRMService extends ZohoOAuthService
     {
         $token = $this->getAccessToken();
 
-        return ZohoCRM::getAttachment($module, $token, $id, $attachmentId);
+        $response = ZohoCRM::getAttachment($module, $token, $id, $attachmentId);
+
+        if (empty($response)) {
+            throw new Exception(__('Not Found'));
+        }
+
+        return $response;
     }
 
     /**
