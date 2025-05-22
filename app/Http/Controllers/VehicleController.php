@@ -35,32 +35,25 @@ class VehicleController extends Controller
         $page = 1;
         $models = [];
         $criteria = "Marca:equals:$brandId";
-        do {
-            $modelsData = $this->crm->searchRecords('Modelos', $criteria, $page);
+        $modelsData = $this->crm->searchRecords('Modelos', $criteria);
 
-            if (!empty($modelsData)) {
-                $modelos_sort = array();
+        $modelos_sort = array();
 
-                foreach ($modelsData['data'] as $modelo) {
-                    $modelos_sort[] = [
-                        'id' => $modelo['id'],
-                        'name' => $modelo['Name'],
-                        'tipo' => $modelo['Tipo'],
-                    ];
-                }
+        foreach ($modelsData['data'] as $modelo) {
+            $modelos_sort[] = [
+                'id' => $modelo['id'],
+                'name' => $modelo['Name'],
+                'tipo' => $modelo['Tipo'],
+            ];
+        }
 
-                usort($modelos_sort, function ($a, $b) {
-                    return strcmp($a['name'], $b['name']);
-                });
+        usort($modelos_sort, function ($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
 
-                $page++;
-                foreach ($modelos_sort as $modelo_sort) {
-                    $models[][$brandId] = [$modelo_sort['id'] => $modelo_sort['name']];
-                }
-            } else {
-                $page = 0;
-            }
-        } while ($page > 0);
+        foreach ($modelos_sort as $modelo_sort) {
+            $models[][$brandId] = [$modelo_sort['id'] => $modelo_sort['name']];
+        }
 
         return response()->json($models);
     }
