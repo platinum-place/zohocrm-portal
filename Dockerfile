@@ -37,16 +37,11 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 COPY . .
 
 # Establecer los permisos correctos
-RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
-        chown -R ${USER_NAME}:${GROUP_NAME} /var/www/html; \
-    else \
-        chown -R root:root /var/www/html; \
-    fi \
-    && chmod -R 755 /var/www/html/storage \
+RUN chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Cambiar al usuario especificado o mantener root
-USER ${USER_ID}
+# NO cambiamos al usuario específico en el Dockerfile
+# Dejamos que el entrypoint.sh maneje la configuración de usuario
 
 RUN composer install --no-interaction --optimize-autoloader
 

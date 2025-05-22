@@ -10,7 +10,6 @@ services:
         GROUP_NAME: ${GROUP_NAME:-laravel}
     container_name: backend
     restart: unless-stopped
-    user: ${USER_ID:-1000}:${GROUP_ID:-1000}
     environment:
       - USER_ID=${USER_ID:-1000}
       - GROUP_ID=${GROUP_ID:-1000}
