@@ -11,6 +11,8 @@ class InspectRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::channel('single')->info('Form Request - Content Length: ' . $_SERVER['CONTENT_LENGTH'] ?? 'unknown');
+        \Log::channel('single')->info('Form Request - PHP Limits:', ['post_max_size' => ini_get('post_max_size'), 'memory_limit' => ini_get('memory_limit'), 'max_input_vars' => ini_get('max_input_vars')]);
         return true;
     }
 
@@ -21,6 +23,8 @@ class InspectRequest extends FormRequest
      */
     public function rules(): array
     {
+        \Log::channel('single')->info('Form Request rules() called');
+
         return [
             'cotz_id' => ['required', 'integer'],
             'passcode' => ['required', 'string', 'size:4'],
