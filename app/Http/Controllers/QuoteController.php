@@ -402,7 +402,7 @@ class QuoteController extends Controller
     public function estimateUnemploymentDebt(EstimateUnemploymentDebtRequest $request)
     {
         try {
-            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Vida/Desempleo))';
+            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Desempleo))';
             $products = $this->crm->searchRecords('Products', $criteria);
         } catch (\Exception $e) {
             return response()->json(['Error' => $e->getMessage()], 404);
