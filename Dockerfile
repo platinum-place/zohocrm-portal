@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libpq-dev \
     zip \
-    unzip
+    unzip \
+    sudo
 
 RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
 
@@ -22,10 +23,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Solo crear usuario/grupo si no es root (ID != 0)
 RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
         groupadd -g ${GROUP_ID} ${GROUP_NAME} \
-        && useradd -u ${USER_ID} -g ${GROUP_NAME} -m -s /bin/bash ${USER_NAME}; \
+        && useradd -u ${USER_ID} -g ${GROUP_NAME} -m -s /bin/bash ${USER_NAME} \
+        && echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${USER_NAME} \
+        && chmod 0440 /etc/sudoers.d/${USER_NAME}; \
     fi
 
 WORKDIR /var/www/html
+
+# Copiar el script de entrada
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 COPY . .
 
@@ -45,4 +52,6 @@ RUN composer install --no-interaction --optimize-autoloader
 
 EXPOSE 9000
 
+# Usar el script de entrada para configurar PHP-FPM
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
