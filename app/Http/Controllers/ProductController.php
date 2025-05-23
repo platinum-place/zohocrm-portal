@@ -9,13 +9,10 @@ use Throwable;
 
 class ProductController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm) {}
+    public function __construct(protected ZohoCRMService $crm)
+    {
+    }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function list()
     {
         try {
@@ -25,18 +22,18 @@ class ProductController extends Controller
             return response()->json(['Error' => $e->getMessage()], 404);
         }
 
-        return response()->json(
-            collect($list['data'])->map(fn ($value) => [
-                $value['id'] => $value['Product_Category'],
+        $sortedProducts = collect($list['data'])
+            ->map(fn($product) => [
+                'IdProducto' => (int)$product['id'],
+                'Producto' => $product['Product_Category'],
             ])
-        );
+            ->sortBy(fn($product) => reset($product))
+            ->values()
+            ->toArray();
+
+        return response()->json($sortedProducts);
     }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function show(string $id)
     {
         try {
@@ -47,11 +44,8 @@ class ProductController extends Controller
         }
 
         return response()->json([
-            $product['id'] => [
-                [
-                    $product['Vendor_Name']['id'] => $product['Product_Name'],
-                ],
-            ],
+            'IdAseguradora' => $product['Vendor_Name']['id'],
+            'Aseguradora' => $product['Vendor_Name']['name'],
         ]);
     }
 }
