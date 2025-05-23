@@ -24,7 +24,7 @@ class IssueVehicleRequest extends FormRequest
         return [
             'cotzid' => ['required', 'string'],
             'ofertaID' => ['required', 'integer'],
-            'FechaVencimiento' => ['required', 'date', 'date_format:d/m/Y'],
+            'FechaVencimiento' => ['required', 'date_format:d/m/Y'],
         ];
     }
 }

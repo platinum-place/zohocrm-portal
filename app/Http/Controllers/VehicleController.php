@@ -43,7 +43,7 @@ class VehicleController extends Controller
         $models = collect($response['data'])
             ->map(fn ($model) => [
                 'IdMarca' => (int) $model['Marca']['id'],
-                'IdModelo' => (int)$model['id'],
+                'IdModelo' => (int) $model['id'],
                 'Modelo' => $model['Name'],
             ])
             ->sortBy(fn ($model) => reset($model))

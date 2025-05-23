@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use Exception;
-use Http\Discovery\Exception\NotFoundException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -11,9 +9,7 @@ use ZohoCRM;
 
 class ZohoCRMService
 {
-    public function __construct(protected ZohoOAuthService $oauth)
-    {
-    }
+    public function __construct(protected ZohoOAuthService $oauth) {}
 
     /**
      * @throws RequestException

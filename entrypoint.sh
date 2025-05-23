@@ -74,5 +74,6 @@ chown -R www-data:www-data /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
 chmod 664 /var/www/html/storage/logs/laravel.log
+chmod 600 /var/www/html/storage/oauth-*.key
 
 exec "$@"

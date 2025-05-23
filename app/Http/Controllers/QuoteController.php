@@ -21,9 +21,7 @@ use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm)
-    {
-    }
+    public function __construct(protected ZohoCRMService $crm) {}
 
     /**
      * @throws RequestException
@@ -57,7 +55,7 @@ class QuoteController extends Controller
             }
 
             try {
-                $criteria = '((Marca:equals:' . $request->get('Marca') . ') and (Aseguradora:equals:' . $product['Vendor_Name']['id'] . '))';
+                $criteria = '((Marca:equals:'.$request->get('Marca').') and (Aseguradora:equals:'.$product['Vendor_Name']['id'].'))';
                 $brands = $this->crm->searchRecords('Restringidos', $criteria);
 
                 foreach ($brands['data'] as $brand) {
@@ -74,12 +72,12 @@ class QuoteController extends Controller
             $taxAmount = 0;
 
             try {
-                $criteria = 'Plan:equals:' . $product['id'];
+                $criteria = 'Plan:equals:'.$product['id'];
                 $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
                 foreach ($taxes['data'] as $tax) {
                     if (in_array($request->get('TipoVehiculo'), $tax['Grupo_de_veh_culo'])) {
-                        if (!empty($tax['Suma_limite'])) {
+                        if (! empty($tax['Suma_limite'])) {
                             if ($request->get('MontoOriginal') >= $tax['Suma_limite']) {
                                 if (empty($tax['Suma_hasta'])) {
                                     $taxAmount = $tax['Name'] / 100;
@@ -96,14 +94,14 @@ class QuoteController extends Controller
 
             }
 
-            if (!$taxAmount) {
+            if (! $taxAmount) {
                 $alert = 'No se encontraron tasas.';
             }
 
             $surchargeAmount = 0;
 
             try {
-                $criteria = '((Marca:equals:' . $request->get('Marca') . ') and (Aseguradora:equals:' . $product['Vendor_Name']['id'] . '))';
+                $criteria = '((Marca:equals:'.$request->get('Marca').') and (Aseguradora:equals:'.$product['Vendor_Name']['id'].'))';
                 $surcharges = $this->crm->searchRecords('Recargos', $criteria);
 
                 foreach ($surcharges['data'] as $surcharge) {
@@ -153,7 +151,7 @@ class QuoteController extends Controller
 
             $data = [
                 'Subject' => $request->get('NombreCliente'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 30 days')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 30 days')),
                 'Vigencia_desde' => date('Y-m-d'),
                 'Account_Name' => 3222373000092390001,
                 'Contact_Name' => 3222373000203318001,
@@ -228,7 +226,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -304,7 +302,7 @@ class QuoteController extends Controller
         ];
 
         foreach ($photos as $photo => $title) {
-            if (!$request->filled($photo)) {
+            if (! $request->filled($photo)) {
                 continue;
             }
 
@@ -320,7 +318,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
+            $path = "photos/{$id}/uploads/".date('YmdHis')."/$title.$extension";
 
             Storage::put($path, $imageData);
 
@@ -386,7 +384,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
+            $path = "photos/{$id}/downloads/".date('YmdHis')."/{$attachment['File_Name']}.$extension";
 
             Storage::put($path, $imageData);
 
@@ -458,7 +456,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -532,7 +530,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -735,7 +733,7 @@ class QuoteController extends Controller
             $amount = 0;
 
             try {
-                $criteria = 'Plan:equals:' . $product['id'];
+                $criteria = 'Plan:equals:'.$product['id'];
                 $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
                 foreach ($taxes['data'] as $tax) {
@@ -771,7 +769,7 @@ class QuoteController extends Controller
 
             $data = [
                 'Subject' => $request->get('NombreCliente'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 30 days')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 30 days')),
                 'Vigencia_desde' => date('Y-m-d'),
                 'Account_Name' => 3222373000092390001,
                 'Contact_Name' => 3222373000203318001,
@@ -840,7 +838,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -913,7 +911,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
