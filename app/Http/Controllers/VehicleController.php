@@ -13,11 +13,6 @@ class VehicleController extends Controller
     {
     }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function list()
     {
         $fields = ['id', 'Name'];
@@ -25,7 +20,7 @@ class VehicleController extends Controller
 
         $sortedBrands = collect($brands['data'])
             ->map(fn($brand) => [
-                'IdMarca' => $brand['id'],
+                'IdMarca' => (int)$brand['id'],
                 'Marca' => $brand['Name']
             ])
             ->sortBy(fn($brand) => reset($brand))
@@ -40,9 +35,9 @@ class VehicleController extends Controller
         $criteria = "Marca:equals:$brandId";
         $modelsData = $this->crm->searchRecords('Modelos', $criteria);
 
-        $sortedModels= collect($modelsData['data'])
+        $sortedModels = collect($modelsData['data'])
             ->map(fn($model) => [
-                'IdMarca' => $model['Marca']['id'],
+                'IdMarca' => (int)$model['Marca']['id'],
                 'IdModelo' => $model['id'],
                 'Modelo' => $model['Name']
             ])
@@ -55,41 +50,121 @@ class VehicleController extends Controller
 
     public function typeList()
     {
-        return response()->json([
-            '01' => 'AUTO',
-            '02' => 'CAMIONETA',
-        ]);
+        $types = [
+            [
+                'IdTipoVehiculo' => 1,
+                'TipoVehiculo' => 'Automóvil'
+            ],
+            [
+                'IdTipoVehiculo' => 2,
+                'TipoVehiculo' => 'Camioneta'
+            ],
+            [
+                'IdTipoVehiculo' => 3,
+                'TipoVehiculo' => 'Camión'
+            ],
+        ];
+
+        return response()->json($types);
     }
 
     public function accessoriesList()
     {
-        return response()->json([
-            '01' => 'Gas',
-            '02' => 'Aros',
-        ]);
+        $accessories = [
+            [
+                'IdAccesorio' => 2,
+                'Accesorio' => 'Cambio de Guia'
+            ],
+            [
+                'IdAccesorio' => 3,
+                'Accesorio' => 'LOVATO'
+            ],
+            [
+                'IdAccesorio' => 1,
+                'Accesorio' => 'OTROS EQUIPO DE GAS'
+            ],
+            [
+                'IdAccesorio' => 5,
+                'Accesorio' => 'ROMANO'
+            ],
+            [
+                'IdAccesorio' => 6,
+                'Accesorio' => 'SISTEMA DE GAS NATURAL APROBADO'
+            ],
+        ];
+
+        return response()->json($accessories);
     }
 
     public function activitiesList()
     {
-        return response()->json([
-            '01' => 'Uber',
-            '02' => 'Taxi',
-        ]);
+        $activities = [
+            [
+                'IdActividad' => 1,
+                'Actividad' => 'Uber',
+            ],
+            [
+                'IdActividad' => 2,
+                'Actividad' => 'Taxi',
+            ],
+        ];
+
+        return response()->json($activities);
     }
 
     public function routeList()
     {
-        return response()->json([
-            '01' => 'Distrito Nacional',
-            '02' => 'Santo Domingo',
-        ]);
+        $routes = [
+            [
+                'IdCirculacion' => 1,
+                'circulacion' => 'AZUA',
+            ],
+            [
+                'IdCirculacion' => 2,
+                'circulacion' => 'BAHORUCO',
+            ],
+            [
+                'IdCirculacion' => 3,
+                'circulacion' => 'BARAHONA',
+            ],
+            [
+                'IdCirculacion' => 4,
+                'circulacion' => 'DAJABON',
+            ],
+            [
+                'IdCirculacion' => 5,
+                'circulacion' => 'DISTRITO NACIONAL',
+            ],
+            [
+                'IdCirculacion' => 0,
+                'circulacion' => 'DISTRITO NACIONAL',
+            ],
+        ];
+
+        return response()->json($routes);
     }
 
     public function colorList()
     {
-        return response()->json([
-            '01' => 'Azul',
-            '02' => 'Rojo',
-        ]);
+        $colors = [
+            [
+                'IdColor' => 2,
+                'Color' => 'Amarillo',
+            ],
+            [
+                'IdColor' => 3,
+                'Color' => 'Azul',
+            ],
+            [
+                'IdColor' => 4,
+                'Color' => 'Azul Agua',
+            ],
+            [
+                'IdColor' => 5,
+                'Color' => 'Azul Cielo',
+            ],
+        ];
+
+        return response()->json($colors);
     }
 }
