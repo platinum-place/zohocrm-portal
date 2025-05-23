@@ -1,5 +1,10 @@
 FROM php:8.2-fpm
 
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+ARG USER_NAME=laravel
+ARG GROUP_NAME=laravel
+
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -41,21 +46,25 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# Create user and group with specified IDs if they don't exist
+RUN groupadd -g ${GROUP_ID} ${GROUP_NAME} || getent group ${GROUP_ID} | cut -d: -f1 | xargs groupmod -n ${GROUP_NAME} \
+    && useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash ${USER_NAME} || usermod -u ${USER_ID} -g ${GROUP_ID} -l ${USER_NAME} $(getent passwd ${USER_ID} | cut -d: -f1)
+
 RUN mkdir -p /var/www/html/storage/logs \
     && mkdir -p /var/www/html/storage/framework/cache \
     && mkdir -p /var/www/html/storage/framework/sessions \
     && mkdir -p /var/www/html/storage/framework/views \
     && mkdir -p /var/www/html/bootstrap/cache \
-    && chown -R www-data:www-data /var/www/html
+    && chown -R ${USER_ID}:${GROUP_ID} /var/www/html
 
-COPY --chown=www-data:www-data composer.json composer.lock* ./
-COPY --chown=www-data:www-data packages ./packages
+COPY --chown=${USER_ID}:${GROUP_ID} composer.json composer.lock* ./
+COPY --chown=${USER_ID}:${GROUP_ID} packages ./packages
 
-USER www-data
+USER ${USER_NAME}
 RUN composer install --no-scripts --no-autoloader --prefer-dist
 
 USER root
-COPY --chown=www-data:www-data . .
+COPY --chown=${USER_ID}:${GROUP_ID} . .
 COPY entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
@@ -64,15 +73,15 @@ RUN mkdir -p /var/www/html/storage/logs \
     && mkdir -p /var/www/html/storage/framework/sessions \
     && mkdir -p /var/www/html/storage/framework/views \
     && mkdir -p /var/www/html/bootstrap/cache \
-    && chown -R www-data:www-data /var/www/html \
+    && chown -R ${USER_ID}:${GROUP_ID} /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache \
     && chmod 600 /var/www/html/storage/oauth-*.key \
     && touch /var/www/html/storage/logs/laravel.log \
-    && chown www-data:www-data /var/www/html/storage/logs/laravel.log \
+    && chown ${USER_ID}:${GROUP_ID} /var/www/html/storage/logs/laravel.log \
     && chmod 664 /var/www/html/storage/logs/laravel.log
 
-USER www-data
+USER ${USER_NAME}
 RUN composer dump-autoload --optimize
 
 EXPOSE 9000

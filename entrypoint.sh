@@ -1,9 +1,15 @@
 #!/bin/bash
 
-cat > /usr/local/etc/php-fpm.d/www.conf << 'EOL'
+# Use environment variables for user and group settings
+USER_ID=${USER_ID:-1000}
+GROUP_ID=${GROUP_ID:-1000}
+USER_NAME=${USER_NAME:-laravel}
+GROUP_NAME=${GROUP_NAME:-laravel}
+
+cat > /usr/local/etc/php-fpm.d/www.conf << EOL
 [www]
-user = www-data
-group = www-data
+user = ${USER_NAME}
+group = ${GROUP_NAME}
 listen = 9000
 
 pm = dynamic
@@ -69,8 +75,8 @@ mkdir -p /var/www/html/bootstrap/cache
 
 touch /var/www/html/storage/logs/laravel.log
 
-chown -R www-data:www-data /var/www/html/storage
-chown -R www-data:www-data /var/www/html/bootstrap/cache
+chown -R ${USER_NAME}:${GROUP_NAME} /var/www/html/storage
+chown -R ${USER_NAME}:${GROUP_NAME} /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
 chmod 664 /var/www/html/storage/logs/laravel.log
