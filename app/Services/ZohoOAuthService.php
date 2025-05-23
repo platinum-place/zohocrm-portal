@@ -48,13 +48,13 @@ class ZohoOAuthService
 
     public function getAccessToken(): string
     {
-        $token = ZohoOauthAccessToken::latest('id')
-            ->where('expires_at', '>=', now())
-            ->value('access_token');
-
-        if (! $token) {
+//        $token = ZohoOauthAccessToken::latest('id')
+//            ->where('expires_at', '>=', now())
+//            ->value('access_token');
+//
+//        if (! $token) {
             $token = $this->refreshAccessToken();
-        }
+//        }
 
         return $token;
     }
