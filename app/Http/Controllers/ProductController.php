@@ -13,16 +13,16 @@ class ProductController extends Controller
     {
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function list()
     {
-        try {
-            $criteria = 'Corredor:equals:3222373000092390001';
-            $list = $this->crm->searchRecords('Products', $criteria);
-        } catch (\Exception $e) {
-            return response()->json(['Error' => $e->getMessage()], 404);
-        }
+        $criteria = 'Corredor:equals:3222373000092390001';
+        $response = $this->crm->searchRecords('Products', $criteria);
 
-        $sortedProducts = collect($list['data'])
+        $products = collect($response['data'])
             ->map(fn($product) => [
                 'IdProducto' => (int)$product['id'],
                 'Producto' => $product['Product_Category'],
@@ -31,21 +31,23 @@ class ProductController extends Controller
             ->values()
             ->toArray();
 
-        return response()->json($sortedProducts);
+        return response()->json($products);
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function show(string $id)
     {
-        try {
-            $fields = ['id', 'Vendor_Name', 'Product_Name'];
-            $product = $this->crm->getRecords('Products', $fields, $id)['data'][0];
-        } catch (\Exception $e) {
-            return response()->json(['Error' => $e->getMessage()], 404);
-        }
+        $fields = ['id', 'Vendor_Name', 'Product_Name'];
+        $response = $this->crm->getRecords('Products', $fields, $id);
 
-        return response()->json([
-            'IdAseguradora' => (int)$product['Vendor_Name']['id'],
-            'Aseguradora' => $product['Vendor_Name']['name'],
-        ]);
+        $product = [
+            'IdAseguradora' => (int)$response['data'][0]['Vendor_Name']['id'],
+            'Aseguradora' => $response['data'][0]['Vendor_Name']['name'],
+        ];
+
+        return response()->json($product);
     }
 }
