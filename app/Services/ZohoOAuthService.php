@@ -4,12 +4,9 @@ namespace App\Services;
 
 use App\Models\Zoho\ZohoOauthAccessToken;
 use App\Models\Zoho\ZohoOauthRefreshToken;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\RequestException;
-use Throwable;
 use ZohoOAuth;
 
-abstract class ZohoOAuthService
+class ZohoOAuthService
 {
     protected function createAccessToken(array $data): void
     {
@@ -21,11 +18,6 @@ abstract class ZohoOAuthService
         ]);
     }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function generateAccessToken(string $grantToken): string
     {
         $response = ZohoOAuth::getPersistentToken($grantToken);
@@ -39,11 +31,6 @@ abstract class ZohoOAuthService
         return $response['access_token'];
     }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function refreshAccessToken(): string
     {
         $refreshToken = ZohoOauthRefreshToken::latest('id')->value('refresh_token');
@@ -59,11 +46,6 @@ abstract class ZohoOAuthService
         return $response['access_token'];
     }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function getAccessToken(): string
     {
         $token = ZohoOauthAccessToken::latest('id')

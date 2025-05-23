@@ -3,21 +3,15 @@
 namespace App\Services;
 
 use Exception;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\RequestException;
-use Throwable;
 use ZohoCRM;
 
-class ZohoCRMService extends ZohoOAuthService
+class ZohoCRMService
 {
-    /**
-     * @throws Throwable
-     * @throws ConnectionException
-     * @throws RequestException
-     */
+    public function __construct(protected ZohoOAuthService $oauth) {}
+
     public function searchRecords(string $module, string $criteria, ?int $page = 1, ?int $perPage = 200): ?array
     {
-        $token = $this->getAccessToken();
+        $token = $this->oauth->getAccessToken();
 
         $response = ZohoCRM::searchRecords($module, $token, $criteria, $page, $perPage);
 
@@ -28,14 +22,9 @@ class ZohoCRMService extends ZohoOAuthService
         return $response;
     }
 
-    /**
-     * @throws Throwable
-     * @throws ConnectionException
-     * @throws RequestException
-     */
     public function getRecords(string $module, array $fields, ?string $id = ''): ?array
     {
-        $token = $this->getAccessToken();
+        $token = $this->oauth->getAccessToken();
 
         $response = ZohoCRM::getRecords($module, $token, $fields, $id);
 
@@ -46,14 +35,9 @@ class ZohoCRMService extends ZohoOAuthService
         return $response;
     }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function updateRecords(string $module, string $id, array $data): ?array
     {
-        $token = $this->getAccessToken();
+        $token = $this->oauth->getAccessToken();
 
         $response = ZohoCRM::updateRecords($module, $token, $id, $data);
 
@@ -64,26 +48,16 @@ class ZohoCRMService extends ZohoOAuthService
         return $response;
     }
 
-    /**
-     * @throws Throwable
-     * @throws ConnectionException
-     * @throws RequestException
-     */
     public function uploadAnAttachment(string $module, string $id, string $filePath): void
     {
-        $token = $this->getAccessToken();
+        $token = $this->oauth->getAccessToken();
 
         ZohoCRM::uploadAttachment($module, $token, $id, $filePath);
     }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function attachmentList(string $module, string $id, array $fields): ?array
     {
-        $token = $this->getAccessToken();
+        $token = $this->oauth->getAccessToken();
 
         $response = ZohoCRM::attachmentList($module, $token, $id, $fields);
 
@@ -94,14 +68,9 @@ class ZohoCRMService extends ZohoOAuthService
         return $response;
     }
 
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
     public function getAttachment(string $module, string $id, string $attachmentId): ?string
     {
-        $token = $this->getAccessToken();
+        $token = $this->oauth->getAccessToken();
 
         $response = ZohoCRM::getAttachment($module, $token, $id, $attachmentId);
 
@@ -112,14 +81,9 @@ class ZohoCRMService extends ZohoOAuthService
         return $response;
     }
 
-    /**
-     * @throws Throwable
-     * @throws ConnectionException
-     * @throws RequestException
-     */
     public function insertRecords(string $module, array $data): ?array
     {
-        $token = $this->getAccessToken();
+        $token = $this->oauth->getAccessToken();
 
         return ZohoCRM::insertRecords($module, $token, $data);
     }
