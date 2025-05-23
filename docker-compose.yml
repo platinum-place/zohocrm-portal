@@ -19,7 +19,7 @@ services:
     container_name: nginx
     restart: unless-stopped
     ports:
-      - "80:80"
+      - '${APP_PORT:-80}:80'
     volumes:
       - ./:/var/www/html
     networks:
