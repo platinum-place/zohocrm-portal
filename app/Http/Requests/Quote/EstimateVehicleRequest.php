@@ -23,7 +23,7 @@ class EstimateVehicleRequest extends FormRequest
     {
         return [
             'NombreCliente' => ['required', 'string', 'max:255'],
-            'FechaNacimiento' => ['required', 'date'],
+            'FechaNacimiento' => ['required', 'date_format:d/m/Y'],
             'IdCliente' => ['required', 'string', 'max:20'],
             'TelefResidencia' => ['required', 'string'],
             'TelefMovil' => ['required', 'string'],
