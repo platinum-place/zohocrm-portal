@@ -3,15 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Services\ZohoCRMService;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\RequestException;
-use Throwable;
 
 class VehicleController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm)
-    {
-    }
+    public function __construct(protected ZohoCRMService $crm) {}
 
     public function list()
     {
@@ -19,11 +14,11 @@ class VehicleController extends Controller
         $brands = $this->crm->getRecords('Marcas', $fields);
 
         $sortedBrands = collect($brands['data'])
-            ->map(fn($brand) => [
-                'IdMarca' => (int)$brand['id'],
-                'Marca' => $brand['Name']
+            ->map(fn ($brand) => [
+                'IdMarca' => (int) $brand['id'],
+                'Marca' => $brand['Name'],
             ])
-            ->sortBy(fn($brand) => reset($brand))
+            ->sortBy(fn ($brand) => reset($brand))
             ->values()
             ->toArray();
 
@@ -36,12 +31,12 @@ class VehicleController extends Controller
         $modelsData = $this->crm->searchRecords('Modelos', $criteria);
 
         $sortedModels = collect($modelsData['data'])
-            ->map(fn($model) => [
-                'IdMarca' => (int)$model['Marca']['id'],
+            ->map(fn ($model) => [
+                'IdMarca' => (int) $model['Marca']['id'],
                 'IdModelo' => $model['id'],
-                'Modelo' => $model['Name']
+                'Modelo' => $model['Name'],
             ])
-            ->sortBy(fn($model) => reset($model))
+            ->sortBy(fn ($model) => reset($model))
             ->values()
             ->toArray();
 
@@ -53,15 +48,15 @@ class VehicleController extends Controller
         $types = [
             [
                 'IdTipoVehiculo' => 1,
-                'TipoVehiculo' => 'Automóvil'
+                'TipoVehiculo' => 'Automóvil',
             ],
             [
                 'IdTipoVehiculo' => 2,
-                'TipoVehiculo' => 'Camioneta'
+                'TipoVehiculo' => 'Camioneta',
             ],
             [
                 'IdTipoVehiculo' => 3,
-                'TipoVehiculo' => 'Camión'
+                'TipoVehiculo' => 'Camión',
             ],
         ];
 
@@ -73,23 +68,23 @@ class VehicleController extends Controller
         $accessories = [
             [
                 'IdAccesorio' => 2,
-                'Accesorio' => 'Cambio de Guia'
+                'Accesorio' => 'Cambio de Guia',
             ],
             [
                 'IdAccesorio' => 3,
-                'Accesorio' => 'LOVATO'
+                'Accesorio' => 'LOVATO',
             ],
             [
                 'IdAccesorio' => 1,
-                'Accesorio' => 'OTROS EQUIPO DE GAS'
+                'Accesorio' => 'OTROS EQUIPO DE GAS',
             ],
             [
                 'IdAccesorio' => 5,
-                'Accesorio' => 'ROMANO'
+                'Accesorio' => 'ROMANO',
             ],
             [
                 'IdAccesorio' => 6,
-                'Accesorio' => 'SISTEMA DE GAS NATURAL APROBADO'
+                'Accesorio' => 'SISTEMA DE GAS NATURAL APROBADO',
             ],
         ];
 
