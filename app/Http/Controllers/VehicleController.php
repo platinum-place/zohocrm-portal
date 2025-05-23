@@ -3,17 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Services\ZohoCRMService;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 
 class VehicleController extends Controller
 {
     public function __construct(protected ZohoCRMService $crm) {}
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function list()
     {
         $fields = ['id', 'Name'];
-        $brands = $this->crm->getRecords('Marcas', $fields);
+        $response = $this->crm->getRecords('Marcas', $fields);
 
-        $sortedBrands = collect($brands['data'])
+        $brands = collect($response['data'])
             ->map(fn ($brand) => [
                 'IdMarca' => (int) $brand['id'],
                 'Marca' => $brand['Name'],
@@ -22,15 +28,19 @@ class VehicleController extends Controller
             ->values()
             ->toArray();
 
-        return response()->json($sortedBrands);
+        return response()->json($brands);
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function getModel(string $brandId)
     {
         $criteria = "Marca:equals:$brandId";
-        $modelsData = $this->crm->searchRecords('Modelos', $criteria);
+        $response = $this->crm->searchRecords('Modelos', $criteria);
 
-        $sortedModels = collect($modelsData['data'])
+        $models = collect($response['data'])
             ->map(fn ($model) => [
                 'IdMarca' => (int) $model['Marca']['id'],
                 'IdModelo' => (int)$model['id'],
@@ -40,7 +50,7 @@ class VehicleController extends Controller
             ->values()
             ->toArray();
 
-        return response()->json($sortedModels);
+        return response()->json($models);
     }
 
     public function typeList()
