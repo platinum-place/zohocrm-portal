@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Zoho\ZohoOauthAccessToken;
 use App\Models\Zoho\ZohoOauthRefreshToken;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use ZohoOAuth;
 
 class ZohoOAuthService
@@ -18,6 +20,10 @@ class ZohoOAuthService
         ]);
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function generateAccessToken(string $grantToken): string
     {
         $response = ZohoOAuth::getPersistentToken($grantToken);
@@ -31,11 +37,15 @@ class ZohoOAuthService
         return $response['access_token'];
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function refreshAccessToken(): string
     {
         $refreshToken = ZohoOauthRefreshToken::latest('id')->value('refresh_token');
 
-        if (! $refreshToken) {
+        if (!$refreshToken) {
             throw new \Exception(__('Not Found'));
         }
 
@@ -46,15 +56,19 @@ class ZohoOAuthService
         return $response['access_token'];
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
     public function getAccessToken(): string
     {
-        //        $token = ZohoOauthAccessToken::latest('id')
-        //            ->where('expires_at', '>=', now())
-        //            ->value('access_token');
-        //
-        //        if (! $token) {
-        $token = $this->refreshAccessToken();
-        //        }
+        $token = ZohoOauthAccessToken::latest('id')
+            ->where('expires_at', '>=', now())
+            ->value('access_token');
+
+        if (!$token) {
+            $token = $this->refreshAccessToken();
+        }
 
         return $token;
     }
