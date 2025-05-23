@@ -9,7 +9,9 @@ use Throwable;
 
 class VehicleController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm) {}
+    public function __construct(protected ZohoCRMService $crm)
+    {
+    }
 
     /**
      * @throws RequestException
@@ -22,8 +24,11 @@ class VehicleController extends Controller
         $brands = $this->crm->getRecords('Marcas', $fields);
 
         $sortedBrands = collect($brands['data'])
-            ->map(fn ($brand) => [$brand['id'] => $brand['Name']])
-            ->sortBy(fn ($brand) => reset($brand))
+            ->map(fn($brand) => [
+                'IdMarca' => $brand['id'],
+                'Marca' => $brand['Name']
+            ])
+            ->sortBy(fn($brand) => reset($brand))
             ->values()
             ->toArray();
 
@@ -32,29 +37,20 @@ class VehicleController extends Controller
 
     public function getModel(string $brandId)
     {
-        $models = [];
         $criteria = "Marca:equals:$brandId";
         $modelsData = $this->crm->searchRecords('Modelos', $criteria);
 
-        $modelos_sort = array();
+        $sortedModels= collect($modelsData['data'])
+            ->map(fn($model) => [
+                'IdMarca' => $model['Marca']['id'],
+                'IdModelo' => $model['id'],
+                'Modelo' => $model['Name']
+            ])
+            ->sortBy(fn($model) => reset($model))
+            ->values()
+            ->toArray();
 
-        foreach ($modelsData['data'] as $modelo) {
-            $modelos_sort[] = [
-                'id' => $modelo['id'],
-                'name' => $modelo['Name'],
-                'tipo' => $modelo['Tipo'],
-            ];
-        }
-
-        usort($modelos_sort, function ($a, $b) {
-            return strcmp($a['name'], $b['name']);
-        });
-
-        foreach ($modelos_sort as $modelo_sort) {
-            $models[][$brandId] = [$modelo_sort['id'] => $modelo_sort['name']];
-        }
-
-        return response()->json($models);
+        return response()->json($sortedModels);
     }
 
     public function typeList()

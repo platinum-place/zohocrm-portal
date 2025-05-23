@@ -1,6 +1,5 @@
 <?php
 
-use App\Exceptions\Handler;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
