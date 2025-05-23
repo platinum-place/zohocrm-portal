@@ -19,6 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (QueryException $e, Request $request) {
-            return response()->json(['error' => __('Unprocessable Entity')], 422);
+            return response()->json(['Error' => __('Unprocessable Entity')], 422);
         });
     })->create();
