@@ -44,7 +44,7 @@ class ProductController extends Controller
         }
 
         return response()->json([
-            'IdAseguradora' => $product['Vendor_Name']['id'],
+            'IdAseguradora' => (int)$product['Vendor_Name']['id'],
             'Aseguradora' => $product['Vendor_Name']['name'],
         ]);
     }
