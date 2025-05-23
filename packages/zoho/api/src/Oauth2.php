@@ -37,8 +37,6 @@ class Oauth2
     /**
      * @throws RequestException
      * @throws ConnectionException
-     * @throws Exception
-     * @throws Throwable
      */
     public function getPersistentToken(string $grantToken): array
     {
@@ -57,8 +55,6 @@ class Oauth2
     /**
      * @throws RequestException
      * @throws ConnectionException
-     * @throws Exception
-     * @throws Throwable
      */
     public function getTemporaryToken(string $refreshToken): array
     {
