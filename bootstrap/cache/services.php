@@ -37,17 +37,16 @@
     33 => 'LaravelLang\\StarterKits\\ServiceProvider',
     34 => 'Laravel\\Pail\\PailServiceProvider',
     35 => 'Laravel\\Passport\\PassportServiceProvider',
-    36 => 'Laravel\\Sail\\SailServiceProvider',
-    37 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    38 => 'Carbon\\Laravel\\ServiceProvider',
-    39 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    40 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    41 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
-    42 => 'Spatie\\Permission\\PermissionServiceProvider',
-    43 => 'Zoho\\API\\ServiceProvider',
-    44 => 'App\\Providers\\AppServiceProvider',
-    45 => 'App\\Providers\\PassportServiceProvider',
-    46 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    36 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    37 => 'Carbon\\Laravel\\ServiceProvider',
+    38 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    39 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    40 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    41 => 'Spatie\\Permission\\PermissionServiceProvider',
+    42 => 'Zoho\\API\\ServiceProvider',
+    43 => 'App\\Providers\\AppServiceProvider',
+    44 => 'App\\Providers\\PassportServiceProvider',
+    45 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
   ),
   'eager' => 
   array (
@@ -236,8 +235,6 @@
     'validator' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
-    'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
-    'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
   'when' => 
@@ -279,9 +276,6 @@
     array (
     ),
     'Illuminate\\Validation\\ValidationServiceProvider' => 
-    array (
-    ),
-    'Laravel\\Sail\\SailServiceProvider' => 
     array (
     ),
     'Laravel\\Tinker\\TinkerServiceProvider' => 
