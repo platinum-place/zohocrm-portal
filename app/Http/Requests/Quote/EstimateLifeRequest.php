@@ -22,15 +22,15 @@ class EstimateLifeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'FechaEmision' => ['required', 'date_format:d/m/Y'],
-            'FechaVencimiento' => ['required', 'date_format:d/m/Y'],
+            'FechaEmision' => ['required', 'date_format:Y-m-d\TH:i:s.vP'],
+            'FechaVencimiento' => ['required','date_format:Y-m-d\TH:i:s.vP'],
             'Edad' => ['required', 'integer'],
             'PlazoAnios' => ['required', 'integer'],
-            'PlazoDias' => ['required', 'integer'],
+            'PlazoDias' => ['required', 'decimal:'],
             'MontoOriginal' => ['required', 'numeric'],
             'NombreCliente' => ['required', 'string', 'max:255'],
             'IdenCliente' => ['required', 'string', 'max:50'],
-            'FechaNacimiento' => ['required', 'date_format:d/m/Y'],
+            'FechaNacimiento' => ['required', 'date'],
             'Telefono1' => ['required', 'string'],
             'Direccion' => ['required', 'string', 'max:255'],
             'codeudor' => ['nullable', 'boolean'],
