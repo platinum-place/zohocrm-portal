@@ -6,7 +6,6 @@ use App\Http\Requests\Quote\CancelVehicleRequest;
 use App\Http\Requests\Quote\EstimateFireRequest;
 use App\Http\Requests\Quote\EstimateLifeRequest;
 use App\Http\Requests\Quote\EstimateUnemploymentDebtRequest;
-use App\Http\Requests\Quote\EstimateUnemploymentRequest;
 use App\Http\Requests\Quote\EstimateVehicleRequest;
 use App\Http\Requests\Quote\InspectRequest;
 use App\Http\Requests\Quote\IssueLifeRequest;
@@ -21,7 +20,9 @@ use Throwable;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected ZohoCRMService $crm) {}
+    public function __construct(protected ZohoCRMService $crm)
+    {
+    }
 
     /**
      * @throws RequestException
@@ -55,7 +56,7 @@ class QuoteController extends Controller
             }
 
             try {
-                $criteria = '((Marca:equals:'.$request->get('Marca').') and (Aseguradora:equals:'.$product['Vendor_Name']['id'].'))';
+                $criteria = '((Marca:equals:' . $request->get('Marca') . ') and (Aseguradora:equals:' . $product['Vendor_Name']['id'] . '))';
                 $brands = $this->crm->searchRecords('Restringidos', $criteria);
 
                 foreach ($brands['data'] as $brand) {
@@ -72,12 +73,12 @@ class QuoteController extends Controller
             $taxAmount = 0;
 
             try {
-                $criteria = 'Plan:equals:'.$product['id'];
+                $criteria = 'Plan:equals:' . $product['id'];
                 $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
                 foreach ($taxes['data'] as $tax) {
                     if (in_array($request->get('TipoVehiculo'), $tax['Grupo_de_veh_culo'])) {
-                        if (! empty($tax['Suma_limite'])) {
+                        if (!empty($tax['Suma_limite'])) {
                             if ($request->get('MontoOriginal') >= $tax['Suma_limite']) {
                                 if (empty($tax['Suma_hasta'])) {
                                     $taxAmount = $tax['Name'] / 100;
@@ -94,14 +95,14 @@ class QuoteController extends Controller
 
             }
 
-            if (! $taxAmount) {
+            if (!$taxAmount) {
                 $alert = 'No se encontraron tasas.';
             }
 
             $surchargeAmount = 0;
 
             try {
-                $criteria = '((Marca:equals:'.$request->get('Marca').') and (Aseguradora:equals:'.$product['Vendor_Name']['id'].'))';
+                $criteria = '((Marca:equals:' . $request->get('Marca') . ') and (Aseguradora:equals:' . $product['Vendor_Name']['id'] . '))';
                 $surcharges = $this->crm->searchRecords('Recargos', $criteria);
 
                 foreach ($surcharges['data'] as $surcharge) {
@@ -151,7 +152,7 @@ class QuoteController extends Controller
 
             $data = [
                 'Subject' => $request->get('NombreCliente'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 30 days')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 30 days')),
                 'Vigencia_desde' => date('Y-m-d'),
                 'Account_Name' => 3222373000092390001,
                 'Contact_Name' => 3222373000203318001,
@@ -226,7 +227,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -302,7 +303,7 @@ class QuoteController extends Controller
         ];
 
         foreach ($photos as $photo => $title) {
-            if (! $request->filled($photo)) {
+            if (!$request->filled($photo)) {
                 continue;
             }
 
@@ -318,7 +319,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/uploads/".date('YmdHis')."/$title.$extension";
+            $path = "photos/{$id}/uploads/" . date('YmdHis') . "/$title.$extension";
 
             Storage::put($path, $imageData);
 
@@ -384,7 +385,7 @@ class QuoteController extends Controller
                 default => throw new \Exception(__('validation.mimetypes', ['values' => '.jpg,.png']))
             };
 
-            $path = "photos/{$id}/downloads/".date('YmdHis')."/{$attachment['File_Name']}.$extension";
+            $path = "photos/{$id}/downloads/" . date('YmdHis') . "/{$attachment['File_Name']}.$extension";
 
             Storage::put($path, $imageData);
 
@@ -456,7 +457,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -530,7 +531,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
@@ -641,26 +642,6 @@ class QuoteController extends Controller
         return response()->noContent(200);
     }
 
-    public function cancelUnemployment(IssueLifeRequest $request)
-    {
-        $id = $request->get('Identificador');
-
-        try {
-            $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
-        } catch (\Exception $e) {
-            return response()->json(['Error' => $e->getMessage()], 404);
-        }
-
-        $data = [
-            'Quote_Stage' => 'Cancelada',
-        ];
-
-        $this->crm->updateRecords('Quotes', $id, $data);
-
-        return response()->noContent(200);
-    }
-
     public function cancelUnemploymentDebt(IssueLifeRequest $request)
     {
         $id = $request->get('Identificador');
@@ -733,7 +714,7 @@ class QuoteController extends Controller
             $amount = 0;
 
             try {
-                $criteria = 'Plan:equals:'.$product['id'];
+                $criteria = 'Plan:equals:' . $product['id'];
                 $taxes = $this->crm->searchRecords('Tasas', $criteria);
 
                 foreach ($taxes['data'] as $tax) {
@@ -769,7 +750,7 @@ class QuoteController extends Controller
 
             $data = [
                 'Subject' => $request->get('NombreCliente'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 30 days')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 30 days')),
                 'Vigencia_desde' => date('Y-m-d'),
                 'Account_Name' => 3222373000092390001,
                 'Contact_Name' => 3222373000203318001,
@@ -838,80 +819,7 @@ class QuoteController extends Controller
                 'Coberturas' => $line['Product_Name']['id'],
                 'Quote_Stage' => 'Emitida',
                 'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
-                'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
-                'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
-                'Prima' => round($line['Net_Total'], 2),
-            ];
-
-            $this->crm->updateRecords('Quotes', $id, $data);
-
-            break;
-        }
-
-        return response()->noContent(200);
-    }
-
-    /**
-     * @throws RequestException
-     * @throws Throwable
-     * @throws ConnectionException
-     */
-    public function estimateUnemployment(EstimateUnemploymentRequest $request)
-    {
-        try {
-            $criteria = '((Corredor:equals:3222373000092390001) and (Product_Category:equals:Desempleo))';
-            $products = $this->crm->searchRecords('Products', $criteria);
-        } catch (\Exception $e) {
-            return response()->json(['Error' => $e->getMessage()], 404);
-        }
-
-        $response = [];
-
-        foreach ($products['data'] as $product) {
-            $response[] = [
-                'Impuesto' => null,
-                'PrimaPeriodo' => null,
-                'PrimaTotal' => null,
-                'identificador' => 3222373000214282001,
-                'Cliente' => $request->get('Cliente'),
-                'Direccion' => $request->get('Direccion'),
-                'Fecha' => date('d/m/Y'),
-                'TipoEmpleado' => null,
-                'IdentCliente' => $request->get('IdentCliente'),
-                'Aseguradora ' => $product['Vendor_Name']['name'],
-                'MontoOriginal' => $request->get('MontoOriginal'),
-                'Cuota' => $request->get('Cuota'),
-                'PlazoMese' => $request->get('Plazo') * 12,
-                'Total' => null,
-            ];
-        }
-
-        return response()->json($response);
-    }
-
-    /**
-     * @throws Throwable
-     * @throws ConnectionException
-     * @throws RequestException
-     */
-    public function issueUnemployment(IssueLifeRequest $request)
-    {
-        $id = $request->get('Identificador');
-
-        try {
-            $fields = ['id', 'Quoted_Items'];
-            $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
-        } catch (\Exception $e) {
-            return response()->json(['Error' => $e->getMessage()], 404);
-        }
-
-        foreach ($quote['Quoted_Items'] as $line) {
-            $data = [
-                'Coberturas' => $line['Product_Name']['id'],
-                'Quote_Stage' => 'Emitida',
-                'Vigencia_desde' => date('Y-m-d'),
-                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d').'+ 1 years')),
+                'Valid_Till' => date('Y-m-d', strtotime(date('Y-m-d') . '+ 1 years')),
                 'Prima_neta' => round($line['Net_Total'] / 1.16, 2),
                 'ISC' => round($line['Net_Total'] - ($line['Net_Total'] / 1.16), 2),
                 'Prima' => round($line['Net_Total'], 2),
