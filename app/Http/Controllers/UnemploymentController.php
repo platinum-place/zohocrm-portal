@@ -8,6 +8,7 @@ use App\Http\Requests\Unemployment\IssueUnemploymentRequest;
 use App\Services\ZohoCRMService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class UnemploymentController
@@ -61,7 +62,7 @@ class UnemploymentController
             if (empty($alert)) {
                 $lifeAmount = ($request->get('MontoOriginal') / 1000) * $lifeTax;
                 $unemploymentAmount = ($request->get('MontoOriginal') / 1000) * $unemploymentTax;
-                $amount = $lifeAmount + $unemploymentAmount;
+                $amount = round($lifeAmount + $unemploymentAmount, 2);
             }
 
             $data = [
@@ -76,7 +77,7 @@ class UnemploymentController
                 "Direcci_n" => $request->get('Direccion'),
                 "Tel_Celular" => $request->get('Telefono'),
                 "Plan" => 'Vida/Desempleo',
-                "Suma_asegurada" => $request->get('MontoOriginal'),
+                "Suma_asegurada" => (float)$request->get('MontoOriginal'),
                 "Plazo" => $request->get('Plazo') * 12,
                 "Cuota" => $request->get('Cuota'),
                 "Fuente" => 'API',
@@ -102,9 +103,10 @@ class UnemploymentController
                 'TipoEmpleado' => $request->get('idTipoEmpleado'),
                 'IdentCliente' => $request->get('IdentCliente'),
                 'Aseguradora' => $product['Vendor_Name']['name'],
-                'MontoOriginal' => (float)$request->get('MontoOriginal'),
-                'Cuota' => round((float)$request->get('Cuota'), 2),
+                'MontoOriginal' => (float)sprintf('%.1f', $request->get('MontoOriginal')),
+                'Cuota' => (float)sprintf('%.1f', $request->get('Cuota')),
                 'PlazoMeses' => $request->get('Plazo') * 12,
+                'Prima' => $amount,
                 'Alerta' => $alert,
                 'Error' => null,
             ];
@@ -151,8 +153,12 @@ class UnemploymentController
     {
         $id = uuid_to_number($request->get('Identificador'));
 
-        $fields = ['id', 'Quoted_Items'];
+        $fields = ['id', 'Plan', 'Quoted_Items'];
         $quote = $this->crm->getRecords('Quotes', $fields, $id)['data'][0];
+
+        if ($quote['Plan'] != 'Vida/Desempleo') {
+            throw new NotFoundHttpException(__('Not Found'));
+        }
 
         $data = [
             'Quote_Stage' => 'Cancelada',
